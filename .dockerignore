@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+**/node_modules
+**/.venv
+**/__pycache__
+web/dist
+logs
+data/world.json
+data/checkam.db
+engines/*/data
+.git
+.github
+*.log

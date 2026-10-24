@@ -1,0 +1,40 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  agents:
+    name: agents (python, sample mode, no keys)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip, cache-dependency-path: api/requirements.txt }
+      - run: pip install -r api/requirements.txt
+      - run: python -m pytest -q api/tests
+
+  engines:
+    name: meterless engines (official suites)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: World Model conformance
+        working-directory: engines/world-model
+        run: npm ci && WORLD_MODEL_IMPL="$PWD/src/index.ts" npm run -s conformance
+      - name: Scout Intent evals
+        working-directory: engines/scout-intent
+        run: npm ci && SCOUT_IMPL="$PWD/src/index.ts" npm run -s evals
+
+  web:
+    name: phone app (type check + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: npm, cache-dependency-path: web/package-lock.json }
+      - working-directory: web
+        run: npm ci && npm run build

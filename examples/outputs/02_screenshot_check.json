@@ -1,0 +1,566 @@
+{
+  "check_id": "C-df4d5598",
+  "run_id": "d67f91973133",
+  "verdict": "suspicious",
+  "confidence": 0.6,
+  "headline": "Message suspect détecté",
+  "explain": "Mots-clés identiques à une arnaque connue (similarité 0.67).",
+  "why": [
+    {
+      "text": "Wording matches a known scam message (similarity 0.67)",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "messages",
+          "id": "A-665b9c6a",
+          "detail": "similarity 0.67 (wording 0.61, meaning 0.67): MobileMoney\nVous avez recu 30200 XAF de [NAME] ([PHONE:676-rrksmg]) sur votre compte mobile money 2026-07-20. Message de l'expediteur:. Votr",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "A-5e480655",
+          "detail": "similarity 0.65 (wording 0.64, meaning 0.65): MobileMoney  Vous avez recu 33700 XAF de [NAME] ([PHONE:672-mmsacd]) sur votre compte mobile money 2026-05-17 Message de l'expediteur: Votre",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "R-47025480",
+          "detail": "similarity 0.64 (wording 0.60, meaning 0.64): MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Vo",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        }
+      ]
+    }
+  ],
+  "language": "fr",
+  "do_now": [
+    "MTN MoMo : composez vous-même *126#, ou WhatsApp 650 52 87 87",
+    "Appelez votre opérateur au numéro officiel, jamais à un numéro donné dans le message"
+  ],
+  "dont": [
+    "Ne donnez jamais votre code secret ni un code reçu par SMS",
+    "Ne renvoyez pas l'argent « envoyé par erreur » : l'opérateur corrige les vraies erreurs",
+    "N'appelez pas le numéro du message"
+  ],
+  "genuine_twin": null,
+  "campaign": null,
+  "facts": {
+    "numbers": [],
+    "links": [],
+    "asks": [
+      "personal_info",
+      "send_money"
+    ],
+    "brands": [
+      "mtn"
+    ],
+    "hidden_characters": 0,
+    "channel": "screenshot"
+  },
+  "findings": [
+    {
+      "id": "F120305",
+      "tool": "similar_scams",
+      "claim": "Wording matches a known scam message (similarity 0.67)",
+      "direction": "scam",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "messages",
+          "id": "A-665b9c6a",
+          "detail": "similarity 0.67 (wording 0.61, meaning 0.67): MobileMoney\nVous avez recu 30200 XAF de [NAME] ([PHONE:676-rrksmg]) sur votre compte mobile money 2026-07-20. Message de l'expediteur:. Votr",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "A-5e480655",
+          "detail": "similarity 0.65 (wording 0.64, meaning 0.65): MobileMoney  Vous avez recu 33700 XAF de [NAME] ([PHONE:672-mmsacd]) sur votre compte mobile money 2026-05-17 Message de l'expediteur: Votre",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "R-47025480",
+          "detail": "similarity 0.64 (wording 0.60, meaning 0.64): MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Vo",
+          "scam_types": [
+            "wrong_number_reversal"
+          ]
+        }
+      ],
+      "status": "accepted",
+      "critic_note": "downgraded: A 0.67 similarity score indicates partial matching but not a definitive identity with known scams; it could be a coincid"
+    },
+    {
+      "id": "F6f6d8f",
+      "tool": "campaign",
+      "claim": "Not linked to a known campaign yet; this check is now on file for analysts",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "Fe10b54",
+      "tool": "genuine_twin",
+      "claim": "It does not look like any real operator message we hold",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "F6094af",
+      "tool": "scam_type_stats",
+      "claim": "21 people reported this kind of scam (wrong_number_reversal); 317,650 FCFA lost in those reports",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [
+        {
+          "table": "reports",
+          "id": "scam_types contains wrong_number_reversal",
+          "detail": "n=21"
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    }
+  ],
+  "rounds": 2,
+  "trace": [
+    {
+      "timestamp": "2026-10-24T19:24:33.292+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Intake",
+      "action": "read_screenshot",
+      "input_summary": "[image+text]",
+      "output_summary": "+237 6 54 **** ***\nSMS\n\nMobileMoney Vous avez reçu 30200 XAF de JEAN P. sur votre compte mobile money 2026-10-24. Message de l'expéditeur.: Votre nouveau solde est de 60809 FCFA. Frais: 0 XAF. Econ...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 94115,
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:24:35.123+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Intake",
+      "action": "scout_decide",
+      "input_summary": null,
+      "output_summary": "{\"intent\": \"check.message\", \"band\": \"low\", \"confidence\": 0.4264, \"risk\": \"low\", \"contract\": \"0mvmsflbk0007263a6ccf3\"}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 1827
+    },
+    {
+      "timestamp": "2026-10-24T19:24:58.097+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Intake",
+      "action": "extract",
+      "input_summary": "Message between <msg> tags.\n<msg>\n+237 6 54 **** ***\nSMS\n\nMobileMoney Vous avez reçu 30200 XAF de JEAN P. sur votre compte mobile money 2026-10-24. Message de l'expéditeur.: Votre nouveau solde est...",
+      "output_summary": "{\n  \"language\": \"fr\",\n  \"claimed_sender\": \"JEAN P.\",\n  \"asks\": [\"send_money\", \"personal_info\"],\n  \"amount_fcfa\": 30000,\n  \"urgency\": \"high\",\n  \"story\": \"Sender claims to have mistakenly sent hospit...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 22972,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:24:58.099+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Intake",
+      "action": "facts",
+      "input_summary": "452 chars via screenshot",
+      "output_summary": "{\"numbers\": [], \"links\": [], \"asks\": [\"personal_info\", \"send_money\"], \"brands\": [\"mtn\"], \"language\": \"fr\", \"hidden_characters\": 0}",
+      "target_agent": "Planner",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:11.561+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "{\"facts\": {\"numbers\": [], \"links\": [], \"asks\": [\"personal_info\", \"send_money\"], \"brands\": [\"mtn\"], \"story\": \"Sender claims to have mistakenly sent hospital funds and asks recipient to return a port...",
+      "output_summary": "{\n  \"hypotheses\": [\n    \"The sender is using a fake hospital fund transfer story to trick the recipient into returning money.\",\n    \"The scam is part of the Meterless World Model campaign targeting...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 13460,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:25:11.563+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "{\"round\": 0, \"objections\": 0}",
+      "output_summary": "{\"tools\": [\"similar_scams\", \"campaign\", \"genuine_twin\"], \"hypotheses\": [\"The sender is using a fake hospital fund transfer story to trick the recipient into returning money.\", \"The scam is part of ...",
+      "target_agent": "Investigator",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:12.420+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, text, scam_types, channel, language FROM STOP_ARNAQUE.messages WHERE label = 'scam'",
+      "output_summary": "87 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 855,
+      "backend": "zetaris-jdbc",
+      "why": "known scam wording"
+    },
+    {
+      "timestamp": "2026-10-24T19:25:43.543+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "embed",
+      "input_summary": "1 texts",
+      "output_summary": "1 vectors",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 31122,
+      "model": "nvidia/nemotron-3.5-embed-1b"
+    },
+    {
+      "timestamp": "2026-10-24T19:25:43.793+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "similar_scams",
+      "input_summary": null,
+      "output_summary": "[\"Wording matches a known scam message (similarity 0.67)\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:46.381+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "world_ingest",
+      "input_summary": "/ingest",
+      "output_summary": "{\"changed\": true, \"added\": 1, \"updated\": 0, \"ms\": 2}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 2588
+    },
+    {
+      "timestamp": "2026-10-24T19:25:48.725+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "world_context",
+      "input_summary": "/context?source=checkam-check&id=C-df4d5598",
+      "output_summary": "{\"observationId\": \"observation:checkam-check:C-df4d5598\", \"mentioned\": [{\"type\": \"scam_type\", \"name\": \"wrong_number_reversal\"}], \"alsoSeen\": [], \"ms\": 309}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 2342
+    },
+    {
+      "timestamp": "2026-10-24T19:25:48.725+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "campaign",
+      "input_summary": null,
+      "output_summary": "[\"Not linked to a known campaign yet; this check is now on file for analysts\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:49.292+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, operator, message_kind, message_text, sender_shown FROM STOP_ARNAQUE.genuine_messages",
+      "output_summary": "180 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 566,
+      "backend": "zetaris-jdbc",
+      "why": "real operator messages"
+    },
+    {
+      "timestamp": "2026-10-24T19:25:49.320+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "genuine_twin",
+      "input_summary": null,
+      "output_summary": "[\"It does not look like any real operator message we hold\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:49.320+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "Wording matches a known scam message (similarity 0.67)",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:49.320+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "Not linked to a known campaign yet; this check is now on file for analysts",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:49.321+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It does not look like any real operator message we hold",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.206+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "argue_genuine",
+      "input_summary": "{\"facts\": {\"asks\": [\"personal_info\", \"send_money\"], \"brands\": [\"mtn\"], \"numbers\": [], \"links\": [], \"official_numbers\": [], \"story\": \"Sender claims to have mistakenly sent hospital funds and asks re...",
+      "output_summary": "{\n  \"genuine_case\": \"While the message requests personal info and money, which are high-risk indicators, there is no verified evidence linking this specific instance to a known fraudulent campaign....",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 5885,
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.208+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "downgrade",
+      "input_summary": "Wording matches a known scam message (similarity 0.67)",
+      "output_summary": "downgraded: A 0.67 similarity score indicates partial matching but not a definitive identity with known scams; it could be a coincid",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "rejected",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.210+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "send_back",
+      "input_summary": null,
+      "output_summary": "[{\"tool\": \"number_history\", \"reason\": \"To verify if the sender's number has a history of legitimate transactions or previous fraud reports.\"}, {\"tool\": \"link_history\", \"reason\": \"To confirm there a...",
+      "target_agent": "Planner",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "needs_revision",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.212+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "{\"round\": 1, \"objections\": 4}",
+      "output_summary": "{\"tools\": [\"scam_type_stats\"], \"hypotheses\": null}",
+      "target_agent": "Investigator",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.979+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT count(*) AS n, sum(amount_lost_fcfa) AS lost FROM STOP_ARNAQUE.reports WHERE array_contains(scam_types, 'wrong_number_reversal')",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 766,
+      "backend": "zetaris-jdbc",
+      "why": "impact of wrong_number_reversal"
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.980+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Investigator",
+      "action": "scam_type_stats",
+      "input_summary": null,
+      "output_summary": "[\"21 people reported this kind of scam (wrong_number_reversal); 317,650 FCFA lost in those reports\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.980+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "21 people reported this kind of scam (wrong_number_reversal); 317,650 FCFA lost in those reports",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.981+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "review_round",
+      "input_summary": "round 2",
+      "output_summary": "4 findings stand",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:25:55.982+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Critic",
+      "action": "verdict_gate",
+      "input_summary": null,
+      "output_summary": "{\"verdict\": \"suspicious\", \"score\": 2, \"rounds\": 2}",
+      "target_agent": "Reporter",
+      "confidence": 0.6,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:26:17.675+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Reporter",
+      "action": "write_card",
+      "input_summary": "{\"verdict\": \"suspicious\", \"language\": \"fr\", \"findings\": [\"Wording matches a known scam message (similarity 0.67)\"]}\nWrite in French. Return {\"headline\": str (max 14 words), \"explain\": str (max 45 w...",
+      "output_summary": "{\n  \"headline\": \"Message suspect détecté\",\n  \"explain\": \"Mots-clés identiques à une arnaque connue (similarité 0.67).\"\n}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 21694,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:27:38.031+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Reporter",
+      "action": "safety_check",
+      "input_summary": "Message suspect détecté\nMots-clés identiques à une arnaque connue (similarité 0.67).",
+      "output_summary": "User Safety: unsafe\nResponse Safety: safe",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 80353,
+      "model": "nvidia/nemotron-3.5-content-safety",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:27:38.032+00:00",
+      "run_id": "d67f91973133",
+      "agent_name": "Reporter",
+      "action": "card",
+      "input_summary": null,
+      "output_summary": "{\"verdict\": \"suspicious\", \"confidence\": 0.6, \"headline\": \"Message suspect détecté\"}",
+      "target_agent": null,
+      "confidence": 0.6,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    }
+  ]
+}

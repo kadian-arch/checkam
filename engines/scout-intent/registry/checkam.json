@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "note": "CheckAm intent registry. Citizens reach check.* and report.loss with no account; analyst.* needs a signed-in analyst.",
+  "intents": [
+    {
+      "id": "GENERAL",
+      "category": "general",
+      "description": "Greeting or question with no message to check. Explain what CheckAm does; never route to tools.",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": [],
+      "riskClass": "low",
+      "surfaces": ["citizen", "analyst", "api"],
+      "roles": ["*"],
+      "examples": ["hello", "what can you do", "how does this work", "bonjour", "how far"],
+      "version": 1
+    },
+    {
+      "id": "check.message",
+      "category": "check",
+      "description": "Check whether a received SMS, WhatsApp message, call or mobile money notification is a scam",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["data.query", "world.query", "world.ingest", "model.reason", "case.store"],
+      "riskClass": "low",
+      "surfaces": ["citizen", "api"],
+      "roles": ["*"],
+      "examples": [
+        "Vous avez recu 45000 XAF de Paul sur votre compte mobile money message de l'expediteur",
+        "I sent money to your number by mistake please send it back",
+        "Please I mistakenly sent 25000 to your MTN number kindly return it",
+        "Congratulations you have won 400000 FCFA call this number to collect your prize",
+        "Your mobile money account will be blocked confirm your PIN",
+        "Felicitations participez a cette enquete et recevez 26000 FCFA partagez avec 15 amis",
+        "Recrutement special du ministere envoyez votre CV et payez les frais de dossier",
+        "Is this message real or a scam",
+        "Someone called me saying he is from MTN and asked for a code",
+        "Dear customer your SIM registration is expiring dial the code to update"
+      ],
+      "version": 1
+    },
+    {
+      "id": "check.number",
+      "category": "check",
+      "description": "Check whether a phone number has been reported for scams",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["data.query", "world.query"],
+      "riskClass": "low",
+      "surfaces": ["citizen", "api"],
+      "roles": ["*"],
+      "examples": ["Is this number a scammer", "who is this number that called me", "has anyone reported this number", "ce numero est il un arnaqueur", "check this number for me"],
+      "version": 1
+    },
+    {
+      "id": "check.link",
+      "category": "check",
+      "description": "Check whether a link or website in a message is safe",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["data.query", "world.query"],
+      "riskClass": "low",
+      "surfaces": ["citizen", "api"],
+      "roles": ["*"],
+      "examples": ["is this link safe", "should I click this link", "ce lien est il fiable", "is this website real"],
+      "version": 1
+    },
+    {
+      "id": "report.loss",
+      "category": "report",
+      "description": "Report that you already lost money to a scam",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["data.query", "world.query", "world.ingest", "case.store"],
+      "riskClass": "medium",
+      "surfaces": ["citizen", "api"],
+      "roles": ["*"],
+      "examples": ["I lost money to a scammer", "they took my money", "j'ai ete arnaque", "I don send money and the person block me", "I was scammed yesterday what do I do"],
+      "version": 1
+    },
+    {
+      "id": "analyst.investigate",
+      "category": "analyst",
+      "description": "Investigate a scam campaign and build an evidence dossier",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["world.query", "data.query", "model.reason"],
+      "riskClass": "low",
+      "surfaces": ["analyst", "api"],
+      "roles": ["analyst", "admin"],
+      "examples": ["investigate this campaign", "build a dossier for campaign", "show me the evidence for this campaign", "which reports belong together"],
+      "version": 1
+    },
+    {
+      "id": "analyst.publish_alert",
+      "category": "analyst",
+      "description": "Publish a public scam alert to all citizens",
+      "parameters": { "type": "object", "properties": {} },
+      "capabilities": ["alert.publish", "approval.require"],
+      "riskClass": "high",
+      "surfaces": ["analyst"],
+      "roles": ["analyst", "admin"],
+      "examples": ["publish this alert", "publish the public alert for this campaign", "send the warning to the public", "approve and publish alert"],
+      "version": 1
+    }
+  ]
+}

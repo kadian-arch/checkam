@@ -1,0 +1,620 @@
+{
+  "run_id": "b6b6cf517263",
+  "campaign_id": "cmp_ec695e098dd7",
+  "name": "MTN Mobile Money Credit Reversal Scam",
+  "summary": "A fraud campaign targeting MTN Mobile Money users in Cameroon was active from January 1, 2026, to October 24, 2026. It involved six phone numbers and resulted in reported losses of 50,650 FCFA across two reports.",
+  "how_it_works": "Scammers send fake MobileMoney credit SMS messages mimicking real formats, then call claiming the funds were sent by mistake and request PINs to facilitate withdrawals.",
+  "limitations": "The dataset includes only 14 members, 2 reports, 3 alerts, and 1 citizen check.",
+  "facts": {
+    "members": 14,
+    "reports": 2,
+    "alerts": 3,
+    "citizen_checks": 1,
+    "numbers": [
+      "654-jwmukg",
+      "670-pvakwe",
+      "670-takuxj",
+      "672-mmsacd",
+      "676-rrksmg",
+      "682-xazfwf"
+    ],
+    "scam_types": [
+      "account_blocked",
+      "credential_request",
+      "deposit_withdrawal_trap",
+      "fake_agent_support",
+      "fake_prize_promo",
+      "wrong_number_reversal"
+    ],
+    "brands": [
+      "MTN Mobile Money"
+    ],
+    "first_seen": "2026-01-01",
+    "last_seen": "2026-10-24",
+    "reported_loss_fcfa": 50650,
+    "links": [
+      "same number 654-jwmukg",
+      "wording overlap 0.537",
+      "wording overlap 0.695",
+      "wording overlap 0.809",
+      "wording overlap 0.874",
+      "wording overlap 1.000"
+    ],
+    "examples": [
+      "It was call, they asked me to send them a pin sent to my phone, but MTN said in the message that never share and someone claiming to be from them asked me to sh",
+      "MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Votre nouveau solde es",
+      "Fake MobileMoney credit SMS, then 'sent by mistake' call, then PIN prompts for withdrawals",
+      "Fake MobileMoney credit SMS from a personal number, copying the real format (French)"
+    ]
+  },
+  "members": [
+    {
+      "kind": "report",
+      "id": "R-b6d06c96",
+      "text": "It was call, they asked me to send them a pin sent to my phone, but MTN said in the message that never share and someone claiming to be from them asked me to share so I was skeptical and the pressure mounted was too much so I fell for it.",
+      "region": "adamaoua",
+      "lost_fcfa": null,
+      "scam_types": [
+        "fake_agent_support",
+        "credential_request",
+        "fake_prize_promo"
+      ]
+    },
+    {
+      "kind": "report",
+      "id": "R-47025480",
+      "text": "MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Votre nouveau solde est de 142609 FCFA. frais: 0 XAF. Transaction ID:[TXN_ID] Economies avec! Juste pour cent frais de retraits transferts a Zero frais.",
+      "region": "far_north",
+      "lost_fcfa": 50650,
+      "scam_types": [
+        "wrong_number_reversal"
+      ]
+    },
+    {
+      "kind": "alert",
+      "id": "A-f4d98ede",
+      "text": "Fake MobileMoney credit SMS, then 'sent by mistake' call, then PIN prompts for withdrawals",
+      "outlet": "facebook_public_post",
+      "url": null,
+      "date": "2026-07-29",
+      "impersonated": "MTN Mobile Money"
+    },
+    {
+      "kind": "alert",
+      "id": "A-665b9c6a",
+      "text": "Fake MobileMoney credit SMS from a personal number, copying the real format (French)",
+      "outlet": "facebook_public_post",
+      "url": null,
+      "date": null,
+      "impersonated": "MTN Mobile Money"
+    },
+    {
+      "kind": "alert",
+      "id": "A-5e480655",
+      "text": "Fake MobileMoney credit SMS, then a call from the same number (French)",
+      "outlet": "instagram_public_post",
+      "url": null,
+      "date": "2026-05-17",
+      "impersonated": "MTN Mobile Money"
+    },
+    {
+      "kind": "check",
+      "id": "C-44ae4acb",
+      "text": "Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast before they cut my line",
+      "date": "2026-10-24",
+      "verdict": "scam"
+    }
+  ],
+  "numbers": [
+    {
+      "phone_id": "654-jwmukg",
+      "times_reported": 2,
+      "times_in_alerts": 0,
+      "top_scam_types": "fake_agent_support|credential_request|fake_prize_promo",
+      "first_seen": "2026-10"
+    },
+    {
+      "phone_id": "670-pvakwe",
+      "times_reported": 0,
+      "times_in_alerts": 1,
+      "top_scam_types": "wrong_number_reversal",
+      "first_seen": null
+    },
+    {
+      "phone_id": "670-takuxj",
+      "times_reported": 1,
+      "times_in_alerts": 0,
+      "top_scam_types": "wrong_number_reversal",
+      "first_seen": "2026-10"
+    },
+    {
+      "phone_id": "672-mmsacd",
+      "times_reported": 0,
+      "times_in_alerts": 1,
+      "top_scam_types": "wrong_number_reversal",
+      "first_seen": "2026-05"
+    },
+    {
+      "phone_id": "676-rrksmg",
+      "times_reported": 0,
+      "times_in_alerts": 1,
+      "top_scam_types": "wrong_number_reversal",
+      "first_seen": null
+    },
+    {
+      "phone_id": "682-xazfwf",
+      "times_reported": 0,
+      "times_in_alerts": 1,
+      "top_scam_types": "wrong_number_reversal|deposit_withdrawal_trap|account_blocked",
+      "first_seen": "2026-07"
+    }
+  ],
+  "links": [
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:stop-arnaque-237:R-47025480",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-f3a8e630",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-49b73f64",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-a9715533",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-7af077db",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-a81ed6b0",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-888c1b73",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-82aa13a4",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-72733af5",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-f4d98ede",
+      "b": "observation:stop-arnaque-237:A-665b9c6a",
+      "why": "wording overlap 0.537",
+      "score": 0.5368421052631579,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-665b9c6a",
+      "b": "observation:stop-arnaque-237:A-5e480655",
+      "why": "wording overlap 0.874",
+      "score": 0.8737864077669902,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-665b9c6a",
+      "b": "observation:checkam-check:C-f3a8e630",
+      "why": "wording overlap 0.695",
+      "score": 0.6954545454545454,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-665b9c6a",
+      "b": "observation:checkam-check:C-49b73f64",
+      "why": "wording overlap 0.695",
+      "score": 0.6954545454545454,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-5e480655",
+      "b": "observation:checkam-check:C-f3a8e630",
+      "why": "wording overlap 0.809",
+      "score": 0.8093023255813954,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:A-5e480655",
+      "b": "observation:checkam-check:C-49b73f64",
+      "why": "wording overlap 0.809",
+      "score": 0.8093023255813954,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-f3a8e630",
+      "b": "observation:checkam-check:C-49b73f64",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-7af077db",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-a81ed6b0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-888c1b73",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-82aa13a4",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-a81ed6b0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-888c1b73",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-82aa13a4",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-888c1b73",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-82aa13a4",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-82aa13a4",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    }
+  ],
+  "review": [
+    {
+      "a": "A-f4d98ede",
+      "b": "A-5e480655",
+      "why": "meaning similarity 0.823 (Nemotron embeddings)"
+    }
+  ],
+  "recommended_actions": [
+    "Ask operators to review number 654-jwmukg",
+    "Ask operators to review number 670-pvakwe",
+    "Ask operators to review number 670-takuxj",
+    "Publish the public alert below in English, French and Pidgin"
+  ],
+  "alert": {
+    "title": "Beware of Fake Mobile Money Credit Reversals",
+    "body_en": "Do not share your MTN Mobile Money PIN. If you receive a fake credit SMS followed by a call asking for your PIN to reverse a 'mistake,' it is a scam. Report it immediately.",
+    "body_fr": "Ne partagez jamais votre code PIN MTN Mobile Money. Si vous recevez un faux SMS de crédit suivi d'un appel demandant votre PIN pour annuler une 'erreur', c'est une arnaque. Signalez-le.",
+    "body_pcm": "No share your MTN Mobile Money PIN. If person send you fake credit message and call say na mistake and ask for PIN, na scam. Report am.",
+    "numbers": [
+      "654-jwmukg",
+      "670-pvakwe",
+      "670-takuxj",
+      "672-mmsacd",
+      "676-rrksmg"
+    ]
+  },
+  "trace": [
+    {
+      "timestamp": "2026-10-24T19:27:42.053+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Planner",
+      "action": "world_campaigns",
+      "input_summary": "/campaigns",
+      "output_summary": "{\"ms\": 0}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 1893
+    },
+    {
+      "timestamp": "2026-10-24T19:27:42.055+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "cmp_ec695e098dd7",
+      "output_summary": "{\"members\": 14, \"tools\": [\"members\", \"number_stats\", \"verify_links\", \"write_dossier\"]}",
+      "target_agent": "Investigator",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:27:42.401+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, message_text, call_description, scam_types, region, amount_lost_fcfa, channel FROM STOP_ARNAQUE.reports WHERE id IN ('A-5e480655','A-665b9c6a','A-f4d98ede','R-47025480','R-b6d06c96')",
+      "output_summary": "2 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 345,
+      "backend": "zetaris-jdbc",
+      "why": "campaign reports"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:42.620+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, title, summary, source, source_url, date_published, impersonated FROM STOP_ARNAQUE.public_alerts WHERE id IN ('A-5e480655','A-665b9c6a','A-f4d98ede','R-47025480','R-b6d06c96')",
+      "output_summary": "3 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 218,
+      "backend": "zetaris-jdbc",
+      "why": "campaign alerts"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:42.621+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "members",
+      "input_summary": null,
+      "output_summary": "2 reports, 3 alerts, 1 citizen checks",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:27:42.892+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '654-jwmukg'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 271,
+      "backend": "zetaris-jdbc",
+      "why": "history of 654-jwmukg"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:43.263+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '670-pvakwe'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 370,
+      "backend": "zetaris-jdbc",
+      "why": "history of 670-pvakwe"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:43.543+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '670-takuxj'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 279,
+      "backend": "zetaris-jdbc",
+      "why": "history of 670-takuxj"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:43.906+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '672-mmsacd'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 362,
+      "backend": "zetaris-jdbc",
+      "why": "history of 672-mmsacd"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:44.125+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '676-rrksmg'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 218,
+      "backend": "zetaris-jdbc",
+      "why": "history of 676-rrksmg"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:44.615+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '682-xazfwf'",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 490,
+      "backend": "zetaris-jdbc",
+      "why": "history of 682-xazfwf"
+    },
+    {
+      "timestamp": "2026-10-24T19:27:44.617+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Critic",
+      "action": "verify_links",
+      "input_summary": "32 links",
+      "output_summary": "all members supported",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-24T19:27:52.174+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Reporter",
+      "action": "write_dossier",
+      "input_summary": "{\"members\": 14, \"reports\": 2, \"alerts\": 3, \"citizen_checks\": 1, \"numbers\": [\"654-jwmukg\", \"670-pvakwe\", \"670-takuxj\", \"672-mmsacd\", \"676-rrksmg\", \"682-xazfwf\"], \"scam_types\": [\"account_blocked\", \"c...",
+      "output_summary": "{\"name\": \"MTN Mobile Money Credit Reversal Scam\", \"summary\": \"A fraud campaign targeting MTN Mobile Money users in Cameroon was active from January 1, 2026, to October 24, 2026. It involved six pho...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 7556,
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-24T19:27:52.177+00:00",
+      "run_id": "b6b6cf517263",
+      "agent_name": "Reporter",
+      "action": "dossier",
+      "input_summary": null,
+      "output_summary": "{\"name\": \"MTN Mobile Money Credit Reversal Scam\", \"members\": 6}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": null
+    }
+  ]
+}

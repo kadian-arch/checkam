@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+logs/
+data/world.json
+data/checkam.db
+data/embeddings*.json.tmp
+dist/
+.DS_Store
+*.log
+engines/*/data/
+web/dist/
