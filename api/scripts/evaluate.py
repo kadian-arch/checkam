@@ -99,3 +99,7 @@ print("misses:")
 for r in results:
     if (r["label"] == "scam") != (r["verdict"] in POS):
         print(f"  {r['id']} {r['label']} -> {r['verdict']} | {r['text'][:110]!r}")
+
+# the Java bridge to Zetaris can keep the process alive after the work is done; leave cleanly
+sys.stdout.flush()
+os._exit(0)

@@ -100,12 +100,17 @@
     "write_card": "writing your answer",
     "safety_check": "checking the answer is safe",
     "facts": "noting what it asks",
-    "card": "done"
+    "card": "done",
+    "site_age": "checking how old the website is",
+    "cache_hit": "found an earlier check of this message",
+    "ignored_demand": "setting aside a demand the message never made",
+    "payer_note": "reading the payment note"
   },
   "working": "working",
   "steps_done": "{n} steps",
   "ask_sender_title": "Who sent it?",
   "ask_sender_sub": "Type the name or number shown at the top of the message on your phone. With it, the agents can usually give a clear answer.",
   "check_again": "Check again",
-  "writing_explanation": "Writing the explanation…"
+  "writing_explanation": "Writing the explanation…",
+  "src_registry": "Domain registry"
 }

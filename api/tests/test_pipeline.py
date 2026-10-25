@@ -66,3 +66,32 @@ def test_chelsey_fixtures_are_clean_if_present():
         row = json.loads(line)
         assert set(row) >= {"text", "language", "label"}, f"line {n}: needs text, language, label"
         assert not re.search(r"\d{6,}|\d{3}[ .-]\d{2}[ .-]\d{2}[ .-]\d{2}", row["text"]), f"line {n}: replace phone numbers with XXX"
+
+
+def test_real_debit_notice_is_not_flagged_and_the_note_is_explained():
+    card = agents.run_check("A transaction of 200 XAF by LEEDTECH LTD on your mobile money account successfully completed at 2026-09-15 22:34:01. "
+                            "Message from debit receiver: Pay SMS Notification Fees. Your new balance:2528 XAF. "
+                            "Borrow up to 100,000 FCFA in advance. Dial *126*6# or use the new MoMo App.")
+    assert card["verdict"] in ("looks_genuine", "cant_tell")
+    assert any("note typed by a person" in w["text"] for w in card["why"])
+
+
+def test_the_same_message_again_is_answered_from_the_earlier_check():
+    msg = "Please   I sent 15000 to your MTN number by mistake, send it back to [PHONE:654-jwmukg]"
+    first = agents.run_check(msg)
+    again = agents.run_check(msg.replace("   ", " ").upper().lower())
+    assert again.get("cached") == 1 and again["verdict"] == first["verdict"]
+    assert any(l["action"] == "cache_hit" for l in again["trace"])
+    store.cache_clear()
+    assert not agents.run_check(msg).get("cached")
+
+
+def test_the_critic_does_not_argue_twice_over_the_same_evidence():
+    from checkam.trace import Trace
+    tr = Trace(echo=False)
+    facts = agents.intake("Bonjour maman, renvoyez moi 25 000 au [PHONE:654-jwmukg] svp", tr)
+    case = agents.Case(tr.run_id, facts["text"], facts)
+    agents.investigate(case, agents.plan(case, tr), tr)
+    agents.critique(case, tr)
+    assert agents.critique(case, tr) == []  # nothing new to argue about
+    assert any(l["action"] == "argue_genuine" and "no new evidence" in str(l["output_summary"]) for l in tr.lines)

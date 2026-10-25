@@ -10,6 +10,6 @@ os.environ.update({
     "WORLD_MODEL_URL": "", "SCOUT_URL": "",
     "CHECKAM_DB": str(tmp / "test.db"), "CHECKAM_LOG_DIR": str(tmp / "logs"),
     "PSEUDONYM_KEY": "dGVzdC1rZXktbm90LXRoZS1yZWFsLW9uZQ==", "PSEUDONYM_KEY_FILE": "",
-    "CHECKAM_SECRET": "test-secret",
+    "CHECKAM_SECRET": "test-secret", "CHECKAM_LINKCHECK": "0",
 })
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))

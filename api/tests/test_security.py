@@ -63,3 +63,22 @@ def test_desk_figures_split_by_operator_from_stored_checks(tmp_path, monkeypatch
     assert mtn["total"] == 1 and [f["id"] for f in mtn["flagged"]] == ["1"]
     assert store.analytics(operator="orange")["kept_fcfa"] == 0
     monkeypatch.setattr(store, "_conn", None)
+
+
+def test_pages_are_compressed_and_built_files_cached_but_streams_are_not_buffered():
+    from fastapi.testclient import TestClient
+    from checkam.app import app
+    c = TestClient(app)
+    r = c.get("/alerts", headers={"Accept-Encoding": "gzip"})
+    assert r.status_code == 200
+    s = c.post("/check/stream", json={"text": "Send back the money to [PHONE:654-jwmukg] it was a mistake"}, headers={"Accept-Encoding": "gzip"})
+    assert s.headers.get("content-encoding") != "gzip" and "event: card" in s.text
+
+
+def test_the_web_route_never_serves_files_outside_the_built_site():
+    from fastapi.testclient import TestClient
+    from checkam.app import app
+    c = TestClient(app)
+    for probe in ("/..%2f..%2f.env", "/%2e%2e/%2e%2e/.env", "/../../api/checkam/config.py", "/..%5c..%5c.env"):
+        r = c.get(probe)
+        assert "MODEL_API_KEY" not in r.text and "ZETARIS" not in r.text, probe

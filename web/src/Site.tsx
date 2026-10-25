@@ -34,7 +34,11 @@ function pickTheme(): "light" | "dark" {
 export default function Site() {
   const [lang, setLang] = useState<Lang>(pickLang);
   const [theme, setTheme] = useState<"light" | "dark">(pickTheme);
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    // the phone status bar takes the page colour too
+    document.querySelectorAll("meta[name=theme-color]").forEach((m) => m.setAttribute("content", theme === "light" ? "#f5f3ee" : "#090d14"));
+  }, [theme]);
   useEffect(() => {
     // follow the phone's own setting until the person picks one
     const mq = window.matchMedia?.("(prefers-color-scheme: dark)");

@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS checks (
 CREATE TABLE IF NOT EXISTS analysts (
   email TEXT PRIMARY KEY, name TEXT, org TEXT, role TEXT, salt TEXT, pw_hash TEXT, created TEXT
 );
+CREATE TABLE IF NOT EXISTS answers (
+  key TEXT PRIMARY KEY, created TEXT, card TEXT, hits INTEGER DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS alerts (
   id TEXT PRIMARY KEY, created TEXT, published_by TEXT, campaign_id TEXT, title TEXT, body_en TEXT,
   body_fr TEXT, body_pcm TEXT, numbers TEXT, status TEXT, run_id TEXT
@@ -170,8 +173,40 @@ def read_token(token: str) -> str | None:
 PUBLIC_ALERT_FIELDS = ("id", "created", "title", "body_en", "body_fr", "numbers", "campaign_id", "contract_id", "prev_hash", "hash", "signature")
 
 
+CACHE_HOURS = 6
+
+
+def cache_key(text: str, sender: str, language: str) -> str:
+    """Same words, same sender, same language: spacing and case do not make a new message."""
+    norm = " ".join(text.lower().split())
+    return hashlib.sha256(f"{norm}|{sender.strip().lower()}|{language}".encode()).hexdigest()
+
+
+def cache_get(key: str) -> dict | None:
+    r = conn().execute("SELECT card, created, hits FROM answers WHERE key=?", (key,)).fetchone()
+    if not r or (datetime.now(timezone.utc) - datetime.fromisoformat(r["created"])).total_seconds() > CACHE_HOURS * 3600:
+        return None
+    with _lock:
+        conn().execute("UPDATE answers SET hits = hits + 1 WHERE key=?", (key,))
+        conn().commit()
+    return {**json.loads(r["card"]), "cached": r["hits"] + 1}
+
+
+def cache_put(key: str, card: dict) -> None:
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO answers VALUES (?,?,?,0)", (key, now(), json.dumps(card, ensure_ascii=False, default=str)))
+        conn().commit()
+
+
+def cache_clear() -> None:
+    with _lock:
+        conn().execute("DELETE FROM answers")
+        conn().commit()
+
+
 def publish_alert(row: dict) -> dict:
     from . import ledger
+    cache_clear()  # a new alert is new evidence: earlier answers are worked out again
     with _lock:
         last = conn().execute("SELECT hash FROM alerts WHERE status='published' AND hash IS NOT NULL ORDER BY rowid DESC LIMIT 1").fetchone()
         row = {"id": "AL-" + uuid.uuid4().hex[:8], "created": now(), "status": "published", "body_pcm": "", **row}

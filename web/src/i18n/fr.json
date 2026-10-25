@@ -100,12 +100,17 @@
     "write_card": "rédige votre réponse",
     "safety_check": "vérifie la réponse",
     "facts": "note ce qui est demandé",
-    "card": "terminé"
+    "card": "terminé",
+    "site_age": "vérifie l'âge du site web",
+    "cache_hit": "a trouvé une vérification précédente de ce message",
+    "ignored_demand": "écarte une demande que le message ne fait pas",
+    "payer_note": "lit la note du paiement"
   },
   "working": "en cours",
   "steps_done": "{n} étapes",
   "ask_sender_title": "Qui l'a envoyé ?",
   "ask_sender_sub": "Tapez le nom ou le numéro affiché en haut du message sur votre téléphone. Avec lui, les agents peuvent en général trancher.",
   "check_again": "Vérifier à nouveau",
-  "writing_explanation": "Rédaction de l'explication…"
+  "writing_explanation": "Rédaction de l'explication…",
+  "src_registry": "Registre des noms de domaine"
 }

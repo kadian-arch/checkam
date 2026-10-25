@@ -52,3 +52,44 @@ def test_model_demands_need_words_in_the_message():
     otp = "Your MTN Skills Academy OTP is: 4411. Do not share this OTP. imtncm-prod.mtn.auth0.com"
     assert not re.search(agents.FOOTPRINT["click_link"], otp)
     assert re.search(agents.FOOTPRINT["click_link"], "Cliquez ici pour réclamer votre prix")
+
+
+def test_advice_fits_the_scheme_and_never_mixes_them_up():
+    from checkam import advice
+    visa = "CANADA VISA LOTTERY 2026. Host: Canada Government. Sponsored travel, work permit. Apply here https://istincy.com/CANADA-VISA-2026"
+    s = advice.scheme_of(visa, [], "visa lottery scam")
+    assert s == "visa_scholarship"
+    do, dont = advice.steps("scam", s, {"brands": [], "asks": ["click_link"], "links": ["istincy.com"]}, "en")
+    text = " ".join(do + dont)
+    assert "canada.ca" in text and "fee" in text
+    assert "PIN" not in text and "by mistake" not in text  # nothing about other schemes
+    rev = "Je vous ai envoye 25 000 FCFA par erreur sur votre compte Mobile Money, renvoyez-les"
+    do, dont = advice.steps("scam", advice.scheme_of(rev, [], ""), {"brands": ["mtn"], "asks": ["send_money"], "links": []}, "fr")
+    assert any("*126#" in d for d in do) and any("erreur" in d for d in dont)
+
+
+def test_official_route_accepts_codes_that_end_with_star_hash():
+    assert agents.OFFICIAL_ROUTE.search("Get your MTN TV bundle now *280*16*#")
+
+
+def test_a_link_that_does_not_belong_to_the_claimed_government_is_caught():
+    from checkam.adapters import linkcheck
+    who = linkcheck.claimed("CANADA VISA LOTTERY 2026. Host: Canada Government")
+    assert who and not linkcheck.belongs("istincy.com", who[1])
+    assert linkcheck.belongs("www.canada.ca", who[1]) and linkcheck.belongs("ircc.gc.ca", who[1])
+    assert linkcheck.registrable("portal.minesup.gov.cm") == "minesup.gov.cm"
+
+
+def test_the_message_itself_decides_the_scheme_over_similar_old_reports():
+    from checkam import advice
+    sos = "Hello my dear, I am stuck at the border and my phone is almost off. Please send me 20 000 by Orange Money, I will refund you tomorrow"
+    assert advice.scheme_of(sos, ["wrong_number_reversal"], "fake border emergency") == "family"
+
+
+def test_advice_points_to_the_institution_the_message_names():
+    from checkam import advice
+    from checkam.adapters import linkcheck
+    msg = "Bourses du MINESUP 2026: payez 15 000 FCFA de frais de dossier pour valider votre place"
+    who = linkcheck.claimed(msg, "fr")
+    do, _ = advice.steps("scam", "visa_scholarship", {"brands": [], "asks": ["send_money"], "links": []}, "fr", "", who)
+    assert "gov.cm" in do[0] and "canada" not in do[0].lower()

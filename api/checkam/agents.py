@@ -9,23 +9,16 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
-from . import config, privacy, store
-from .adapters import nvidia, scout, world
+from . import advice, config, privacy, store
+from .adapters import linkcheck, nvidia, scout, world
 from .adapters.data import data
 from .similarity import containment, cosine, jaccard, norm, shingles, words
-from .trace import Trace
+from .trace import Trace, timer
 
 DB = config.ZETARIS_DB
 WEIGHT = {"strong": 3, "medium": 2, "weak": 1}
 TOOLS = ["number_history", "link_history", "similar_scams", "genuine_twin", "sender", "model_judgement", "campaign", "scam_type_stats"]
 
-# Official channels, fixed. The model never invents a number to call.
-OFFICIAL_HELP = {
-    "mtn": {"en": "MTN MoMo: dial *126# yourself, or WhatsApp 650 52 87 87", "fr": "MTN MoMo : composez vous-même *126#, ou WhatsApp 650 52 87 87"},
-    "orange": {"en": "Orange Money anti-scam WhatsApp: 698 71 71 71", "fr": "Orange Money anti-arnaque, WhatsApp : 698 71 71 71"},
-    "any": {"en": "Call your operator from the number printed on your SIM pack, never a number given in the message",
-            "fr": "Appelez votre opérateur au numéro officiel, jamais à un numéro donné dans le message"},
-}
 
 # What the message DEMANDS of the reader. Notifications ("you have transferred", "do not share this
 # code") are not demands; scams always end in one of these.
@@ -48,7 +41,7 @@ ASKS = {
 EXCEPTION = re.compile(r"(?i)\b(except|sauf|other than|apart from|only (?:to|with)|uniquement|seulement (?:a|à)|but (?:you can|send|give|share))\b")
 NEGATED = re.compile(r"(?i)(do not|don'?t|dont|never|ne\s+\w+\s+pas|n'\w+\s+pas|jamais|ne partagez|not|no one|nobody|personne)\W+(?:\w+\W+){0,3}$")
 # the only routes a real operator promotion uses: USSD codes, short codes, the official app
-OFFICIAL_ROUTE = re.compile(r"(?i)\*\d{2,4}(?:\*\d+)*#|\b(?:dial|composez|tape[rz]?)\b[^.\n]{0,20}\b\d{3,4}\b|\b(?:new )?momo ?app\b|\bmy ?mtn\b|\bmax it\b|\borange money app\b|\bsend \w+ (?:to|au) \d{3,4}\b|\benvoyez \w+ au \d{3,4}\b")
+OFFICIAL_ROUTE = re.compile(r"(?i)[*#]\d{2,4}(?:\*\d+)*\*?#|\b(?:dial|composez|tape[rz]?)\b[^.\n]{0,20}\b\d{3,4}\b|\b(?:new )?momo ?app\b|\bmy ?mtn\b|\bmax it\b|\borange money app\b|\bsend \w+ (?:to|au) \d{3,4}\b|\benvoyez \w+ au \d{3,4}\b")
 # unearned windfalls: prizes, gifts, grants, mass recruitment, easy returns
 PROMISE = re.compile(r"(?i)\b(congratulations|f[ée]licitations|you (?:have )?won|vous avez gagn|winner|gagnant|s[ée]lectionn[ée]|selected|free (?:data|money|gift)|gratuit|cadeau|gift|"
                      r"subvention|grant|subsidy|aide financi|financement|recrutement|recruitment|recrute|recruiting|stages? r[ée]mun[ée]r|paid internship|offres? d'emploi|"
@@ -251,11 +244,14 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     facts = privacy.extract((sender + "\n" if sender else "") + (text or ""))
     kind = sender_kind(sender)
     asks = operator_demands(facts["text"], kind)
+    ignored: list[str] = []
     seen = QUOTED_FIELD.sub(" ", facts["text"]) if payer_note_is_label(facts["text"], kind) else facts["text"]
     staked = stake_and_return(facts["text"]) and not OFFICIAL_ROUTE.search(facts["text"])
     if staked and "send_money" not in asks:
         asks.append("send_money")
     brands = [k for k, rx in BRANDS.items() if re.search(rx, facts["text"])]
+    if facts["links"] and linkcheck.enabled():
+        linkcheck.prefetch(facts["links"])  # the registry answers while the other agents work
     # Scout (what is asked, is the message steering the AI that reads it) and Nemotron extraction
     # are independent, so they run side by side
     extract_msgs = [
@@ -274,7 +270,11 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     if llm:
         said = {("send_money" if a == "pay_fee" else a) for a in llm.get("asks", []) if a in ASKS or a == "pay_fee"}
         # the model may add what the rules missed, but only demands the message has words for
-        asks = sorted(set(asks) | {a for a in said if re.search(FOOTPRINT[a], seen)})
+        kept = {a for a in said if re.search(FOOTPRINT[a], seen)}
+        ignored = sorted(said - kept - set(asks))
+        if ignored:
+            trace.log("Intake", "ignored_demand", input=ignored, output="the model read demands the message has no words for", status="rejected")
+        asks = sorted(set(asks) | kept)
     # answers go out in an official language: the user's choice, else French for French messages, else English
     lang = lang_hint if lang_hint in ("en", "fr") else ("fr" if message_lang == "fr" else "en")
     out = {**facts, "asks": asks, "brands": brands, "language": lang, "message_language": message_lang,
@@ -283,7 +283,9 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
            "story": (llm or {}).get("story"), "channel": channel, "sender": sender,
            "promise": staked or bool(PROMISE.search(facts["text"])) or bool((llm or {}).get("promise")),
            "stake_return": staked, "impossible_date": impossible_date(facts["text"]),
-           "sender_kind": kind}
+           "sender_kind": kind, "ignored_asks": ignored,
+           "payer_note": (QUOTED_FIELD.search(facts["text"]).group(0)[:140] if payer_note_is_label(facts["text"], kind) and QUOTED_FIELD.search(facts["text"]) else None),
+           "payer_note_kind": "official" if kind == "official" else "debit"}
     trace.log("Intake", "facts", input=f"{len(facts['text'])} chars via {channel}",
               output={k: out[k] for k in ("numbers", "links", "asks", "brands", "language", "hidden_characters")}, target="Planner")
     return out
@@ -431,6 +433,30 @@ def _tool_link_history(case: Case, trace: Trace) -> list[Finding]:
             trusted = case.facts.get("sender_kind") in ("official", "registered") and "click_link" not in case.facts["asks"] and not case.facts.get("promise")
             out.append(Finding(_fid(), "link_history", f"The link {host} is not an operator website, and nobody has reported it yet",
                                "context" if trusted else "scam", "weak" if trusted else "medium", [{"table": "message", "id": host}]))
+        out += _vet_site(case, host, trace)
+    return out
+
+
+def _vet_site(case: Case, host: str, trace: Trace) -> list[Finding]:
+    """Who the message claims to be against where its link really goes, and how old that site is."""
+    out = []
+    claim = linkcheck.claimed(case.facts["text"])
+    if claim and not linkcheck.belongs(host, claim[1]):
+        case.facts.setdefault("wrong_site", []).append(host)
+        out.append(Finding(_fid(), "link_check", f"It claims to come from {claim[0]}, but the link goes to {host}, which is not one of their sites (theirs end in {claim[1][0]})",
+                           "scam", "strong", [{"table": "message", "id": host, "detail": f"{claim[0]}: {', '.join(claim[1][:3])}"}]))
+    if linkcheck.enabled():
+        with timer() as tm:
+            age = linkcheck.age_days(host)
+        trace.log("Investigator", "site_age", input=linkcheck.registrable(host), output=f"{age} days" if age is not None else "registry did not answer",
+                  latency_ms=tm.ms, why="when the site was registered (public domain registry)")
+        if age is not None and age < 180:
+            case.facts.setdefault("young_site", []).append(host)
+            out.append(Finding(_fid(), "link_check", f"The site {host} was created only {age} day{'s' if age != 1 else ''} ago. Scam sites are new and disappear fast",
+                               "scam", "strong" if age < 60 else "medium", [{"table": "registry", "id": linkcheck.registrable(host), "detail": f"{age} days old"}]))
+        elif age is not None and age > 730:
+            out.append(Finding(_fid(), "link_check", f"The site {host} has existed for {age // 365} years", "context", "weak",
+                               [{"table": "registry", "id": linkcheck.registrable(host), "detail": f"{age // 365} years old"}]))
     return out
 
 
@@ -548,6 +574,8 @@ def _tool_model_judgement(case: Case, trace: Trace) -> list[Finding]:
     if conf < 0.6 or not signals:
         return []
     weight = "strong" if conf >= 0.85 and len(signals) >= 2 else "medium"
+    if out.get("scheme") and out["verdict"] == "scam":
+        case.facts["scheme"] = str(out["scheme"])[:60]
     scheme = f" ({out['scheme']})" if out.get("scheme") else ""
     return [Finding(_fid(), "model_judgement", ("Our AI fraud analyst reads it as a scam" if out["verdict"] == "scam" else "Our AI fraud analyst reads it as a real message") + f"{scheme}: {signals[0]}", out["verdict"], weight,
                     [{"table": "nemotron", "id": config.MODEL_REASON.split("/")[-1], "detail": s} for s in signals])]
@@ -612,6 +640,8 @@ def red_flags(case: Case, twin_text: str = "") -> list[str]:
         flags.append("a dial code that sends money to a person")
     if f.get("stake_return"):
         flags.append("pay now to get more back")
+    flags += [f"link to {h} does not belong to who it claims to be" for h in f.get("wrong_site", [])]
+    flags += [f"site {h} is only a few weeks old" for h in f.get("young_site", [])]
     if f.get("hidden_characters"):
         flags.append("hidden characters")
     if any(fd.tool in ("number_history", "link_history") and fd.direction == "scam" and fd.status == "accepted" and fd.weight == "strong" for fd in case.findings):
@@ -682,8 +712,13 @@ def critique(case: Case, trace: Trace) -> list[dict]:
 
     arbitrate(case, trace)
     accepted = [f for f in case.findings if f.status == "accepted"]
-    # every round the Critic argues the other side again over the new evidence; later rounds use the
-    # fast model so the loop stays quick without losing the argument
+    # the Critic argues the other side every time the evidence that points one way or the other changes;
+    # a round that only added background (stats, an empty campaign) has nothing new to argue about
+    weighed = sorted((f.id, f.direction, f.weight) for f in accepted if f.direction in ("scam", "genuine"))
+    if weighed == case.facts.get("_argued"):
+        trace.log("Critic", "argue_genuine", output="no new evidence since the last argument", status="ok", target="Reporter")
+        return []
+    case.facts["_argued"] = weighed
     llm = nvidia.chat_json([
         {"role": "system", "content": "You are the Critic. Try to prove the message is GENUINE. Point out findings that do not support a scam verdict, and evidence still missing. Reply with JSON only."},
         {"role": "user", "content": json.dumps({"facts": {k: case.facts[k] for k in ("asks", "brands", "numbers", "links", "official_numbers", "story")},
@@ -744,10 +779,6 @@ TEXT = {
     "cant_tell": {"en": "We cannot tell for sure. Check with your operator before you act.",
                   "fr": "Impossible d'être sûr. Vérifiez auprès de votre opérateur avant d'agir."},
 }
-DONT = {"en": ["Never give your PIN or a code you received by SMS", "Do not send back money 'sent by mistake'; the operator reverses real mistakes",
-               "Do not call the number in the message"],
-        "fr": ["Ne donnez jamais votre code secret ni un code reçu par SMS", "Ne renvoyez pas l'argent « envoyé par erreur » : l'opérateur corrige les vraies erreurs",
-               "N'appelez pas le numéro du message"]}
 
 
 def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
@@ -755,6 +786,16 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     acc = [f for f in case.findings if f.status == "accepted" and f.direction in ("scam", "genuine")]
     acc.sort(key=lambda f: -WEIGHT[f.weight])
     why = [{"text": f.claim, "weight": f.weight, "evidence": f.evidence[:3]} for f in acc[:5]]
+    # say what was set aside and why, so a real message is not left looking suspicious
+    if verdict in ("looks_genuine", "cant_tell"):
+        if case.facts.get("payer_note"):
+            whose = ("money that already left your account" if case.facts.get("payer_note_kind") == "debit"
+                     else "a payment, and the operator only carries it")
+            why.append({"text": f"\"{case.facts['payer_note']}\" is a note typed by a person on {whose}. It is not the operator asking you to do anything.",
+                        "weight": "weak", "evidence": []})
+        plain = {"click_link": "open a link", "send_money": "send or pay money", "call_back": "call a number", "pin": "give a code", "personal_info": "send your documents"}
+        for a in case.facts.get("ignored_asks", []):
+            why.append({"text": f"Nothing in the message asks you to {plain.get(a, a)}.", "weight": "weak", "evidence": []})
     if case.facts["hidden_characters"]:
         why.append({"text": f"The message hides {case.facts['hidden_characters']} invisible character(s) used to slip past filters", "weight": "medium", "evidence": []})
     if case.facts.get("injection"):
@@ -768,9 +809,20 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     if "pin" in case.facts["asks"]:
         why.insert(0,{"text": "It asks for a PIN or a secret code. No operator ever does that.", "weight": "strong", "evidence": []})
     headline = TEXT[verdict][lang]
-    llm = nvidia.chat_json([
-        {"role": "system", "content": "You write the verdict card for a Cameroonian mobile money user. Use ONLY the findings given. Plain words, short sentences. Never name a model, tool, database or AI: say what was found, not who found it. Reply with JSON only."},
-        {"role": "user", "content": json.dumps({"verdict": verdict, "language": lang, "findings": [w["text"] for w in why]}, ensure_ascii=False) +
+    scheme = advice.scheme_of(case.facts["text"], case.facts.get("scam_types", []), case.facts.get("scheme", "")) if verdict in ("scam", "suspicious") else None
+    if scheme:
+        headline = {"scam": {"en": f"This is {advice.label(scheme, 'en')}. Do not pay or share anything.",
+                             "fr": f"C'est {advice.label(scheme, 'fr')}. Ne payez et ne partagez rien."},
+                    "suspicious": {"en": f"Be careful: this looks like {advice.label(scheme, 'en')}.",
+                                   "fr": f"Attention : cela ressemble à {advice.label(scheme, 'fr')}."}}[verdict][lang]
+    scheme_headline = headline if scheme else None
+    # with nothing found there is nothing to write about; the template is the honest answer
+    llm = None if not why else nvidia.chat_json([
+        {"role": "system", "content": "You write the verdict card for a person in Cameroon who just received a message. Use ONLY the findings given. "
+         "The headline is about THIS message (what it is), never about other people, victims or past reports. Plain words, short sentences. "
+         "Never name a model, tool, database or AI: say what was found, not who found it. Reply with JSON only."},
+        {"role": "user", "content": json.dumps({"verdict": verdict, "language": lang, "kind_of_message": advice.label(scheme, lang) or None,
+                                                "message_start": privacy.mask(case.facts["text"])[:300], "findings": [w["text"] for w in why]}, ensure_ascii=False) +
          f"\nWrite in {'correct French with every accent (é, è, à, ç, ê)' if lang == 'fr' else 'English'}, for someone who has never used a computer. Return {{\"headline\": str (max 14 words), "
          "\"explain\": str (max 45 words, mention the strongest evidence), \"findings\": [each finding rewritten in the same order, same meaning, "
          "keep every number and quote exactly, no new facts, max 25 words each]}"},
@@ -789,15 +841,14 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     if safe is False:
         for w, p in zip(why, plain):
             w["text"] = p
-        headline, explain = TEXT[verdict][lang], " ".join(w["text"] + "." for w in why[:2])
+        headline, explain = scheme_headline or TEXT[verdict][lang], " ".join(w["text"] + "." for w in why[:2])
         trace.log("Reporter", "safety_fallback", output="model text replaced by template", status="rejected")
-    brand = next((b for b in case.facts["brands"] if b in OFFICIAL_HELP), "any")
-    help_lang = "fr" if lang == "fr" else "en"
+    route = OFFICIAL_ROUTE.search(case.facts["text"])
+    do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))
     card = {
         "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2),
         "headline": headline, "explain": explain, "why": why, "language": lang,
-        "do_now": [OFFICIAL_HELP[brand][help_lang]] + ([OFFICIAL_HELP["any"][help_lang]] if brand != "any" else []),
-        "dont": DONT[lang] if verdict != "looks_genuine" else [],
+        "do_now": do_now, "dont": dont, "scheme": scheme,
         "genuine_twin": next((e for f in case.findings if f.tool == "genuine_twin" for e in f.evidence if "text" in e), None),
         "campaign": {"id": case.campaign["id"], "size": len(case.campaign["members"])} if case.campaign else None,
         "facts": {k: case.facts[k] for k in ("numbers", "links", "asks", "brands", "hidden_characters", "channel")},
@@ -811,6 +862,17 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
               holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None) -> dict:
     trace = Trace(run_id, echo=echo, on_line=on_line)
     check_id = "C-" + uuid.uuid4().hex[:8]
+    # the same scam reaches thousands of phones: a message checked in the last hours is answered at once
+    key = store.cache_key(text, sender, language) if persist and not holdout and not image and text.strip() else None
+    hit = store.cache_get(key) if key else None
+    if hit:
+        trace.log("Reporter", "cache_hit", output={"verdict": hit["verdict"], "earlier_checks": hit["cached"]}, target="Reporter",
+                  why="same message, same sender, checked before; the earlier agents' answer and trace are reused")
+        store.save_check({"id": check_id, "created": store.now(), "masked_text": privacy.mask(text)[:2000], "verdict": hit["verdict"],
+                          "confidence": hit["confidence"], "language": hit.get("language", "en"), "numbers": [n["code"] for n in hit.get("facts", {}).get("numbers", []) if n.get("code")],
+                          "links": hit.get("facts", {}).get("links", []), "scam_types": [], "campaign_id": (hit.get("campaign") or {}).get("id"),
+                          "run_id": trace.run_id, "channel": "text", "operator": hit.get("operator", "other"), "amount_fcfa": hit.get("amount_fcfa")})
+        return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", [])}
     facts = intake(text, trace, image=image, sender=sender, lang_hint=language)
     if not facts["text"].strip():
         trace.log("Reporter", "card", output="empty input", status="error")
@@ -844,4 +906,7 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
     card["findings"] = [f.public() for f in case.findings]
     card["rounds"] = case.rounds
     card["trace"] = trace.lines
+    if key and verdict != "cant_tell":
+        store.cache_put(key, {**card, "operator": next((b for b in facts["brands"] if b in ("mtn", "orange", "camtel")), "other"),
+                              "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) else None})
     return card

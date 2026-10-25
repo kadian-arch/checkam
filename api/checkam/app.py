@@ -20,6 +20,7 @@ origins = [o.strip() for o in config.env("CHECKAM_ORIGINS").split(",") if o.stri
 if origins:
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type"])
 app.middleware("http")(security.middleware)
+app.add_middleware(security.Compress)
 
 
 @app.on_event("startup")
@@ -233,7 +234,11 @@ WEB = config.ROOT / "web" / "dist"
 if WEB.exists():
     app.mount("/assets", StaticFiles(directory=WEB / "assets"), name="assets")
 
+    ROOT_WEB = WEB.resolve()
+
     @app.get("/{path:path}")
     def spa(path: str):
-        f = WEB / path
-        return FileResponse(f if path and f.is_file() else WEB / "index.html")
+        # only files inside the built web folder; anything else ("../.env" included) gets the app page
+        f = (WEB / path).resolve()
+        inside = f == ROOT_WEB or ROOT_WEB in f.parents
+        return FileResponse(f if path and inside and f.is_file() else WEB / "index.html")

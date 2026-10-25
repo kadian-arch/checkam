@@ -1,7 +1,7 @@
 // Offline shell for the installed app. Checks always go to the network.
-const SHELL = "checkam-shell-v1";
+const SHELL = "checkam-shell-v2";
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(["/", "/manifest.webmanifest", "/icon.svg"])));
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(["/", "/manifest.webmanifest", "/icon.svg", "/icon-192.png", "/theme.js"])));
   self.skipWaiting();
 });
 self.addEventListener("activate", (e) => {
@@ -11,7 +11,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (/^\/(check|run|auth|analyst|alerts|traces|health)/.test(url.pathname)) return;
+  if (/^\/(check|run|auth|analyst|alerts|traces|health|stats|telegram)/.test(url.pathname)) return;
   e.respondWith(fetch(e.request).then((r) => {
     const copy = r.clone();
     caches.open(SHELL).then((c) => c.put(e.request, copy));
