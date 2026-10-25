@@ -5,10 +5,13 @@ export type TraceLine = {
   target_agent: string | null; confidence: number | null; retry_count: number; status: string; sponsor: string; latency_ms: number | null;
 };
 export type Verdict = "scam" | "suspicious" | "looks_genuine" | "cant_tell";
+export type Radar = { days: number; checks: number; flagged: number; top: { scheme: string; n: number }[] };
+export type PublicStats = { checks: number; flagged: number; alerts: number; radar?: Radar };
 export type Card = {
   check_id: string; run_id: string; verdict: Verdict; confidence: number; headline: string;
   explain: string; why: Why[]; language: string; do_now: string[]; dont: string[]; genuine_twin: Evidence | null;
   campaign: { id: string; size: number } | null; rounds: number; trace: TraceLine[]; error?: string;
+  receipt?: { id: string; url: string }; cached?: number; scheme?: string | null;
 };
 
 async function call<T>(path: string, init: RequestInit = {}, token?: string): Promise<T> {
@@ -72,7 +75,7 @@ export const api = {
     return call<Card>("/check/image", { method: "POST", body: f });
   },
   alerts: () => call<{ alerts: any[] }>("/alerts"),
-  publicStats: () => call<{ checks: number; flagged: number; alerts: number }>("/stats/public"),
+  publicStats: () => call<PublicStats>("/stats/public"),
   login: (email: string, password: string) =>
     call<{ token: string; analyst: { name: string; email: string; org: string } }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   stats: (t: string, operator = "") => call<any>(`/analyst/stats${operator ? `?operator=${operator}` : ""}`, {}, t),

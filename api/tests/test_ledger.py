@@ -36,3 +36,23 @@ def test_chain_detects_a_deleted_alert():
 def test_public_feed_hides_who_published():
     publish("privacy")
     assert all("published_by" not in a for a in store.alerts())
+
+
+def test_a_checkam_answer_can_be_verified_and_a_faked_one_cannot():
+    from fastapi.testclient import TestClient
+    from checkam import agents, ledger, store
+    from checkam.app import app
+    msg = "Your MTN account is blocked. Send the code you received to 677 00 11 22 to unlock it"
+    card = agents.run_check(msg)
+    rid = card["receipt"]["id"]
+    assert card["receipt"]["url"].endswith(f"/v/{rid}")
+    c = TestClient(app)
+    got = c.get(f"/receipts/{rid}").json()
+    assert got["valid"] and got["receipt"]["verdict"] == card["verdict"]
+    assert "text" not in got["receipt"] and "677" not in str(got)  # the message itself is never shown
+    assert c.post(f"/receipts/{rid}/match", json={"text": msg.upper()}).json()["same_message"]
+    assert not c.post(f"/receipts/{rid}/match", json={"text": "a different message"}).json()["same_message"]
+    forged = {**store.get_receipt(rid), "verdict": "looks_genuine"}  # someone edits the verdict
+    assert not ledger.verify_receipt(forged)["valid"]
+    assert c.get("/receipts/C-00000000").status_code == 404
+    assert "MODEL_API_KEY" not in c.get("/receipts/..%2f..%2f.env").text

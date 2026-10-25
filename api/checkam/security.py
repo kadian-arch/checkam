@@ -33,8 +33,13 @@ def group(path: str) -> str:
 
 
 def client_ip(request: Request) -> str:
-    fwd = request.headers.get("x-forwarded-for", "")
-    return fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "?")
+    """The address our own proxy saw. A client can put anything at the start of X-Forwarded-For, so only
+    the last entry (added by Render's proxy) is trusted; locally there is no proxy and the socket is used."""
+    fwd = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    return fwd[-1] if fwd else (request.client.host if request.client else "?")
+
+
+MAX_BODY = 8_000_000
 
 
 def allowed(ip: str, g: str) -> tuple[bool, int]:
@@ -54,6 +59,9 @@ def allowed(ip: str, g: str) -> tuple[bool, int]:
 
 
 async def middleware(request: Request, call_next):
+    size = request.headers.get("content-length", "")
+    if size.isdigit() and int(size) > MAX_BODY:
+        return JSONResponse({"detail": "Request too large."}, status_code=413)
     if request.method != "GET" or request.url.path.startswith(("/analyst", "/traces")):
         ok, wait = allowed(client_ip(request), group(request.url.path))
         if not ok:

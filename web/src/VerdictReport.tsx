@@ -24,7 +24,8 @@ export default function VerdictReport({ card, t, onAgain, askSender }: { card: C
   const label = t[`verdict_${card.verdict}` as keyof Dict] as string;
   const twin = card.genuine_twin;
   const share = () => {
-    const msg = `${fill(t.share_text, { verdict: label })} ${location.origin}`;
+    // the signed answer travels with the warning, so the person receiving it can check it is real
+    const msg = card.receipt ? `${fill(t.share_receipt, { verdict: label })} ${card.receipt.url}` : `${fill(t.share_text, { verdict: label })} ${location.origin}`;
     if (navigator.share) navigator.share({ text: msg }).catch(() => {});
     else window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
   };

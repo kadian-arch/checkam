@@ -7,7 +7,7 @@ import sqlite3
 import threading
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from . import config
 
@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS checks (
 );
 CREATE TABLE IF NOT EXISTS analysts (
   email TEXT PRIMARY KEY, name TEXT, org TEXT, role TEXT, salt TEXT, pw_hash TEXT, created TEXT
+);
+CREATE TABLE IF NOT EXISTS receipts (
+  id TEXT PRIMARY KEY, created TEXT, receipt TEXT
 );
 CREATE TABLE IF NOT EXISTS answers (
   key TEXT PRIMARY KEY, created TEXT, card TEXT, hits INTEGER DEFAULT 0
@@ -44,7 +47,7 @@ def db() -> sqlite3.Connection:
         if col not in have:
             c.execute(f"ALTER TABLE alerts ADD COLUMN {col} TEXT")
     have = {r[1] for r in c.execute("PRAGMA table_info(checks)")}
-    for col, kind in (("operator", "TEXT"), ("amount_fcfa", "INTEGER")):
+    for col, kind in (("operator", "TEXT"), ("amount_fcfa", "INTEGER"), ("scheme", "TEXT")):
         if col not in have:
             c.execute(f"ALTER TABLE checks ADD COLUMN {col} {kind}")
     # checks saved before the operator column existed: read it back from the stored (masked) text
@@ -70,9 +73,9 @@ def conn() -> sqlite3.Connection:
 def save_check(row: dict) -> None:
     with _lock:
         conn().execute(
-            "INSERT OR REPLACE INTO checks (id, created, masked_text, verdict, confidence, language, numbers, links, scam_types, campaign_id, run_id, channel, operator, amount_fcfa) "
-            "VALUES (:id,:created,:masked_text,:verdict,:confidence,:language,:numbers,:links,:scam_types,:campaign_id,:run_id,:channel,:operator,:amount_fcfa)",
-            {"operator": "other", "amount_fcfa": None, **row, "numbers": json.dumps(row.get("numbers", [])), "links": json.dumps(row.get("links", [])),
+            "INSERT OR REPLACE INTO checks (id, created, masked_text, verdict, confidence, language, numbers, links, scam_types, campaign_id, run_id, channel, operator, amount_fcfa, scheme) "
+            "VALUES (:id,:created,:masked_text,:verdict,:confidence,:language,:numbers,:links,:scam_types,:campaign_id,:run_id,:channel,:operator,:amount_fcfa,:scheme)",
+            {"operator": "other", "amount_fcfa": None, "scheme": None, **row, "numbers": json.dumps(row.get("numbers", [])), "links": json.dumps(row.get("links", [])),
              "scam_types": json.dumps(row.get("scam_types", []))})
         conn().commit()
 
@@ -127,6 +130,16 @@ def analytics(days: int = 14, operator: str = "") -> dict:
             "alerts": c.execute("SELECT count(*) FROM alerts WHERE status='published'").fetchone()[0], "total": total, "by_verdict": by}
 
 
+def radar(days: int = 7) -> dict:
+    """What scams are going round right now, from citizens' own checks. Counts only, nothing personal."""
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
+    c = conn()
+    rows = c.execute("SELECT scheme, count(*) AS n FROM checks WHERE created >= ? AND verdict IN ('scam','suspicious') AND scheme IS NOT NULL "
+                     "GROUP BY scheme ORDER BY n DESC LIMIT 6", (since,)).fetchall()
+    week = c.execute("SELECT count(*), sum(verdict IN ('scam','suspicious')) FROM checks WHERE created >= ?", (since,)).fetchone()
+    return {"days": days, "checks": week[0] or 0, "flagged": week[1] or 0, "top": [{"scheme": r["scheme"], "n": r["n"]} for r in rows]}
+
+
 def check_stats() -> dict:
     c = conn()
     total = c.execute("SELECT count(*) FROM checks").fetchone()[0]
@@ -171,6 +184,17 @@ def read_token(token: str) -> str | None:
 
 # ---------- alerts ----------
 PUBLIC_ALERT_FIELDS = ("id", "created", "title", "body_en", "body_fr", "numbers", "campaign_id", "contract_id", "prev_hash", "hash", "signature")
+
+
+def save_receipt(r: dict) -> None:
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO receipts VALUES (?,?,?)", (r["id"], r["created"], json.dumps(r)))
+        conn().commit()
+
+
+def get_receipt(rid: str) -> dict | None:
+    r = conn().execute("SELECT receipt FROM receipts WHERE id=?", (rid,)).fetchone()
+    return json.loads(r["receipt"]) if r else None
 
 
 CACHE_HOURS = 6

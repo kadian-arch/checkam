@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/logo.tsx","./src/portal.tsx","./src/site.tsx","./src/traceview.tsx","./src/verdictreport.tsx","./src/api.ts","./src/i18n.ts","./src/main.tsx"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/logo.tsx","./src/portal.tsx","./src/receipt.tsx","./src/site.tsx","./src/traceview.tsx","./src/verdictreport.tsx","./src/api.ts","./src/i18n.ts","./src/main.tsx"],"version":"5.9.3"}

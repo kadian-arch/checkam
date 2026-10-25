@@ -73,3 +73,30 @@ def verify_chain(alerts_oldest_first: list[dict]) -> dict:
             return {"valid": False, "broken_at": a["id"], "reason": r["reason"]}
         prev = a["hash"]
     return {"valid": True, "length": len(alerts_oldest_first), "head": prev}
+
+
+# ---------- verdict receipts: a CheckAm answer anyone can verify, so nobody can fake one ----------
+RECEIPT_FIELDS = ("kind", "id", "created", "verdict", "confidence", "scheme", "text_sha256")
+
+
+def text_fingerprint(text: str) -> str:
+    """Same words, any spacing or case: the fingerprint a pasted copy of the message must match."""
+    return hashlib.sha256(" ".join(text.lower().split()).encode()).hexdigest()
+
+
+def sign_receipt(receipt: dict) -> dict:
+    body = {k: receipt.get(k) for k in RECEIPT_FIELDS}
+    digest = hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+    return {**body, "hash": digest, "signature": base64.b64encode(_load().sign(digest.encode())).decode()}
+
+
+def verify_receipt(receipt: dict) -> dict:
+    body = {k: receipt.get(k) for k in RECEIPT_FIELDS}
+    digest = hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+    if digest != receipt.get("hash"):
+        return {"valid": False, "reason": "the receipt was changed after CheckAm signed it"}
+    try:
+        _load().public_key().verify(base64.b64decode(receipt.get("signature") or ""), digest.encode())
+    except (InvalidSignature, ValueError):
+        return {"valid": False, "reason": "the signature is not CheckAm's"}
+    return {"valid": True}

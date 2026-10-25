@@ -9,7 +9,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
-from . import advice, config, privacy, store
+from . import advice, config, ledger, privacy, store
 from .adapters import linkcheck, nvidia, scout, world
 from .adapters.data import data
 from .similarity import containment, cosine, jaccard, norm, shingles, words
@@ -83,7 +83,9 @@ CREDIT = re.compile(r"(?i)\b(you have received|vous avez re[çc]u|received [\d .
 # a demand the model reports only counts when the message has words for it
 FOOTPRINT = {
     "click_link": r"(?i)\b(click|tap|open|visit|go to|download|log ?in|sign ?in|connect|register|follow|access|cliqu\w*|ouvr\w*|visit\w*|allez|t[ée]l[ée]charg\w*|connect\w*|inscri\w*|suiv\w*|appuy\w*|acc[ée]d\w*)\b",
-    "send_money": r"(?i)\b(send|pay|transfer|deposit|refund|return|lend|loan|keep|fee|fees|envoi\w*|envoy\w*|transf[ée]r\w*|vers\w*|d[ée]pos\w*|pai\w*|pay\w*|frais|rembours\w*|renvoy\w*|pr[êe]t\w*|gard\w*|cotis\w*|invest\w*)\b",
+    # demand verbs only: nouns such as "payments", "fees" or "dépôt" also fill genuine receipts
+    "send_money": r"(?i)\b(send|pay|transfer|deposit|refund|return|lend|loan me|keep the rest|invest|envoie[sz]?|envoyez|envoyer|transf[èée]re[rz]?|transf[ée]rez|verse[rz]?|versez|"
+                  r"d[ée]pose[rz]?|d[ée]posez|paie[sz]?|payez|payer|rembourse[rz]?|remboursez|renvoie[sz]?|renvoyez|pr[êe]te[rz]?|pr[êe]tez|cotise[rz]?|cotisez|investi(?:ssez|r))\b",
     "call_back": r"(?i)\b(call|whatsapp|contact|text|sms|appel\w*|joindre|[ée]cri\w*|contactez)\b",
     "pin": r"(?i)\b(pin|code|otp|password|mot de passe)\b",
     "personal_info": r"(?i)\b(cni|id card|identity|carte|passport|passeport|photo|dipl[oô]m\w*|cv|date of birth|naissance)\b",
@@ -181,8 +183,16 @@ def scam_name(code: str, lang: str = "en") -> str:
     return SCAM_NAMES.get(code, (code.replace("_", " "),) * 2)[lang == "fr"]
 
 
-def _times(n: int) -> str:
+def _times(n: int, lang: str = "en") -> str:
+    if lang == "fr":
+        return "une fois" if n == 1 else f"{n} fois"
     return "once" if n == 1 else f"{n} times"
+
+
+def L(case: "Case", en: str, fr: str) -> str:
+    """Every reason is written in both official languages at the source, so the answer never depends on
+    a model to be in French."""
+    return fr if case.language == "fr" else en
 
 
 BRANDS = {"mtn": r"(?i)\bmtn|momo|mobile ?money\b", "orange": r"(?i)\borange\b", "camtel": r"(?i)\bcamtel|blue\b",
@@ -289,6 +299,14 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     trace.log("Intake", "facts", input=f"{len(facts['text'])} chars via {channel}",
               output={k: out[k] for k in ("numbers", "links", "asks", "brands", "language", "hidden_characters")}, target="Planner")
     return out
+
+
+def nothing_to_check(facts: dict) -> bool:
+    """Emoji, a greeting, a few letters: no number, link, amount, request, brand or real sentence. Giving a
+    verdict on that would be guessing, so the person is asked for the actual message instead."""
+    words_ = re.findall(r"[^\W\d_]{2,}", facts["text"])
+    signals = facts["numbers"] or facts["links"] or facts.get("official_numbers") or facts["asks"] or facts.get("promise") or facts["brands"]         or re.search(r"\d{3,}|[*#]\d{2,4}", facts["text"]) or facts.get("injection") or facts.get("hidden_characters")
+    return not signals and len(words_) < 4
 
 
 def _guess_lang(t: str) -> str:
@@ -399,7 +417,7 @@ def _tool_number_history(case: Case, trace: Trace) -> list[Finding]:
         code = n["code"]
         if not code:
             if set(case.facts["asks"]) & {"call_back", "send_money"}:
-                out.append(Finding(_fid(), "number_history", f"It asks you to call or pay a personal number starting {n['prefix']}", "scam", "medium"))
+                out.append(Finding(_fid(), "number_history", L(case, f"It asks you to call or pay a personal number starting {n['prefix']}", f"Il vous demande d'appeler ou de payer un numéro personnel commençant par {n['prefix']}"), "scam", "medium"))
             continue
         reps = data().sql(f"SELECT id, scam_types, region, amount_lost_fcfa FROM {DB}.reports WHERE (array_contains(phone_ids, {_q(code)}) OR sender_phone_id = {_q(code)}){_not_held(case)}", trace, why=f"reports naming {code}")
         alr = data().sql(f"SELECT id, title, source, date_published FROM {DB}.public_alerts WHERE array_contains(phone_ids, {_q(code)}){_not_held(case)}", trace, why=f"alerts naming {code}")
@@ -409,14 +427,16 @@ def _tool_number_history(case: Case, trace: Trace) -> list[Finding]:
             ev = [{"table": "reports", "id": r["id"], "detail": ", ".join(scam_name(s, case.language) for s in (r["scam_types"] or []))} for r in reps]
             ev += [{"table": "public_alerts", "id": a["id"], "detail": a["title"]} for a in alr]
             ev += [{"table": "checks", "id": p["id"], "detail": p['created'][:10], "verdict": p['verdict']} for p in prior[:5]]
-            said = [f"reported as a scam {_times(len(reps))}"] if reps else []
-            said += [f"named in {len(alr)} public warning(s)"] if alr else []
-            said += [f"checked {_times(len(prior))} before on CheckAm"] if prior else []
+            fr = case.language == "fr"
+            said = [L(case, f"reported as a scam {_times(len(reps))}", f"signalé comme arnaque {_times(len(reps), 'fr')}")] if reps else []
+            said += [L(case, f"named in {len(alr)} public warning(s)", f"cité dans {len(alr)} alerte(s) publique(s)")] if alr else []
+            said += [L(case, f"checked {_times(len(prior))} before on CheckAm", f"déjà vérifié {_times(len(prior), 'fr')} sur CheckAm")] if prior else []
             out.append(Finding(_fid(), "number_history",
-                               f"The number starting {n['prefix']} has already been " + " and ".join(said),
+                               (f"Le numéro commençant par {n['prefix']} a déjà été " if fr else f"The number starting {n['prefix']} has already been ")
+                               + (" et " if fr else " and ").join(said),
                                "scam", "strong" if total else "medium", ev, verify={"kind": "number", "code": code, "count": total}))
         else:
-            out.append(Finding(_fid(), "number_history", f"The number starting {n['prefix']} has not been reported yet", "context", "weak"))
+            out.append(Finding(_fid(), "number_history", L(case, f"The number starting {n['prefix']} has not been reported yet", f"Le numéro commençant par {n['prefix']} n'a pas encore été signalé"), "context", "weak"))
     return out
 
 
@@ -427,11 +447,11 @@ def _tool_link_history(case: Case, trace: Trace) -> list[Finding]:
         alr = data().sql(f"SELECT id, title FROM {DB}.public_alerts WHERE array_contains(domains, {_q(host)}){_not_held(case)}", trace, why=f"alerts with {host}")
         if reps or alr:
             ev = [{"table": "reports", "id": r["id"]} for r in reps] + [{"table": "public_alerts", "id": a["id"], "detail": a["title"]} for a in alr]
-            out.append(Finding(_fid(), "link_history", f"The link {host} has already been reported in {len(reps) + len(alr)} scam(s)", "scam", "strong", ev,
+            out.append(Finding(_fid(), "link_history", L(case, f"The link {host} has already been reported in {len(reps) + len(alr)} scam(s)", f"Le lien {host} a déjà été signalé dans {len(reps) + len(alr)} arnaque(s)"), "scam", "strong", ev,
                                verify={"kind": "link", "host": host, "count": len(reps) + len(alr)}))
         else:
             trusted = case.facts.get("sender_kind") in ("official", "registered") and "click_link" not in case.facts["asks"] and not case.facts.get("promise")
-            out.append(Finding(_fid(), "link_history", f"The link {host} is not an operator website, and nobody has reported it yet",
+            out.append(Finding(_fid(), "link_history", L(case, f"The link {host} is not an operator website, and nobody has reported it yet", f"Le lien {host} n'est pas un site d'opérateur, et personne ne l'a encore signalé"),
                                "context" if trusted else "scam", "weak" if trusted else "medium", [{"table": "message", "id": host}]))
         out += _vet_site(case, host, trace)
     return out
@@ -440,22 +460,31 @@ def _tool_link_history(case: Case, trace: Trace) -> list[Finding]:
 def _vet_site(case: Case, host: str, trace: Trace) -> list[Finding]:
     """Who the message claims to be against where its link really goes, and how old that site is."""
     out = []
-    claim = linkcheck.claimed(case.facts["text"])
+    f = case.facts
+    # same rule as any outside link: it weighs when the message pushes you to it or the sender is not
+    # one a personal phone cannot fake; a registered sender's login or terms address that asks nothing is context
+    pushed = "click_link" in f["asks"] or bool(f.get("promise")) or f.get("sender_kind") not in ("official", "registered")
+    claim = linkcheck.claimed(f["text"])
     if claim and not linkcheck.belongs(host, claim[1]):
-        case.facts.setdefault("wrong_site", []).append(host)
-        out.append(Finding(_fid(), "link_check", f"It claims to come from {claim[0]}, but the link goes to {host}, which is not one of their sites (theirs end in {claim[1][0]})",
-                           "scam", "strong", [{"table": "message", "id": host, "detail": f"{claim[0]}: {', '.join(claim[1][:3])}"}]))
+        if pushed:
+            f.setdefault("wrong_site", []).append(host)
+        out.append(Finding(_fid(), "link_check", L(case, f"It claims to come from {claim[0]}, but the link goes to {host}, which is not one of their sites (theirs end in {claim[1][0]})",
+                             f"Il prétend venir de {linkcheck.claimed(f['text'], 'fr')[0]}, mais le lien mène à {host}, qui n'est pas l'un de leurs sites (les leurs finissent par {claim[1][0]})"),
+                           "scam" if pushed else "context", "strong" if pushed else "weak", [{"table": "message", "id": host, "detail": f"{claim[0]}: {', '.join(claim[1][:3])}"}]))
     if linkcheck.enabled():
         with timer() as tm:
             age = linkcheck.age_days(host)
         trace.log("Investigator", "site_age", input=linkcheck.registrable(host), output=f"{age} days" if age is not None else "registry did not answer",
                   latency_ms=tm.ms, why="when the site was registered (public domain registry)")
         if age is not None and age < 180:
-            case.facts.setdefault("young_site", []).append(host)
-            out.append(Finding(_fid(), "link_check", f"The site {host} was created only {age} day{'s' if age != 1 else ''} ago. Scam sites are new and disappear fast",
-                               "scam", "strong" if age < 60 else "medium", [{"table": "registry", "id": linkcheck.registrable(host), "detail": f"{age} days old"}]))
+            if pushed:
+                f.setdefault("young_site", []).append(host)
+            out.append(Finding(_fid(), "link_check", L(case, f"The site {host} was created only {age} day{'s' if age != 1 else ''} ago. Scam sites are new and disappear fast",
+                                 f"Le site {host} a été créé il y a seulement {age} jour{'s' if age != 1 else ''}. Les sites d'arnaque sont récents et disparaissent vite"),
+                               "scam" if pushed else "context", ("strong" if age < 60 else "medium") if pushed else "weak",
+                               [{"table": "registry", "id": linkcheck.registrable(host), "detail": f"{age} days old"}]))
         elif age is not None and age > 730:
-            out.append(Finding(_fid(), "link_check", f"The site {host} has existed for {age // 365} years", "context", "weak",
+            out.append(Finding(_fid(), "link_check", L(case, f"The site {host} has existed for {age // 365} years", f"Le site {host} existe depuis {age // 365} ans"), "context", "weak",
                                [{"table": "registry", "id": linkcheck.registrable(host), "detail": f"{age // 365} years old"}]))
     return out
 
@@ -477,7 +506,7 @@ def _tool_similar_scams(case: Case, trace: Trace) -> list[Finding]:
     scored.sort(key=lambda x: -x[0])
     top = [x for x in scored[:3] if x[0] >= 0.3]
     if not top:
-        return [Finding(_fid(), "similar_scams", "It is not worded like any scam people have reported", "context", "weak")]
+        return [Finding(_fid(), "similar_scams", L(case, "It is not worded like any scam people have reported", "Il n'est formulé comme aucune arnaque signalée"), "context", "weak")]
     best = top[0]
     ev = [{"table": "messages", "id": r["id"], "detail": r['text'][:140], "score": round(score, 2), "wording": round(lex, 2), "meaning": round(sem, 2),
            "scam_types": r["scam_types"]} for score, lex, sem, r in top]
@@ -485,13 +514,14 @@ def _tool_similar_scams(case: Case, trace: Trace) -> list[Finding]:
     # scammers copy real operator formats on purpose, so resemblance alone proves nothing:
     # it is scam evidence only when the message also demands something or promises a windfall
     if not (case.facts["asks"] or case.facts.get("promise")):
-        return [Finding(_fid(), "similar_scams", "It looks a bit like a known scam, but it asks nothing of you. "
-                        "If someone follows up asking for money back or a code, that follow-up is the scam", "context", "weak", ev)]
+        return [Finding(_fid(), "similar_scams", L(case, "It looks a bit like a known scam, but it asks nothing of you. If someone follows up asking for money back or a code, that follow-up is the scam",
+                          "Il ressemble un peu à une arnaque connue, mais il ne vous demande rien. Si quelqu'un vous relance pour récupérer de l'argent ou un code, c'est cette relance l'arnaque"),
+                        "context", "weak", ev)]
     if best[0] < 0.4:
-        return [Finding(_fid(), "similar_scams", "It looks a little like a known scam, not enough to count", "context", "weak", ev)]
+        return [Finding(_fid(), "similar_scams", L(case, "It looks a little like a known scam, not enough to count", "Il ressemble un peu à une arnaque connue, pas assez pour compter"), "context", "weak", ev)]
     weight = "strong" if best[0] >= 0.55 else "medium"
-    return [Finding(_fid(), "similar_scams", ("It is worded almost exactly like a scam people have already reported" if weight == "strong"
-                     else "It is worded like a scam people have already reported"), "scam", weight, ev,
+    return [Finding(_fid(), "similar_scams", (L(case, "It is worded almost exactly like a scam people have already reported", "Il est formulé presque exactement comme une arnaque déjà signalée") if weight == "strong"
+                     else L(case, "It is worded like a scam people have already reported", "Il est formulé comme une arnaque déjà signalée")), "scam", weight, ev,
                     verify={"kind": "similar", "id": best[3]["id"], "score": round(best[0], 3)})]
 
 
@@ -505,7 +535,7 @@ def _tool_genuine_twin(case: Case, trace: Trace) -> list[Finding]:
         return []
     score = jaccard(mine, shingles(best["message_text"]))
     if score < 0.2:
-        return [Finding(_fid(), "genuine_twin", "It does not look like any real operator message we know", "context", "weak")]
+        return [Finding(_fid(), "genuine_twin", L(case, "It does not look like any real operator message we know", "Il ne ressemble à aucun vrai message d'opérateur que nous connaissons"), "context", "weak")]
     extra = sorted(words(case.facts["text"]) - words(best["message_text"]))[:12]
     twin = {"table": "genuine_messages", "id": best["id"], "operator": best["operator"], "kind": best["message_kind"],
             "sender": best["sender_shown"], "text": best["message_text"][:400], "only_in_yours": extra, "similarity": round(score, 2)}
@@ -513,8 +543,9 @@ def _tool_genuine_twin(case: Case, trace: Trace) -> list[Finding]:
     # an unofficial link or a request for your PIN
     red = bool(red_flags(case, best["message_text"]))
     if score >= 0.55 and not red:
-        return [Finding(_fid(), "genuine_twin", f"It reads like a real {best['operator'].upper()} message", "genuine", "strong", [twin])]
-    return [Finding(_fid(), "genuine_twin", f"It copies the look of a real {best['operator'].upper()} message, but changes the part that matters", "scam" if red else "context",
+        return [Finding(_fid(), "genuine_twin", L(case, f"It reads like a real {best['operator'].upper()} message", f"Il se lit comme un vrai message de {best['operator'].upper()}"), "genuine", "strong", [twin])]
+    return [Finding(_fid(), "genuine_twin", L(case, f"It copies the look of a real {best['operator'].upper()} message, but changes the part that matters",
+                                              f"Il copie l'apparence d'un vrai message de {best['operator'].upper()}, mais change la partie qui compte"), "scam" if red else "context",
                     "medium" if red else "weak", [twin])]
 
 
@@ -523,17 +554,19 @@ def _tool_sender(case: Case, trace: Trace) -> list[Finding]:
     who = (f.get("sender") or "").strip()
     brand = next((b for b in f["brands"] if b not in ("government",)), None)
     if f["sender_kind"] == "personal" and brand:
-        return [Finding(_fid(), "sender", f"It claims to be {brand.upper()} but was sent from a personal number. Operators send from their official names",
+        return [Finding(_fid(), "sender", L(case, f"It claims to be {brand.upper()} but was sent from a personal number. Operators send from their official names",
+                          f"Il prétend être {brand.upper()} mais vient d'un numéro personnel. Les opérateurs envoient depuis leurs noms officiels"),
                         "scam", "strong", [{"table": "message", "id": "sender", "detail": privacy.mask(who)}])]
     if f["sender_kind"] == "personal" and (f["asks"] or f.get("promise")):
-        return [Finding(_fid(), "sender", "A personal number is asking you to act or promising you money", "scam", "medium",
+        return [Finding(_fid(), "sender", L(case, "A personal number is asking you to act or promising you money", "Un numéro personnel vous demande d'agir ou vous promet de l'argent"), "scam", "medium",
                         [{"table": "message", "id": "sender", "detail": privacy.mask(who)}])]
     safe_asks = not set(f["asks"]) & {"pin", "send_money", "call_back", "personal_info"}
     if f["sender_kind"] == "official" and safe_asks and not f["links"]:
-        return [Finding(_fid(), "sender", f"It comes from the official name {who} and asks nothing risky", "genuine", "medium",
+        return [Finding(_fid(), "sender", L(case, f"It comes from the official name {who} and asks nothing risky", f"Il vient du nom officiel {who} et ne demande rien de risqué"), "genuine", "medium",
                         [{"table": "message", "id": "sender", "detail": who}])]
     if f["sender_kind"] == "registered" and safe_asks:
-        return [Finding(_fid(), "sender", f"It comes from the name {who}, which a personal phone cannot use, and asks nothing risky", "genuine", "weak",
+        return [Finding(_fid(), "sender", L(case, f"It comes from the name {who}, which a personal phone cannot use, and asks nothing risky",
+                          f"Il vient du nom {who}, qu'un téléphone personnel ne peut pas utiliser, et ne demande rien de risqué"), "genuine", "weak",
                         [{"table": "message", "id": "sender", "detail": who}])]
     return []
 
@@ -577,7 +610,8 @@ def _tool_model_judgement(case: Case, trace: Trace) -> list[Finding]:
     if out.get("scheme") and out["verdict"] == "scam":
         case.facts["scheme"] = str(out["scheme"])[:60]
     scheme = f" ({out['scheme']})" if out.get("scheme") else ""
-    return [Finding(_fid(), "model_judgement", ("Our AI fraud analyst reads it as a scam" if out["verdict"] == "scam" else "Our AI fraud analyst reads it as a real message") + f"{scheme}: {signals[0]}", out["verdict"], weight,
+    return [Finding(_fid(), "model_judgement", (L(case, "Our AI fraud analyst reads it as a scam", "Notre analyste IA y voit une arnaque") if out["verdict"] == "scam"
+                     else L(case, "Our AI fraud analyst reads it as a real message", "Notre analyste IA y voit un vrai message")) + f"{scheme} : {signals[0]}", out["verdict"], weight,
                     [{"table": "nemotron", "id": config.MODEL_REASON.split("/")[-1], "detail": s} for s in signals])]
 
 
@@ -588,7 +622,8 @@ def _tool_scam_type_stats(case: Case, trace: Trace) -> list[Finding]:
     t = types[0]
     r = data().sql(f"SELECT count(*) AS n, sum(amount_lost_fcfa) AS lost FROM {DB}.reports WHERE array_contains(scam_types, {_q(t)})", trace, why=f"impact of {t}")
     n, lost = (r[0]["n"], r[0]["lost"]) if r else (0, 0)
-    return [Finding(_fid(), "scam_type_stats", f"{n} people have reported {scam_name(t)}; together they lost {int(lost or 0):,} FCFA".replace(",", " "), "context", "weak",
+    return [Finding(_fid(), "scam_type_stats", L(case, f"{n} people have reported {scam_name(t)}; together they lost {int(lost or 0):,} FCFA",
+                     f"{n} personnes ont signalé {scam_name(t, 'fr')} ; elles ont perdu ensemble {int(lost or 0):,} FCFA").replace(",", " "), "context", "weak",
                     [{"table": "reports", "id": t, "detail": scam_name(t, case.language), "count": n}])]
 
 
@@ -604,16 +639,17 @@ def _tool_campaign(case: Case, trace: Trace) -> list[Finding]:
     ctx = world.context(case.check_id, trace=trace) or {}
     camp = ctx.get("campaign")
     if not camp:
-        return [Finding(_fid(), "campaign", "It is not linked to a known scam wave yet; fraud analysts can now see it", "context", "weak")]
+        return [Finding(_fid(), "campaign", L(case, "It is not linked to a known scam wave yet; fraud analysts can now see it", "Il n'est lié à aucune vague d'arnaques connue pour l'instant ; les analystes peuvent maintenant le voir"), "context", "weak")]
     case.campaign = camp
     others = [m for m in camp["members"] if not m.endswith(case.check_id)]
     why = sorted({l["why"] for l in camp["links"]})[:4]
     kinds = camp.get("kinds", {})
     if not (kinds.get("report") or kinds.get("alert")):
         # only other citizen checks so far: worth watching, not proof of a scam
-        return [Finding(_fid(), "campaign", f"{len(others)} other people checked a message like this one", "context", "weak",
+        return [Finding(_fid(), "campaign", L(case, f"{len(others)} other people checked a message like this one", f"{len(others)} autres personnes ont vérifié un message comme celui-ci"), "context", "weak",
                         [{"table": "world_model", "id": camp["id"], "members": others[:10]}])]
-    return [Finding(_fid(), "campaign", f"It is part of a scam wave: {len(camp['members'])} linked reports, warnings and checks", "scam", "strong",
+    return [Finding(_fid(), "campaign", L(case, f"It is part of a scam wave: {len(camp['members'])} linked reports, warnings and checks",
+                            f"Il fait partie d'une vague d'arnaques : {len(camp['members'])} signalements, alertes et vérifications liés"), "scam", "strong",
                     [{"table": "world_model", "id": camp["id"], "count": len(others), "members": others[:10]}],
                     verify={"kind": "campaign", "id": camp["id"]})]
 
@@ -655,7 +691,10 @@ def arbitrate(case: Case, trace: Trace) -> None:
     twin = next((f for f in case.findings if f.tool == "genuine_twin" and f.status == "accepted"), None)
     tw = next((e for e in (twin.evidence if twin else []) if "similarity" in e), None)
     flags = red_flags(case, tw["text"] if tw else "")
-    official_only = bool(OFFICIAL_ROUTE.search(case.facts["text"])) and not flags
+    # anyone can type a dial code into a text: it vouches for a message that asks nothing and promises
+    # nothing; free money "for dialing a code" needs a sender a personal phone cannot fake
+    trusted = case.facts.get("sender_kind") in ("official", "registered")
+    official_only = bool(OFFICIAL_ROUTE.search(case.facts["text"])) and not flags and (trusted or not case.facts.get("promise"))
     if flags:
         if twin and twin.direction == "genuine":
             twin.direction, twin.weight = "context", "weak"
@@ -678,12 +717,15 @@ def arbitrate(case: Case, trace: Trace) -> None:
             trace.log("Critic", "arbitrate", input=f.claim, output=f.critic_note, status="rejected", target="Reporter")
     if strong_twin and twin:
         twin.direction, twin.weight = "genuine", "strong"
-        twin.claim = f"It reads like a real {tw['operator'].upper()} message and asks nothing a real operator would not"
+        twin.claim = L(case, f"It reads like a real {tw['operator'].upper()} message and asks nothing a real operator would not",
+                       f"Il se lit comme un vrai message de {tw['operator'].upper()} et ne demande rien qu'un vrai opérateur ne demanderait pas")
     elif harmless and not official_only and not any(f.tool == "no_harm_path" for f in case.findings):
-        case.findings.append(Finding(_fid(), "no_harm_path", f"It comes from {case.facts.get('sender')}, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        case.findings.append(Finding(_fid(), "no_harm_path", L(case, f"It comes from {case.facts.get('sender')}, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+                                       f"Il vient de {case.facts.get('sender')}, un nom qu'un téléphone personnel ne peut pas utiliser, et ne demande ni argent, ni code, ni appel, ni lien extérieur"),
                                      "genuine", "medium", [{"table": "message", "id": "sender", "detail": case.facts.get("sender")}], status="accepted"))
     elif official_only and not any(f.tool == "official_route" for f in case.findings):
-        case.findings.append(Finding(_fid(), "official_route", "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        case.findings.append(Finding(_fid(), "official_route", L(case, "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+                                       "Tout ce qu'il vous demande passe par les canaux officiels : un code que vous composez vous-même, un numéro court ou l'application officielle"),
                                      "genuine", "medium", [{"table": "message", "id": "route", "detail": OFFICIAL_ROUTE.search(case.facts["text"]).group(0)}],
                                      status="accepted"))
 
@@ -775,7 +817,7 @@ def decide(case: Case) -> tuple[str, float, int]:
 TEXT = {
     "scam": {"en": "This is a scam. Do not send money or any code.", "fr": "C'est une arnaque. N'envoyez ni argent ni code."},
     "suspicious": {"en": "Be careful: this message has signs of a scam.", "fr": "Attention : ce message a des signes d'arnaque."},
-    "looks_genuine": {"en": "This looks like a real operator message.", "fr": "Ceci ressemble à un vrai message de l'opérateur."},
+    "looks_genuine": {"en": "Nothing in this message can cost you money.", "fr": "Rien dans ce message ne peut vous coûter de l'argent."},
     "cant_tell": {"en": "We cannot tell for sure. Check with your operator before you act.",
                   "fr": "Impossible d'être sûr. Vérifiez auprès de votre opérateur avant d'agir."},
 }
@@ -789,25 +831,34 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     # say what was set aside and why, so a real message is not left looking suspicious
     if verdict in ("looks_genuine", "cant_tell"):
         if case.facts.get("payer_note"):
-            whose = ("money that already left your account" if case.facts.get("payer_note_kind") == "debit"
-                     else "a payment, and the operator only carries it")
-            why.append({"text": f"\"{case.facts['payer_note']}\" is a note typed by a person on {whose}. It is not the operator asking you to do anything.",
+            debit = case.facts.get("payer_note_kind") == "debit"
+            why.append({"text": L(case, f"\"{case.facts['payer_note']}\" is a note typed by a person on "
+                                        + ("money that already left your account" if debit else "a payment, and the operator only carries it") + ". It is not the operator asking you to do anything.",
+                                  f"« {case.facts['payer_note']} » est une note tapée par une personne sur "
+                                        + ("de l'argent déjà sorti de votre compte" if debit else "un paiement, que l'opérateur ne fait que transmettre") + ". Ce n'est pas l'opérateur qui vous demande quelque chose."),
                         "weight": "weak", "evidence": []})
-        plain = {"click_link": "open a link", "send_money": "send or pay money", "call_back": "call a number", "pin": "give a code", "personal_info": "send your documents"}
+        plain = {"click_link": ("open a link", "d'ouvrir un lien"), "send_money": ("send or pay money", "d'envoyer ou de payer de l'argent"),
+                 "call_back": ("call a number", "d'appeler un numéro"), "pin": ("give a code", "de donner un code"), "personal_info": ("send your documents", "d'envoyer vos documents")}
         for a in case.facts.get("ignored_asks", []):
-            why.append({"text": f"Nothing in the message asks you to {plain.get(a, a)}.", "weight": "weak", "evidence": []})
+            en_, fr_ = plain.get(a, (a, a))
+            why.append({"text": L(case, f"Nothing in the message asks you to {en_}.", f"Rien dans le message ne vous demande {fr_}."), "weight": "weak", "evidence": []})
     if case.facts["hidden_characters"]:
-        why.append({"text": f"The message hides {case.facts['hidden_characters']} invisible character(s) used to slip past filters", "weight": "medium", "evidence": []})
+        why.append({"text": L(case, f"The message hides {case.facts['hidden_characters']} invisible character(s) used to slip past filters",
+                              f"Le message cache {case.facts['hidden_characters']} caractère(s) invisible(s) utilisé(s) pour passer les filtres"), "weight": "medium", "evidence": []})
     if case.facts.get("injection"):
-        why.insert(0, {"text": f"The message hides instructions aimed at AI checkers ({case.facts['injection']['kind'].replace('-', ' ')}). Real operators never do that.",
+        why.insert(0, {"text": L(case, "The message hides instructions aimed at AI checkers, to make them call it safe. Real operators never do that.",
+                                 "Le message cache des instructions destinées aux vérificateurs IA, pour qu'ils le déclarent sûr. Les vrais opérateurs ne font jamais ça."),
                        "weight": "strong", "evidence": [{"table": "scout", "id": case.facts["injection"]["kind"], "engine": "Meterless Scout"}]})
     if case.facts.get("impossible_date"):
-        why.insert(0, {"text": f"It carries a date that does not exist ({case.facts['impossible_date']}). Real receipts come from the operator's system and never do that.",
+        why.insert(0, {"text": L(case, f"It carries a date that does not exist ({case.facts['impossible_date']}). Real receipts come from the operator's system and never do that.",
+                                 f"Il porte une date qui n'existe pas ({case.facts['impossible_date']}). Les vrais reçus viennent du système de l'opérateur et n'ont jamais ça."),
                        "weight": "strong", "evidence": []})
     if USSD_TO_PERSON.search(case.facts["text"]):
-        why.insert(0, {"text": "The dial code it gives you sends money to a personal number. Never dial a code that someone else wrote for you.", "weight": "strong", "evidence": []})
+        why.insert(0, {"text": L(case, "The dial code it gives you sends money to a personal number. Never dial a code that someone else wrote for you.",
+                                 "Le code qu'il vous donne envoie de l'argent à un numéro personnel. Ne composez jamais un code écrit par quelqu'un d'autre."), "weight": "strong", "evidence": []})
     if "pin" in case.facts["asks"]:
-        why.insert(0,{"text": "It asks for a PIN or a secret code. No operator ever does that.", "weight": "strong", "evidence": []})
+        why.insert(0, {"text": L(case, "It asks for a PIN or a secret code. No operator ever does that.", "Il demande un code secret. Aucun opérateur ne fait jamais ça."),
+                       "weight": "strong", "evidence": []})
     headline = TEXT[verdict][lang]
     scheme = advice.scheme_of(case.facts["text"], case.facts.get("scam_types", []), case.facts.get("scheme", "")) if verdict in ("scam", "suspicious") else None
     if scheme:
@@ -857,6 +908,15 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     return card
 
 
+def _receipt(check_id: str, card: dict, text: str) -> dict:
+    """A signed record of this answer. The share link carries it, so a faked 'CheckAm says genuine'
+    screenshot can be told apart from a real one. It holds no message text, only its fingerprint."""
+    r = ledger.sign_receipt({"kind": "verdict", "id": check_id, "created": store.now(), "verdict": card["verdict"],
+                             "confidence": card["confidence"], "scheme": card.get("scheme"), "text_sha256": ledger.text_fingerprint(text)})
+    store.save_receipt(r)
+    return {"id": check_id, "url": f"{config.env('CHECKAM_PUBLIC_URL', 'https://checkam.me').rstrip('/')}/v/{check_id}"}
+
+
 # ======================= the loop =======================
 def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: str = "", language: str = "", run_id: str | None = None,
               holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None) -> dict:
@@ -871,12 +931,18 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
         store.save_check({"id": check_id, "created": store.now(), "masked_text": privacy.mask(text)[:2000], "verdict": hit["verdict"],
                           "confidence": hit["confidence"], "language": hit.get("language", "en"), "numbers": [n["code"] for n in hit.get("facts", {}).get("numbers", []) if n.get("code")],
                           "links": hit.get("facts", {}).get("links", []), "scam_types": [], "campaign_id": (hit.get("campaign") or {}).get("id"),
-                          "run_id": trace.run_id, "channel": "text", "operator": hit.get("operator", "other"), "amount_fcfa": hit.get("amount_fcfa")})
-        return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", [])}
+                          "run_id": trace.run_id, "channel": "text", "operator": hit.get("operator", "other"), "amount_fcfa": hit.get("amount_fcfa"),
+                          "scheme": hit.get("scheme")})
+        return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", []), "receipt": _receipt(check_id, hit, text)}
     facts = intake(text, trace, image=image, sender=sender, lang_hint=language)
     if not facts["text"].strip():
         trace.log("Reporter", "card", output="empty input", status="error")
         return {"run_id": trace.run_id, "error": "Paste a message or attach a screenshot."}
+    if nothing_to_check(facts):
+        trace.log("Intake", "nothing_to_check", output="no number, link, amount, request, brand or sentence to check", target="Reporter")
+        return {"run_id": trace.run_id, "nothing": True, "language": facts["language"],
+                "error": ("Il n'y a rien à vérifier ici. Collez ou transférez le message que vous avez reçu." if facts["language"] == "fr"
+                          else "There is nothing here to check. Paste or forward the message you received.")}
     case = Case(trace.run_id, facts["text"], facts, facts["channel"], facts["language"], check_id,
                 holdout=frozenset(holdout), holdout_text=facts["text"] if holdout else "")
     while case.rounds < config.MAX_AGENT_ROUNDS:
@@ -902,10 +968,13 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "links": facts["links"], "scam_types": facts.get("scam_types", []), "campaign_id": case.campaign["id"] if case.campaign else None,
                           "run_id": trace.run_id, "channel": facts["channel"],
                           "operator": next((b for b in facts["brands"] if b in ("mtn", "orange", "camtel")), "other"),
-                          "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) and 0 < facts["amount_fcfa"] < 50_000_000 else None})
+                          "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) and 0 < facts["amount_fcfa"] < 50_000_000 else None,
+                          "scheme": card.get("scheme")})
     card["findings"] = [f.public() for f in case.findings]
     card["rounds"] = case.rounds
     card["trace"] = trace.lines
+    if persist and not holdout:
+        card["receipt"] = _receipt(check_id, card, text or facts["text"])
     if key and verdict != "cant_tell":
         store.cache_put(key, {**card, "operator": next((b for b in facts["brands"] if b in ("mtn", "orange", "camtel")), "other"),
                               "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) else None})

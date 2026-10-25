@@ -26,18 +26,18 @@ TEXT = {
                     "Five agents check it against real scam reports and official messages, then tell you what it is, why, and what to do.\n\nTry it: forward the last suspicious message you got.",
            "wait": "🔎 Checking…", "busy": "Too many checks from this chat. Try again in {s} s.",
            "why": "Why", "do": "What to do", "dont": "Don't", "error": "The check failed. Please try again in a minute.",
-           "web": "🌐 Full evidence", "warn": "📣 Warn a friend", "share": "I checked this message with CheckAm: {v}. Check yours before you send money:",
+           "web": "🔏 Signed answer", "warn": "📣 Warn a friend", "share": "I checked this message with CheckAm: {v}. Check yours before you send money:",
            "who": "Who sent it? Reply with the name or number shown at the top of the message on your phone, and I'll check again.",
-           "seconds": "checked in {s} s", "again": "Seen before: same answer as {n} earlier check(s)",
+           "seconds": "checked in {s} s", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
            "stage": {"Intake": "📖 Reading the message", "Planner": "🧭 Planning the checks", "Investigator": "🔍 Searching scam reports and real operator messages",
                      "Critic": "⚖️ The critic is arguing the other side", "Reporter": "✍️ Writing your answer"}},
     "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi un message d'argent qui vous paraît louche (SMS, WhatsApp, emploi, bourse, gain), ou une capture d'écran. "
                     "Cinq agents le vérifient avec de vrais signalements et de vrais messages officiels, puis vous disent ce que c'est, pourquoi, et quoi faire.\n\nEssayez : transférez le dernier message suspect que vous avez reçu.",
            "wait": "🔎 Vérification…", "busy": "Trop de vérifications depuis ce chat. Réessayez dans {s} s.",
            "why": "Pourquoi", "do": "Que faire", "dont": "À ne pas faire", "error": "La vérification a échoué. Réessayez dans une minute.",
-           "web": "🌐 Toutes les preuves", "warn": "📣 Prévenir un proche", "share": "J'ai vérifié ce message avec CheckAm : {v}. Vérifiez les vôtres avant d'envoyer de l'argent :",
+           "web": "🔏 Réponse signée", "warn": "📣 Prévenir un proche", "share": "J'ai vérifié ce message avec CheckAm : {v}. Vérifiez les vôtres avant d'envoyer de l'argent :",
            "who": "Qui l'a envoyé ? Répondez avec le nom ou le numéro affiché en haut du message sur votre téléphone, et je vérifie à nouveau.",
-           "seconds": "vérifié en {s} s", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
+           "seconds": "vérifié en {s} s", "unsupported": "Je vérifie les textes et les captures d'écran. Transférez le message lui-même, ou envoyez-en une capture.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
            "stage": {"Intake": "📖 Lecture du message", "Planner": "🧭 Choix des vérifications", "Investigator": "🔍 Recherche dans les signalements et les vrais messages",
                      "Critic": "⚖️ Le critique défend l'autre hypothèse", "Reporter": "✍️ Rédaction de votre réponse"}},
 }
@@ -105,8 +105,10 @@ def buttons(card: dict, ui: str) -> list:
     lang = card.get("language") if card.get("language") in TEXT else ui
     t = TEXT[lang]
     verdict = LABEL[lang].get(card["verdict"], "").split(" ", 1)[-1]
-    share = f"https://t.me/share/url?url={quote(SITE)}&text={quote(t['share'].format(v=verdict))}"
-    return [[{"text": t["web"], "url": SITE}, {"text": t["warn"], "url": share}]]
+    # the signed answer travels with the warning, so whoever receives it can check it is real
+    link = (card.get("receipt") or {}).get("url") or SITE
+    share = f"https://t.me/share/url?url={quote(link)}&text={quote(t['share'].format(v=verdict))}"
+    return [[{"text": t["web"], "url": link}, {"text": t["warn"], "url": share}]]
 
 
 def _photo(file_id: str) -> tuple[str, str] | None:
@@ -179,6 +181,29 @@ def handle(update: dict) -> None:
         return
     ui = _lang((msg.get("from") or {}).get("language_code", ""))
     text = (msg.get("text") or msg.get("caption") or "")[:4000]
+    if (msg.get("chat") or {}).get("type") in ("group", "supergroup"):
+        # in a group the bot speaks only when someone calls it: a mention, a reply to it, or /check
+        me = config.env("TELEGRAM_BOT_USERNAME", "checkam_bot").lower()
+        replied = ((msg.get("reply_to_message") or {}).get("from") or {}).get("username", "").lower() == me
+        called = f"@{me}" in text.lower() or text.startswith("/check")
+        if not (called or replied):
+            return
+        target = msg.get("reply_to_message") if called and msg.get("reply_to_message") else None
+        if target:  # "@checkam_bot" in reply to a suspicious message: check that message
+            msg, text = target, (target.get("text") or target.get("caption") or "")[:4000]
+        text = re.sub(rf"(?i)@{re.escape(me)}|^/check\S*", "", text).strip()
+    if text.startswith("/check"):
+        text = re.sub(r"^/check(@\w+)?", "", text).strip()  # "/check <message>" works anywhere
+        if not text and not msg.get("photo"):
+            _send(chat_id, TEXT[ui]["start"])
+            return
+    doc = msg.get("document") or {}
+    if str(doc.get("mime_type", "")).startswith("image/"):
+        msg = {**msg, "photo": [{"file_id": doc["file_id"]}]}  # a screenshot sent "as a file"
+    if not text and not msg.get("photo") and not msg.get("text"):
+        # stickers, voice notes, files, locations: say what works instead of guessing
+        _send(chat_id, TEXT[ui]["unsupported"])
+        return
     photo_id = msg["photo"][-1]["file_id"] if msg.get("photo") else ""
     if text.startswith("/start") or text.startswith("/help") or (not text and not photo_id):
         _send(chat_id, TEXT[ui]["start"])

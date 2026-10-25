@@ -38,15 +38,35 @@ def test_pin_requests_are_flagged():
     assert privacy.extract("Confirm your PIN to receive the money")["asks_for_secret"]
 
 
-def test_channel_file_adds_only_sourced_entries(tmp_path):
+def test_a_clean_channel_file_adds_to_the_official_lists(tmp_path):
     f = tmp_path / "channels.json"
-    f.write_text('{"mtn": {"sender_names": ["Y\'ello Care"], "whatsapp": ["+237 651 00 00 00"], "sources": ["https://mtn.cm"]},'
-                 ' "fake": {"sender_names": ["FreeMoney"], "whatsapp": ["699999999"], "sources": []}}', encoding="utf-8")
+    f.write_text('{"mtn": {"sender_names": ["Yello Care"], "whatsapp": ["+237 651 00 00 00"], "short_codes": ["*126#"], '
+                 '"websites": ["mtn.cm"], "sources": ["https://mtn.cm/help/contact-us/"]}}', encoding="utf-8")
     before = (set(privacy.OFFICIAL), set(privacy.SENDER_NAMES))
     try:
-        privacy.load_channels(f)
+        assert privacy.load_channels(f) == []
         assert "651000000" in privacy.OFFICIAL and "yellocare" in privacy.SENDER_NAMES
-        assert "699999999" not in privacy.OFFICIAL and "freemoney" not in privacy.SENDER_NAMES
     finally:
         privacy.OFFICIAL.clear(); privacy.OFFICIAL.update(before[0])
         privacy.SENDER_NAMES.clear(); privacy.SENDER_NAMES.update(before[1])
+
+
+def test_an_unsafe_channel_file_is_refused_whole_and_never_crashes_the_app(tmp_path):
+    f = tmp_path / "channels.json"
+    f.write_text('{ "mtn": { "whatsapp": ["650528787"] "sources": [] }', encoding="utf-8")  # broken JSON
+    assert privacy.load_channels(f) and privacy.load_channels(f)[0].startswith("not valid JSON")
+    bad = {"mtn": {"whatsapp": ["650528787"], "websites": ["mtn.cm"], "short_codes": ["*126#"], "sources": ["https://mtn.cm"]},
+           "orange": {"whatsapp": ["650528787"], "websites": ["orange.cm"], "short_codes": ["#150#, #123#"], "sources": ["https://orange.cm"]},
+           "camtel": {"whatsapp": ["620105050"], "websites": ["mtn.cm"], "sources": []}}
+    problems = " | ".join(privacy.channel_problems(bad))
+    assert "also listed for mtn" in problems          # one number, two operators
+    assert "one code per item" in problems            # "#150#, #123#" in one string
+    assert "does not belong to camtel" in problems    # camtel pointing at mtn.cm
+    assert "needs at least one source" in problems
+
+
+def test_the_channel_file_in_the_repo_is_safe():
+    # this runs in CI on every pull request: a wrong official number can never be merged
+    if privacy.CHANNELS_FILE.exists():
+        import json
+        assert privacy.channel_problems(json.loads(privacy.CHANNELS_FILE.read_text(encoding="utf-8"))) == []

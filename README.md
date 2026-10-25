@@ -6,6 +6,13 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 
 **Open Agent Hackathon 2026 · Track 02: The Agent That Can Explain Why · Team Ground Truth**
 
+| Try it | |
+|---|---|
+| Web app (any phone, installs like an app) | **https://checkam.me** |
+| Telegram: forward any message to | **https://t.me/checkam_bot** |
+| Analyst desk | https://checkam.me/analyst (judge sign-in on the submission form) |
+| Contact | groundtruth.cm@gmail.com |
+
 | | |
 |---|---|
 | Who it is for | People who receive scam messages (the citizen check), and fraud analysts, CERT staff and fact-checkers (the analyst desk) |
@@ -13,6 +20,19 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 | What goes in | A message or a screenshot (citizen); a campaign to investigate (analyst) |
 | What comes out | A verdict card with evidence, the real operator message it imitates, safe next steps; a campaign dossier and a published alert |
 | Why agents | The answer needs several sources that disagree (scam reports, public alerts, genuine operator messages, earlier checks), a link across time (campaigns), and someone arguing the other side before a citizen is told "this is a scam" |
+
+## What makes it different
+
+- **It explains why, with the record behind every claim.** Each reason on the answer opens to its evidence: the scam report, the public alert, the real operator message it copies, the site registry, the analyst's quote. Plain words for citizens; the full agent trail for experts.
+- **The Critic argues the other side.** It re-counts every number claim in Zetaris itself, looks for proof the message is genuine, and can overrule the other agents. A real MTN message with a link is not flagged just because it has a link.
+- **It vets links like an analyst.** Who the message claims to be (Canada's government, MINESUP, MTN) against where the link really goes, and how old the site is in the public domain registry. A "Canada visa lottery" on istincy.com, or an "investment" site registered 9 days ago, is caught on that alone.
+- **Signed answers.** Every answer has a link like `checkam.me/v/C-1a2b3c4d`, signed with CheckAm's Ed25519 key. A doctored "CheckAm says it's real" screenshot cannot produce a valid link, and anyone can paste the message to confirm it is the one that was checked. The message itself is never shown.
+- **Signed, hash-chained public alerts.** Analysts publish alerts only with a Scout-signed contract and an approval; each alert is signed and chained to the one before, so nobody can quietly edit or remove one.
+- **Scam radar.** The home page shows which scams are going round this week, counted from people's own anonymous checks.
+- **It answers like a person on Telegram.** It tells a question from a message to check, edits one message from "Checking…" to the answer with live progress, asks "who sent it?" when that would settle it, and in groups only speaks when called.
+- **Advice that fits the scam.** A visa scam gets "check canada.ca yourself, never pay a processing fee"; a "sent by mistake" message gets "dial *126# yourself to see your real balance". Official numbers come from a fixed, validated list, never from the model.
+- **Instant for repeats.** The same scam reaches thousands of phones; a message checked in the last hours is answered in about a second and says so.
+- **Built for every phone.** Works from 320 px screens up, light or dark following the phone, installs as an app with share-to-CheckAm, English or French following the phone.
 
 ## How it works
 
@@ -32,9 +52,9 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 |---|---|---|
 | **Intake** | Reads text or a screenshot (Nemotron VL), strips hidden characters, turns phone numbers into the dataset's HMAC codes, finds links, asks and brands. Scout screens the message for instructions aimed at AI | Scout can block: a verdict-tampering attempt becomes evidence of a scam |
 | **Planner** | Forms hypotheses and chooses tools (Nemotron Lightning), never fewer than the facts call for | Re-plans when the Critic objects |
-| **Investigator** | Runs the tools: number and link history, similar scam wording (Nemotron embeddings), the genuine twin, campaign membership (World Model), scale of the scam type. All data through Zetaris | One failing tool never stops the run |
-| **Critic** | Re-counts every number claim in Zetaris itself, rejects claims without an evidence row, argues the message is genuine (Nemotron Super), downgrades weak findings, asks for missing evidence | **Yes:** rejects findings, sends work back to the Planner (max 3 rounds), gates the verdict |
-| **Reporter** | Writes the card from accepted findings only, in the user's language; safe next steps come from a fixed list of official channels, never from the model; Nemotron safety checks the reply | Falls back to templates if the safety check fails |
+| **Investigator** | Runs the tools in parallel: number and link history, site vetting (claimed institution against the link, site age from the domain registry), similar scam wording (Nemotron embeddings), the genuine twin, the sender, a fraud analyst's reading (Nemotron Super), campaign membership (World Model), scale of the scam type. All data through Zetaris | One failing tool never stops the run |
+| **Critic** | Re-counts every number claim in Zetaris itself, rejects claims without an evidence row, overrules look-alike findings when the message only routes to official channels or comes from a registered sender and asks for nothing that costs money, argues the message is genuine whenever the evidence changes, asks for missing evidence | **Yes:** rejects findings, sends work back to the Planner (max 3 rounds), gates the verdict |
+| **Reporter** | Writes the answer from accepted findings only, in plain English or French, about this message; picks next steps for the kind of scam from a fixed list of official channels, never from the model; Nemotron safety checks the reply; signs the answer | Falls back to templates if the safety check fails |
 
 Every step of every run is a line in `logs/trace-<run_id>.jsonl` and in the app under "See how we checked": agent, action, input and output summaries, target agent, confidence, retry count, status, sponsor and latency.
 
@@ -81,7 +101,9 @@ cd web && npm ci && npm run build                      # served by the API
 | `python run.py investigate [campaign_id]` | one analyst dossier |
 | `POST /run` | `{"mode": "check", "text": ...}` or `{"mode": "investigate", "campaign_id": ...}` |
 | `POST /check`, `POST /check/image` | citizen check (text or screenshot) |
-| `GET /alerts` | published alerts |
+| `GET /alerts`, `GET /alerts/verify` | published alerts and the chain check |
+| `GET /receipts/{id}`, `POST /receipts/{id}/match` | is this CheckAm answer real, and is it about this message |
+| `POST /telegram/{secret}` | the Telegram bot (webhook) |
 | `GET /traces/{run_id}` | full trace of a run |
 
 Examples with real saved outputs: `examples/inputs/` and `examples/outputs/`.
@@ -103,15 +125,31 @@ CI runs all three on every push and pull request.
 | Model writes something unsafe | Content-safety check replaces it with a template |
 | Message tries to steer the AI | Scout flags it; the Reporter shows it as evidence of a scam |
 
+## Security
+
+CheckAm is a safety tool, so it is built to be attacked.
+- **Abuse limits** per client (the address our own proxy recorded, so a forged forwarding header does not reset them), stricter limits on sign-in, request bodies capped at 8 MB, screenshots accepted only when their first bytes are a real image.
+- **No way out of the web folder**: the file route resolves every path and refuses anything outside the built site.
+- **Headers**: strict Content-Security-Policy, HSTS, no framing, no sniffing, no referrer.
+- **Analysts** sign in with scrypt-hashed passwords and short-lived HMAC tokens; publishing needs a Scout-signed contract and a signature check.
+- **Messages are untrusted data** for every model call, and Scout flags instructions aimed at the AI.
+- **Secrets** live only in the environment; `.env.example` lists every setting with placeholders. Dependencies are audited with `pip-audit` and `npm audit` (no known vulnerabilities at submission).
+- **Official channels** come from a validated file: a number listed for two operators, a website that is not the operator's, or an entry without a source fails CI and is never loaded.
+
 ## Data, privacy and licence
 - Data: **Stop Arnaque 237 v1.0** (CC BY 4.0, DOI 10.5281/zenodo.23287617), built by the team before the hackathon and declared as a pre-existing component. Phone numbers in it are HMAC codes that cannot be reversed.
-- A citizen's real number is turned into the same code on the server, so it can be matched without being stored. Checks are stored masked; trace lines never hold more than 200 characters of a message.
+- A citizen's real number is turned into the same code on the server, so it can be matched without being stored. Codes typed into a message ("my PIN is 4821") are removed before anything is saved. Checks are stored masked; trace lines never hold more than 200 characters of a message. Signed answers hold a fingerprint of the message, never the message.
 - Code: Apache-2.0. The Meterless test harnesses in `engines/*/conformance` and `engines/scout-intent/evals` are the sponsor's, Apache-2.0 (see `engines/NOTICE.md`).
 
 ## Limitations
 - A campaign link shows a shared signal (number, link, wording), not proof that one person is behind it. Dossiers say so.
 - The dataset is small (60 reports, 160 alerts, 267 messages) and skews to the South West and Littoral. New checks grow it.
-- With hosted Nemotron a full check takes 20 to 40 seconds; the app shows each step as it happens.
+- With hosted Nemotron a new message takes about 10 to 30 seconds (median 15 s in our test run with four checks at once); the verdict shows the moment the agents decide it, then the written explanation. Repeats answer in about a second.
+- A receipt or bank notice with no sender shown can be impossible to judge from the text; CheckAm then asks who sent it instead of guessing.
+
+## Team
+- **Kum Donalsien Akwo** (KAD): agents, Zetaris and Meterless integration, data, security, deployment.
+- **Chelsey**: field research and user testing, French review, official channel research, the operator view of the analyst desk (from her FraudLens mock-up), demo video.
 
 ## Pre-existing components
 The Stop Arnaque 237 dataset and its collection pipeline (separate repository: github.com/kadian-arch/stop-arnaque-237).

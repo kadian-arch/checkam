@@ -86,8 +86,10 @@ def scheme_of(text: str, scam_types: list[str], model_scheme: str = "") -> str |
     reports only break ties, since a neighbour can be a different scheme."""
     best, top = None, 0
     for name, (rx, _, _) in SCHEMES.items():
-        n = (2 * len(re.findall(rx, text, flags=re.I)) + 2 * len(re.findall(rx, model_scheme or "", flags=re.I))
-             + len(re.findall(rx, " ".join(scam_types or []), flags=re.I)))
+        direct = 2 * len(re.findall(rx, text, flags=re.I)) + 2 * len(re.findall(rx, model_scheme or "", flags=re.I))
+        if not direct:
+            continue  # neighbours can break a tie, never name a scheme the message itself does not show
+        n = direct + len(re.findall(rx, " ".join(scam_types or []), flags=re.I))
         if n > top:
             best, top = name, n
     return best

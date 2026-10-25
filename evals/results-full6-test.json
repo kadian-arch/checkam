@@ -1,0 +1,876 @@
+{
+  "summary": {
+    "tag": "full6",
+    "split": "test",
+    "with_sender": true,
+    "n": 49,
+    "mode": "data=zetaris-jdbc, nemotron=on",
+    "seconds": 344,
+    "precision": 0.8824,
+    "recall": 0.8333,
+    "f1": 0.8571,
+    "false_alarm_rate": 0.0645,
+    "cant_tell": 3,
+    "confusion": {
+      "not_scam->looks_genuine": 29,
+      "not_scam->scam": 1,
+      "not_scam->suspicious": 1,
+      "scam->cant_tell": 3,
+      "scam->scam": 15
+    },
+    "recall_by_source": {
+      "public_alert/verbatim": 7,
+      "report/retold": 5,
+      "report/verbatim": 3,
+      "social_post/verbatim": 1
+    }
+  },
+  "results": [
+    {
+      "id": "A-1228516d",
+      "text": "Mobile Money, vous avez reçu 56 500 FCFA de [NAME] ([PHONE:677-cvbmej]) le 2018-11-23. 10 : 13 :31. Transaction Id : [TXN_ID].",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 17.7,
+      "rounds": 2,
+      "why": []
+    },
+    {
+      "id": "A-307eded0",
+      "text": "BIENVENU AU SERVICE ORANGE PRIME PROMO 2016. Bravooh!! Mr/Mme à l'occurance de l'année 2016,du à vos multiples recharges effectuées, après tirage au sort dans les 10 régions votre numéro est tiré gagnant! vous bénéficiez d'une prime de [380.000frs]et Un Séjour A Kribi veuillez contacter votre service orange PRIME PROMO en partenariat avec le service EXPRESS UNION au numéro standard <<[PHONE:691-bzkfta]>> pour les modalités. orange vous remercie de votre fidélité(......",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 16.0,
+      "rounds": 2,
+      "why": [
+        "C'est presque exactement le même texte que des arnaques déjà signalées",
+        "Notre analyste IA le lit comme une arnaque (faux gain / fraude aux avances) : demande de prix non sollicitée : \"votre numéro est tiré gagnant! vous bénéficiez d'une prime de [380.000frs]\""
+      ]
+    },
+    {
+      "id": "A-3801e3c3",
+      "text": "Recrutement d'offres d'emploi. La structure carrefour market lance une campagne à courte durée. La société Carrefour Market lance un grand recrutement. Dans le cadre d'aider la jeunesse",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 41.9,
+      "rounds": 2,
+      "why": [
+        "Notre analyste IA le lit comme une arnaque : \"Recrutement d'offres d'emploi\"",
+        "Il est presque identique à des arnaques déjà signalées"
+      ]
+    },
+    {
+      "id": "A-596d59a6",
+      "text": "MTN Cameroon offre 10 000 FCFA à toute personne souscrivant au code #237#",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 36.6,
+      "rounds": 2,
+      "why": [
+        "Tout ce qu'il demande de faire passe par des canaux officiels : un code à composer soi-même, un numéro court ou l'application officielle."
+      ]
+    },
+    {
+      "id": "A-5c83e930",
+      "text": "ADC lance pour 2026 un recrutement rémunéré de 250 stagiaires et agents, ouvert aux élèves, étudiants et chercheurs d'emploi, pour ses aéroports de Douala, Yaoundé, Garoua (…)",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 22.3,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a scam (fake job recruitment scam): ADC lance pour 2026 un recrutement rémunéré de 250 stagiaires et agents",
+        "It is worded almost exactly like a scam people have already reported"
+      ]
+    },
+    {
+      "id": "A-5e480655",
+      "text": "MobileMoney  Vous avez recu 33700 XAF de [NAME] ([PHONE:672-mmsacd]) sur votre compte mobile money 2026-05-17 Message de l'expediteur: Votre nouveau solde est de :68870 FCFA. Frais: 0 XAF. Transaction ID: [TXN_ID]. Economies avec MoMoApp! Juste pour cent frais de retraits transferts.",
+      "label": "scam",
+      "origin": "social_post",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 14.2,
+      "rounds": 2,
+      "why": [
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app"
+      ]
+    },
+    {
+      "id": "A-601a9ea5",
+      "text": "Bonjour cher ami ! S'il te plait envoie-moi urgemment 30.000 Fcfa.",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 16.5,
+      "rounds": 2,
+      "why": [
+        "Notre analyste IA lit le message comme une arnaque (demande d'argent en urgence) : \"S'il te plait envoie-moi urgemment 30.000 Fcfa\"",
+        "Il est rédigé comme une arnaque que les gens ont déjà signalée"
+      ]
+    },
+    {
+      "id": "A-7d9e9b1f",
+      "text": "Recrutement Perenco Cameroun. Nous recrutons pour le Cameroun des techniciens Camerounais avec expérience dans le secteur pétrolier : Instrumentistes, Opérateurs de Production, Mécaniciens et soudeurs qualifiés…",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 17.3,
+      "rounds": 2,
+      "why": [
+        "Notre IA analyste fraude le classe comme arnaque : Recrutement Perenco Cameroun",
+        "Il est formulé comme une arnaque déjà signalée par des gens"
+      ]
+    },
+    {
+      "id": "A-7f03a592",
+      "text": "Félicitations! Santa Lucia — Journée des enfants Cadeau Grâce au questionnaire, vous aurez la chance d'obtenir des 100000 franc",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.9,
+      "seconds": 18.6,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a scam (fake prize questionnaire): Félicitations! Santa Lucia — Journée des enfants Cadeau"
+      ]
+    },
+    {
+      "id": "A-f6444ba9",
+      "text": "Offre d'emploi. En prélude des fêtes de fin d'année 2024, Chococam leader dans la production d'aliments chocolatés au Cameroun informe la population camerounaise qu'un recrutement de 276 jeunes Camerounais(es) pour des stages pré-emplois rémunérés dans toutes les villes du Cameroun (…)",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.9,
+      "seconds": 106.9,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported"
+      ]
+    },
+    {
+      "id": "G-1246aef9",
+      "text": "Yello, your Momo Advance limit has been decreased. Your new limit is 100F. T&C: bit[.]ly/cm-ma",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 15.2,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: Sender shown = \"MoMoAdvance\"",
+        "It comes from the name MoMoAdvance, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-199a48c9",
+      "text": "Despite the Janviose, the joy stays plugged in. Get your Camon 40 with 52,000F deposit, then pay the rest gradually. Register on *244# and visit a TECNO store",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 11.4,
+      "rounds": 1,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: Sender shown = Tecno",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name Tecno, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-259cfb28",
+      "text": "Your MTN Skills Academy OTP is: [CODE]. Do not share this OTP. MTN is not liable for incident that result from sharing your OTP. imtncm-prod[.]mtn[.]auth0[.]com #[CODE]",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "suspicious",
+      "confidence": 0.6,
+      "seconds": 15.1,
+      "rounds": 2,
+      "why": [
+        "It claims to come from MTN, but the link goes to imtncm-prod.mtn.auth0.com, which is not one of their sites (theirs end in mtn.cm)",
+        "It comes from the name MyMTNapp, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-2709a19d",
+      "text": "You have transferred 2200 XAF to [NAME] ([PHONE:671-guawdw]) from your mobile money account [ACCOUNT] at 2026-09-12 13:27:31 FEES 8 FCFA. Your new balance: 0 XAF. Message from sender: 1. Message to receiver: . Financial Transaction Id: [TXN_ID]. Back-to-School is Here... MoMo Got You! For any transactions from XAF 5,237,  stand a chance to win everyday : A Laptop + XAF 50,000 + a Home Box every day. Dial *126*6# or download the New MoMo App : link[.]mtn[.]cm/NewMoMoAppRef. More info: 8787 | WhatsApp 650 528 787",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 26.7,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: You have transferred 2200 XAF to [NAME] ([PHONE:671-guawdw]) from your mobile money account [ACCOUNT] at 2026-09-12 13:27:31 FEES 8 FCFA. Your new balance: 0 XAF.",
+        "It comes from the official name Mobile Money and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-293acea7",
+      "text": "<#> Y'ello. Please enter the following code :[CODE] to complete your login. Be careful, do not share with anyone. RdbS6eMOXvx > N/RywfrtIZL> l+/DM+Y0kqw L9X0x07s5X9 +BQ+l2vBZvQ 071KQ0fm1I6",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 11.8,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: Sender shown = \"Mobile Money\"",
+        "It comes from the official name Mobile Money and asks nothing risky",
+        "It comes from Mobile Money, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link"
+      ]
+    },
+    {
+      "id": "G-2c0f9f07",
+      "text": "Your Top Deals bundle could be your lucky one! Subscribe to top deal from 237U via *237# and stand a chance to win 50,000F every hour",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 10.7,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: sender shown = \"MonTopDeal\"",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name MonTopDeal, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-2e3d20c2",
+      "text": "You have transferred 650 XAF to [NAME] ([PHONE:672-zvuhug]) from your mobile money account [ACCOUNT] at 2026-09-13 19:46:48 FEES 0 FCFA. Your new balance: 0 XAF. Message from sender: 1. Message to receiver: . Financial Transaction Id: [TXN_ID]. Back-to-School is Here... MoMo Got You! For any transactions from XAF 5,237,  stand a chance to win everyday : A Laptop + XAF 50,000 + a Home Box every day. Dial *126*6# or download the New MoMo App : link[.]mtn[.]cm/NewMoMoAppRef. More info: 8787 | WhatsApp 650 528 787",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 11.1,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: Official MTN transaction receipt format: transferred 650 XAF to [NAME] ([PHONE:672-zvuhug]) ... Financial Transaction Id: [TXN_ID]",
+        "It comes from the official name Mobile Money and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-33dc31bb",
+      "text": "You can BORROW airtime, Internet and Calls Bundles and PAYBACK LATER. To discover what's new, Kindly dial *121#",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 100.4,
+      "rounds": 1,
+      "why": [
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name PLAN B, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-39a70022",
+      "text": "Yello Bao ! Double your commisions with QR code ! Earn up to 30 000F/Month with MoMo by performing your cashouts everyday using QR code it's simple and fast",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 12.9,
+      "rounds": 2,
+      "why": [
+        "It comes from QRCOD BOOST, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name QRCOD BOOST, which a personal phone cannot use, and asks nothing risky",
+        "Nothing in the message asks you to open a link."
+      ]
+    },
+    {
+      "id": "G-3b167e69",
+      "text": "Yello, your Momo Advance limit has been decreased. Your new limit is 200F. T&C: bit[.]ly/cm-ma",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 16.0,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: sender shown = MoMoAdvance",
+        "It comes from the name MoMoAdvance, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-3d6333b0",
+      "text": "Limited stock: smartphone + free earphones with YaMo SmartPay. Flexible financing up to 12 months. Visit MTN Touch Buea soon!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 18.3,
+      "rounds": 2,
+      "why": [
+        "It comes from MTNSmartPay, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name MTNSmartPay, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-46ccbae3",
+      "text": "A transaction of 200 XAF by LEEDTECH LTD ([PHONE:681-jmtnsq]) on your mobile money account successfully completed at 2026-09-15 22:34:01. The amount was subject to a discount of 0 and coupons worth 0. Message from debit receiver: Pay SMS Notification Fees. Your new balance:2528 XAF. Fee was 0 XAF, loyalty fee was 0 and loyalty reward was 0. Financial Transaction Id: [TXN_ID]. External Transaction Id: [TXN_ID].  Borrow up to 100,000 FCFA in advance in just seconds for your transactions. Dial *126*6# or access the new MoMo App here:link[.]mtn[.]cm/NewMoMoAppRef.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 10.3,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name unknown, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-47f4922a",
+      "text": "Fatigué qu'on espionne tes secrets sur WhatsApp ? Voici la clé de secours ! La vidéo qui te montre tout est sur Flash Tech au *031*42#. 1jr gratuit, 250F/sem.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 17.7,
+      "rounds": 2,
+      "why": [
+        "Tout ce qu'il demande passe par des canaux officiels : un code à composer, un court numéro ou l'application officielle",
+        "Il vient du nom StarNews, qu'un téléphone personnel ne peut pas utiliser, et ne demande rien de risqué",
+        "Rien dans le message ne vous demande d'ouvrir un lien"
+      ]
+    },
+    {
+      "id": "G-7778c85a",
+      "text": "Dial *281# and play the AFCON quiz daily. Answer 5 questions daily and stand a chance to win XAF 20000. Hurry up contest will end on 25 Jan.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 11.4,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: Sender shown = \"8403\"",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name 8403, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-78ca1be5",
+      "text": "You [PHONE:620-ewejep] received 3,000.00 FCFA of top-up. TransactionID is [TXN_ID]",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 13.9,
+      "rounds": 2,
+      "why": [
+        "It reads like a real CAMTEL message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: sender shown = \"CamtelEVC\"",
+        "It comes from the name CamtelEVC, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-7fedfe3f",
+      "text": "CHALLENGE MOMO : TROP MOO! BOOST your commissions! Get customers to scan your QR Code on every CASH-OUT to DOUBLE your MONEY! More scans = More commissions!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 15.8,
+      "rounds": 2,
+      "why": [
+        "It comes from MOMO QRCOD, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name MOMO QRCOD, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-86367d6a",
+      "text": "Level up ! Win 8,000F/day with the New MoMo App. Refer 15 friends daily and receive your CASH the next day. Download here: link[.]mtn[.]cm/NewMoMoAppRef",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 13.7,
+      "rounds": 2,
+      "why": [
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name WeekendDose, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-97b2b252",
+      "text": "Lending or selling your MoMo account to someone else is a crime and makes you liable for illicit funds passing through it. Protect your identity.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 15.3,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: \"Lending or selling your MoMo account to someone else is a crime\"",
+        "It comes from MoMoSecure, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name MoMoSecure, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-a78fa908",
+      "text": "Dear Customer, For a more convenient support from MTN, dial 8449 and get assisted with ease.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 13.7,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message",
+        "Our AI fraud analyst reads it as a real message: Sender shown as \"MTN Care\"",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app"
+      ]
+    },
+    {
+      "id": "G-a89d880c",
+      "text": "Transfer mistake? Don't panic! Recover your money yourself via the MoMo App: bit[.]ly/MoMoAppCEXS under the Money Transfer section, or dial *126*6*6#.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 13.7,
+      "rounds": 2,
+      "why": [
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name MOMOCARE, which a personal phone cannot use, and asks nothing risky",
+        "Nothing in the message asks you to open a link"
+      ]
+    },
+    {
+      "id": "G-b3c68eae",
+      "text": "Good news! Instant referral payments are back. Earn 200F automatically for every successful referral. Reach 15 referrals and get an extra 5,000F bonus!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.86,
+      "seconds": 12.4,
+      "rounds": 2,
+      "why": []
+    },
+    {
+      "id": "G-bf9c7b87",
+      "text": "Are you going to miss out? It's the same bundle with more BONUS: 500U=1GB+200MB/30D on *126*0#. And because it's you. WE ADD 250MB!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 14.7,
+      "rounds": 1,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: Promotes a data bundle via official USSD code *126*0#",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name TheHotTip, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-c25093e0",
+      "text": "You understand your language, but do you really dare to speak it? With BIBALA, learn while having fun and speak with confidence from 250F. Dial 28036# and start",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 14.5,
+      "rounds": 1,
+      "why": [
+        "Notre analyste IA lit le message comme réel : l'expéditeur \"Ma Langue\" n'est pas un numéro de téléphone personnel",
+        "Il vient de Ma Langue, un nom qu'un téléphone personnel ne peut pas utiliser, et il ne demande aucun argent, aucun code, aucun appel et aucun lien extérieur",
+        "Il vient du nom Ma Langue, qu'un téléphone personnel ne peut pas utiliser, et il ne demande rien de risqué"
+      ]
+    },
+    {
+      "id": "G-ced109de",
+      "text": "Congratulations! Following your bundle purchase on *237#, you have unlocked 2500U Bonus valid 3 days. Check your balance on […]",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 64.1,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a real message: Sender shown = \"MTNBonus\"",
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+        "It comes from the name MTNBonus, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-d4634ece",
+      "text": "You have transferred 850 XAF to [NAME] ([PHONE:671-guawdw]) from your mobile money account [ACCOUNT] at 2026-09-16 10:01:55 FEES 5 FCFA. Your new balance: 213 XAF. Message from sender: 1. Message to receiver: . Financial Transaction Id: [TXN_ID]. Back-to-School is Here... MoMo Got You! For any transactions from XAF 5,237,  stand a chance to win everyday : A Laptop + XAF 50,000 + a Home Box every day. Dial *126*6# or download the New MoMo App : link[.]mtn[.]cm/NewMoMoAppRef. More info: 8787 | WhatsApp 650 528 787",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 14.5,
+      "rounds": 2,
+      "why": [
+        "It reads like a real MTN message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: You have transferred 850 XAF to [NAME] ([PHONE:671-guawdw]) from your mobile money account [ACCOUNT] at 2026-09-16 10:01:55 FEES 5 FCFA. Your new balance: 213 XAF.",
+        "It comes from the official name Mobile Money and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-d4af0b93",
+      "text": "You [PHONE:620-ewejep] received 200.00 FCFA of top-up. TransactionID is [TXN_ID]",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 15.5,
+      "rounds": 2,
+      "why": [
+        "It reads like a real CAMTEL message and asks nothing a real operator would not",
+        "Our AI fraud analyst reads it as a real message: sender shown = \"CamtelEVC\"",
+        "It comes from the name CamtelEVC, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-d6fc2c52",
+      "text": "Attention! The only official MoMo Facebook page is \"MoMo from MTNC CM\": bit[.]ly/MoMoFacebookCM",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 20.8,
+      "rounds": 2,
+      "why": [
+        "It comes from MoMoSecure, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name MoMoSecure, which a personal phone cannot use, and asks nothing risky",
+        "Nothing in the message asks you to open a link."
+      ]
+    },
+    {
+      "id": "G-dad767ea",
+      "text": "Your Ring verification code is: [CODE]. Dont share this code with anyone; our employees will never ask for the code.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 9.3,
+      "rounds": 1,
+      "why": [
+        "It reads like a real ONLINE_SERVICE message",
+        "Our AI fraud analyst reads it as a real message: Sender shown = \"VERIFY\"",
+        "It comes from VERIFY, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link"
+      ]
+    },
+    {
+      "id": "G-db1d9056",
+      "text": "Carte [ID] Note:Chargement effectue par UNICS PLC Received Cr XAF 4.000 Date:25-09-2026 03:54 Solde XAF 3.500",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "mixed",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 12.5,
+      "rounds": 2,
+      "why": [
+        "Il vient du nom officiel UBA et ne demande rien de risqué",
+        "Il vient de UBA, nom qu'un téléphone personnel ne peut pas utiliser, et ne demande aucun argent, aucun code, aucun appel et aucun lien extérieur",
+        "\"Note:Chargement effectue par UNICS PLC Received Cr XAF 4\" est une note tapée par une personne sur un paiement, et l'opérateur ne la porte que. Ce n'est pas l'opérateur qui vous demande de faire quelque chose."
+      ]
+    },
+    {
+      "id": "G-f6a0460b",
+      "text": "Congratulations! You were among the first 1,000 activations for the Weekend Dose YouScribe promo. You have received your 1GB bonus yesterday!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 19.9,
+      "rounds": 2,
+      "why": [
+        "It comes from Youscribe, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name Youscribe, which a personal phone cannot use, and asks nothing risky",
+        "Nothing in the message asks you to open a link."
+      ]
+    },
+    {
+      "id": "G-fb33728e",
+      "text": "Plenty bonus! 1GB njoh on the NewMoMoApp. Download, log in, make a transaction, then get 1GB valid for 24h the next day. Download: link[.]mtn[.]cm/NewMoMoAppRef",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 14.4,
+      "rounds": 2,
+      "why": [
+        "It comes from WeekendDose, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
+        "It comes from the name WeekendDose, which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "R-0003e2c0",
+      "text": "Sorry but please I sent money to your number mistakenly \nCan you enter your pin code your number has been suspended",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 12.5,
+      "rounds": 2,
+      "why": [
+        "It asks for a PIN or a secret code. No operator ever does that.",
+        "It is worded almost exactly like a scam people have already reported",
+        "Our AI fraud analyst reads it as a scam (PIN phishing / mistaken transfer scam): \"Can you enter your pin code\""
+      ]
+    },
+    {
+      "id": "R-089218ec",
+      "text": "They asked to called a number that their car is bad with goods worth millions from Nigeria and the sim they bought from Nigeria can not call. After I called they appreciated  and they said they want to give me some good for my good car, big of rice tv, laptop that I should send transport but I declined",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 21.2,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a scam (advance-fee gift scam): They asked to called a number that their car is bad with goods worth millions from Nigeria"
+      ]
+    },
+    {
+      "id": "R-23c65119",
+      "text": "It was a fake mobile money message saying money had been transferred to me. Now this person called me, and asked me to send it back. This money was never sent to me",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 32.5,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported",
+        "Our AI fraud analyst reads it as a scam (fake mobile money refund scam): fake mobile money message saying money had been transferred to me"
+      ]
+    },
+    {
+      "id": "R-3d9f783a",
+      "text": "I contacted this guy and told him I needed a WhatsApp channel, he said he has WhatsApp channel for sale\nHe told me he is selling the channel for 20k which I accepted and ask him that how are we going to do for the transfer of ownership\nHe said he will make me admin of the channel which he actually did and after I transfer the money he will then make me the owner of the channel\n\nI did my own part of it and actually transferred the money to him and now asking him to make me admin he is not saying anything and instead went ahead to block me",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 19.8,
+      "rounds": 2,
+      "why": [
+        "The message hides instructions aimed at AI checkers (privilege escalation). Real operators never do that.",
+        "Our AI fraud analyst reads it as a scam (WhatsApp channel sale scam): \"he said he has WhatsApp channel for sale\"",
+        "It is worded like a scam people have already reported"
+      ]
+    },
+    {
+      "id": "R-47025480",
+      "text": "MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Votre nouveau solde est de 142609 FCFA. frais: 0 XAF. Transaction ID:[TXN_ID] Economies avec! Juste pour cent frais de retraits transferts a Zero frais.",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 104.0,
+      "rounds": 2,
+      "why": [
+        "Date du 30 février 2026 inexistante. Reçus officiels ne comportent jamais cette date.",
+        "Message identique aux arnaques déjà signalées par les victimes."
+      ]
+    },
+    {
+      "id": "R-639e6502",
+      "text": "Buy a machine for 5000frs,mine everyday for 1month and get 10500frs.",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 17.1,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a scam (investment/mining scam): Buy a machine for 5000frs"
+      ]
+    },
+    {
+      "id": "R-649d902d",
+      "text": "Please I have sent money to this number by mistake \nPlease refund it back",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 18.5,
+      "rounds": 2,
+      "why": [
+        "Our AI fraud analyst reads it as a scam (mistaken transfer refund scam): Please I have sent money to this number by mistake",
+        "It is worded almost exactly like a scam people have already reported"
+      ]
+    },
+    {
+      "id": "R-ce78baf4",
+      "text": "“If you can just send me 30,000frs I’ll double it before 12 pm abs you’ll get 60,000” after I sent he said “add 20,000frs so that the money will reach you now”",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.94,
+      "seconds": 10.5,
+      "rounds": 2,
+      "why": [
+        "It is worded like a scam people have already reported"
+      ]
+    }
+  ]
+}

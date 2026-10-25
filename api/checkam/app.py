@@ -1,5 +1,6 @@
 import base64
 import hmac
+import re
 import json
 import queue
 import threading
@@ -39,7 +40,7 @@ def _startup():
 class CheckIn(BaseModel):
     text: str = Field("", max_length=4000)
     sender: str = Field("", max_length=80)
-    language: str = ""
+    language: str = Field("", max_length=5)
 
 
 class RunIn(BaseModel):
@@ -99,21 +100,29 @@ def check_stream(body: CheckIn):
     return _stream(lambda on_line: agents.run_check(body.text, sender=body.sender, language=body.language, on_line=on_line))
 
 
-@app.post("/check/image/stream")
-async def check_image_stream(image: UploadFile = File(...), text: str = Form("", max_length=4000), language: str = Form("")):
-    raw = await image.read()
+IMAGE_TYPES = {b"\x89PNG": "image/png", b"\xff\xd8\xff": "image/jpeg", b"GIF8": "image/gif", b"RIFF": "image/webp"}
+
+
+async def _image(upload: UploadFile) -> tuple[str, str]:
+    """Read at most 6 MB, and only real images: the type comes from the file's first bytes, not its name."""
+    raw = await upload.read(6_000_001)
     if len(raw) > 6_000_000:
         raise HTTPException(413, "Image too large (6 MB max)")
-    img = (base64.b64encode(raw).decode(), image.content_type or "image/png")
+    mime = next((m for sig, m in IMAGE_TYPES.items() if raw.startswith(sig)), None)
+    if not mime or (mime == "image/webp" and raw[8:12] != b"WEBP"):
+        raise HTTPException(415, "Send a screenshot (PNG, JPEG, WEBP or GIF)")
+    return base64.b64encode(raw).decode(), mime
+
+
+@app.post("/check/image/stream")
+async def check_image_stream(image: UploadFile = File(...), text: str = Form("", max_length=4000), language: str = Form("", max_length=5)):
+    img = await _image(image)
     return _stream(lambda on_line: agents.run_check(text, image=img, language=language, on_line=on_line))
 
 
 @app.post("/check/image")
-async def check_image(image: UploadFile = File(...), text: str = Form(""), language: str = Form("")):
-    raw = await image.read()
-    if len(raw) > 6_000_000:
-        raise HTTPException(413, "Image too large (6 MB max)")
-    return agents.run_check(text, image=(base64.b64encode(raw).decode(), image.content_type or "image/png"), language=language)
+async def check_image(image: UploadFile = File(...), text: str = Form("", max_length=4000), language: str = Form("", max_length=5)):
+    return agents.run_check(text, image=await _image(image), language=language)
 
 
 @app.post("/run")
@@ -158,7 +167,7 @@ def stats(operator: str = "", _: str = Depends(analyst)):
 def public_stats():
     s = store.check_stats()
     return {"checks": s["total"], "flagged": s["by_verdict"].get("scam", 0) + s["by_verdict"].get("suspicious", 0),
-            "alerts": len(store.alerts(500))}
+            "alerts": len(store.alerts(500)), "radar": store.radar()}
 
 
 @app.get("/analyst/checks")
@@ -220,6 +229,29 @@ def telegram_webhook(secret: str, update: dict, x_telegram_bot_api_secret_token:
         raise HTTPException(404)
     telegram.handle(update)
     return {"ok": True}
+
+
+class Match(BaseModel):
+    text: str = Field(max_length=4000)
+
+
+@app.get("/receipts/{rid}")
+def receipt(rid: str):
+    """Is this CheckAm answer real? Anyone can ask; the answer says only the verdict, the kind of scam and when."""
+    r = store.get_receipt(rid) if re.fullmatch(r"C-[0-9a-f]{8}", rid) else None
+    if not r:
+        raise HTTPException(404, "No CheckAm answer has this number")
+    return {"receipt": {k: r[k] for k in ("id", "created", "verdict", "confidence", "scheme")}, **ledger.verify_receipt(r),
+            "public_key": ledger.public_key_b64()}
+
+
+@app.post("/receipts/{rid}/match")
+def receipt_match(rid: str, body: Match):
+    """Paste the message you were shown: is it the one CheckAm checked?"""
+    r = store.get_receipt(rid) if re.fullmatch(r"C-[0-9a-f]{8}", rid) else None
+    if not r:
+        raise HTTPException(404, "No CheckAm answer has this number")
+    return {"same_message": ledger.text_fingerprint(body.text) == r["text_sha256"]}
 
 
 @app.get("/traces/{run_id}")

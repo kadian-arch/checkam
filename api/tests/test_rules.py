@@ -93,3 +93,16 @@ def test_advice_points_to_the_institution_the_message_names():
     who = linkcheck.claimed(msg, "fr")
     do, _ = advice.steps("scam", "visa_scholarship", {"brands": [], "asks": ["send_money"], "links": []}, "fr", "", who)
     assert "gov.cm" in do[0] and "canada" not in do[0].lower()
+
+
+def test_footprints_are_demand_verbs_not_nouns():
+    import re
+    fp = agents.FOOTPRINT["send_money"]
+    assert not re.search(fp, "Good news! Instant referral payments are back. Earn 200F automatically for every referral")
+    assert not re.search(fp, "Fee was 0 XAF, loyalty fee was 0. Your new balance: 2528 XAF")
+    assert re.search(fp, "Payez 5000 pour activer") and re.search(fp, "please send me the money")
+
+
+def test_a_code_does_not_vouch_for_free_money_from_an_unverified_sender():
+    card = agents.run_check("MTN Cameroon offre 10 000 FCFA à toute personne souscrivant au code #237#", persist=False)
+    assert card["verdict"] != "looks_genuine"

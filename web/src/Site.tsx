@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, streamCheck, type Card, type TraceLine } from "./api";
+import { api, streamCheck, type Card, type TraceLine, type PublicStats } from "./api";
 
 // which of the six visible stages a live agent step belongs to
 function phase(l: TraceLine): number {
@@ -53,7 +53,7 @@ export default function Site() {
   };
   const t = LANGS[lang];
   const [install, setInstall] = useState<InstallEvent | null>(null);
-  const [stats, setStats] = useState<{ checks: number; flagged: number; alerts: number } | null>(null);
+  const [stats, setStats] = useState<PublicStats | null>(null);
 
   useEffect(() => {
     try { localStorage.setItem("checkam.lang", lang); } catch {}
@@ -89,6 +89,7 @@ export default function Site() {
       <main>
         <Hero t={t} lang={lang} shared={shared} />
         <Stats t={t} stats={stats} />
+        <RadarStrip t={t} radar={stats?.radar} />
         <How t={t} />
         <Alerts t={t} lang={lang} />
         <section className="duo">
@@ -205,6 +206,31 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
         {err && <p className="error" role="alert">{err}</p>}
         <p className="privacy"><svg viewBox="0 0 24 24" aria-hidden><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>{t.privacy}</p>
       </div>
+    </section>
+  );
+}
+
+// what is going round this week, from people's own checks: warn before it reaches you
+function RadarStrip({ t, radar }: { t: Dict; radar?: PublicStats["radar"] }) {
+  if (!radar || !radar.top.length) return null;
+  const max = Math.max(...radar.top.map((r) => r.n));
+  const names = t.schemes as Record<string, string>;
+  return (
+    <section className="radar" aria-labelledby="radar-h">
+      <div className="radar-head">
+        <span className="pulse" aria-hidden />
+        <h2 id="radar-h">{t.radar_title}</h2>
+        <small>{fill(t.radar_sub, { n: radar.flagged, days: radar.days })}</small>
+      </div>
+      <ol>
+        {radar.top.map((r) => (
+          <li key={r.scheme}>
+            <span className="radar-name">{names[r.scheme] ?? r.scheme}</span>
+            <i style={{ width: `${Math.max(8, (100 * r.n) / max)}%` }} />
+            <b>{r.n}</b>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
