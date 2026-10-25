@@ -75,7 +75,7 @@ def investigate(campaign_id: str | None) -> dict:
         {"role": "system", "content": "You write a fraud-analyst dossier for Cameroon. Use ONLY the facts given; every sentence must trace to them. Reply with JSON only."},
         {"role": "user", "content": json.dumps(facts, ensure_ascii=False) +
          "\nReturn {\"name\": short campaign name, \"summary\": 2-3 sentences, \"how_it_works\": 1-2 sentences, \"limitations\": 1 sentence, "
-         "\"alert_title\": max 10 words, \"alert_en\": max 60 words for the public, \"alert_fr\": same in French, \"alert_pcm\": same in Cameroonian Pidgin}"},
+         "\"alert_title\": max 10 words, \"alert_en\": max 60 words for the public, \"alert_fr\": same in French}"},
     ], model=config.MODEL_REASON, trace=trace, agent="Reporter", action="write_dossier", max_tokens=900)
     d = llm or {}
     name = d.get("name") or f"Campaign {camp['id'][-6:]}"
@@ -88,8 +88,8 @@ def investigate(campaign_id: str | None) -> dict:
         "how_it_works": d.get("how_it_works", ""), "limitations": d.get("limitations") or "Linked records show a shared signal, not proof of one person behind them.",
         "facts": facts, "members": members, "numbers": num_stats, "links": camp["links"], "review": review,
         "recommended_actions": ([f"Ask operators to review number {n}" for n in camp["numbers"][:3]] +
-                                ["Publish the public alert below in English, French and Pidgin"]),
-        "alert": {"title": d.get("alert_title") or name, "body_en": alert_en, "body_fr": d.get("alert_fr", ""), "body_pcm": d.get("alert_pcm", ""),
+                                ["Publish the public alert below in English and French"]),
+        "alert": {"title": d.get("alert_title") or name, "body_en": alert_en, "body_fr": d.get("alert_fr", ""),
                   "numbers": camp["numbers"][:5]},
     }
     trace.log("Reporter", "dossier", output={"name": name, "members": len(members)}, sponsor="nvidia" if llm else "none")

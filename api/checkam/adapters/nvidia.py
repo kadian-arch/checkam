@@ -1,7 +1,9 @@
 """NVIDIA Nemotron over the OpenAI-compatible API. Every call is traced; with no key, or when the
 API fails, callers get None and fall back to their rule-based path."""
 import json
+import random
 import re
+import threading
 import time
 
 import httpx
@@ -14,12 +16,65 @@ def enabled() -> bool:
     return bool(config.MODEL_API_KEY)
 
 
+_client = httpx.Client(limits=httpx.Limits(max_connections=16, max_keepalive_connections=8))
+_slots = threading.BoundedSemaphore(int(config.env("NVIDIA_MAX_INFLIGHT", "6")))
+
+
+class Pacer:
+    """The hosted API limits requests per minute per key. Calls queue for their turn instead of
+    being refused; after a refusal the pace slows down for a while, then recovers."""
+
+    def __init__(self, key: str, rpm: float):
+        self.key, self.gap, self.base = key, 60.0 / rpm, 60.0 / rpm
+        self.next = 0.0
+        self.lock = threading.Lock()
+
+    def wait(self, deadline: float) -> bool:
+        with self.lock:
+            now = time.monotonic()
+            start = max(now, self.next)
+            if start > deadline - 2:
+                return False
+            self.next = start + self.gap
+            self.gap = max(self.base, self.gap * 0.97)  # recover towards the normal pace
+        time.sleep(start - now)
+        return True
+
+    def refused(self) -> None:
+        with self.lock:
+            self.gap = min(self.gap * 2, 10.0)
+
+
+# several keys (comma-separated) share the load, each at its own pace
+_pacers = [Pacer(k.strip(), float(config.env("NVIDIA_RPM", "35"))) for k in config.MODEL_API_KEY.split(",") if k.strip()]
+_turn_lock = threading.Lock()
+
+
+def _pacer(deadline: float) -> "Pacer | None":
+    for _ in range(len(_pacers)):
+        with _turn_lock:
+            p = min(_pacers, key=lambda x: x.next)  # the key free soonest
+        if p.wait(deadline):
+            return p
+    return None
+
+
 def _post(path: str, body: dict, timeout: float) -> dict:
+    """timeout is the budget for the whole call, retries included, so one slow step cannot stall a check."""
     last = None
-    for attempt in range(2):
+    deadline = time.monotonic() + timeout
+    for attempt in range(4):
+        pacer = _pacer(deadline)
+        left = deadline - time.monotonic()
+        if pacer is None or left < 2:
+            last = last or "no turn left within the time budget"
+            break
         try:
-            r = httpx.post(f"{config.MODEL_BASE_URL.rstrip('/')}{path}", json=body, timeout=timeout,
-                           headers={"Authorization": f"Bearer {config.MODEL_API_KEY}"})
+            with _slots:
+                r = _client.post(f"{config.MODEL_BASE_URL.rstrip('/')}{path}", json=body, timeout=left,
+                                 headers={"Authorization": f"Bearer {pacer.key}"})
+            if r.status_code == 429:
+                pacer.refused()
             if r.status_code == 429 or r.status_code >= 500:
                 raise httpx.HTTPStatusError(f"{r.status_code}", request=r.request, response=r)
             r.raise_for_status()
@@ -27,9 +82,16 @@ def _post(path: str, body: dict, timeout: float) -> dict:
             if "choices" not in out and "data" not in out:
                 raise ValueError(f"no choices in reply: {str(out)[:120]}")
             return out
+        except httpx.HTTPStatusError as e:
+            last = e
+            if e.response.status_code < 500 and e.response.status_code != 429:
+                break  # a bad request will not get better by asking again
+            wait = e.response.headers.get("retry-after", "")
+            pause = min(float(wait), 8) if wait.replace(".", "", 1).isdigit() else 1.5 * 2 ** attempt + random.random()
+            time.sleep(max(0, min(pause, deadline - time.monotonic() - 2)))
         except (httpx.HTTPError, ValueError) as e:
             last = e
-            time.sleep(1.5 * (attempt + 1))
+            time.sleep(1 + attempt + random.random())
     raise RuntimeError(f"nvidia call failed: {last}")
 
 

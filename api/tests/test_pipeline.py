@@ -14,7 +14,8 @@ def lines(trace):
 def test_mistaken_transfer_with_known_number_is_a_scam():
     card = agents.run_check("Please I sent 25000 to your MTN number by mistake, send it back to [PHONE:654-jwmukg] fast")
     assert card["verdict"] == "scam"
-    assert any("654-jwmukg" in w["text"] for w in card["why"])
+    assert any("starting 654" in w["text"] and "reported" in w["text"] for w in card["why"])
+    assert not any("654-jwmukg" in w["text"] for w in card["why"])  # citizens see plain words, never internal codes
     steps = lines(card["trace"])
     for agent in ("Intake", "Planner", "Investigator", "Critic", "Reporter"):
         assert any(a == agent for a, _ in steps), agent

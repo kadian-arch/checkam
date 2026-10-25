@@ -29,14 +29,26 @@ ap.add_argument("--split", default="all", choices=["all", "train", "test"])
 ap.add_argument("--workers", type=int, default=4)
 ap.add_argument("--tag", default="run")
 ap.add_argument("--limit", type=int, default=0)
+ap.add_argument("--sample", type=int, default=0, help="stratified random sample of this size (seed 7)")
+ap.add_argument("--ids", default="", help="comma-separated ids to re-run, e.g. the misses of a previous run")
 ap.add_argument("--with-sender", action="store_true", help="also give the sender the person saw on their phone")
 args = ap.parse_args()
 
 where = "" if args.split == "all" else f" WHERE split = '{args.split}'"
 rows = data().sql(f"SELECT id, text, label, origin, text_type, language, split FROM {config.ZETARIS_DB}.messages{where}", why="evaluation set")
 rows.sort(key=lambda r: r["id"])
+if args.ids:
+    keep = set(args.ids.split(","))
+    rows = [r for r in rows if r["id"] in keep]
 if args.limit:
     rows = rows[: args.limit]
+if args.sample:
+    import random
+    rnd = random.Random(7)
+    pos = [r for r in rows if r["label"] == "scam"]
+    neg = [r for r in rows if r["label"] != "scam"]
+    k = args.sample
+    rows = rnd.sample(pos, min(len(pos), k * len(pos) // len(rows) + 1)) + rnd.sample(neg, min(len(neg), k - k * len(pos) // len(rows) - 1))
 
 senders = {}
 if args.with_sender:

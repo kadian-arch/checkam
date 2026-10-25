@@ -16,18 +16,18 @@ def placeholders(v):
 
 def test_every_language_has_every_key():
     en = load("en")
-    for lang in ("fr", "pcm"):
+    for lang in ("fr",):
         other = load(lang)
         assert set(other) == set(en), f"{lang}: missing {set(en) - set(other)}, extra {set(other) - set(en)}"
 
 
 def test_placeholders_survive_translation():
     en = load("en")
-    for lang in ("fr", "pcm"):
+    for lang in ("fr",):
         other = load(lang)
         for k in en:
             assert placeholders(other[k]) == placeholders(en[k]), f"{lang}.{k} must keep {placeholders(en[k])}"
 
 
 def test_progress_steps_line_up():
-    assert len(load("fr")["steps"]) == len(load("en")["steps"]) == len(load("pcm")["steps"])
+    assert len(load("fr")["steps"]) == len(load("en")["steps"])

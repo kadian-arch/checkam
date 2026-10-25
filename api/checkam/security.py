@@ -1,0 +1,70 @@
+"""Abuse limits and response headers. Checks call paid models, so every client gets a fair share;
+sign-in is throttled against password guessing."""
+import threading
+import time
+from collections import defaultdict, deque
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+# (requests, seconds) per client IP, per route group
+LIMITS = {
+    "check": [(8, 60), (60, 3600)],
+    "login": [(5, 60), (20, 3600)],
+    "analyst": [(120, 60)],
+    "default": [(240, 60)],
+}
+_hits: dict[tuple[str, str], deque] = defaultdict(deque)
+_lock = threading.Lock()
+
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; "
+       "font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; "
+       "base-uri 'none'; form-action 'self'; object-src 'none'")
+
+
+def group(path: str) -> str:
+    if path.startswith("/check") or path == "/run":
+        return "check"
+    if path.startswith("/auth"):
+        return "login"
+    if path.startswith("/analyst"):
+        return "analyst"
+    return "default"
+
+
+def client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "")
+    return fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "?")
+
+
+def allowed(ip: str, g: str) -> tuple[bool, int]:
+    now = time.monotonic()
+    longest = max(w for _, w in LIMITS[g])
+    with _lock:
+        q = _hits[(ip, g)]
+        while q and now - q[0] > longest:
+            q.popleft()
+        for n, window in LIMITS[g]:
+            recent = sum(1 for t in q if now - t <= window)
+            if recent >= n:
+                oldest = next(t for t in q if now - t <= window)
+                return False, int(window - (now - oldest)) + 1
+        q.append(now)
+    return True, 0
+
+
+async def middleware(request: Request, call_next):
+    if request.method != "GET" or request.url.path.startswith(("/analyst", "/traces")):
+        ok, wait = allowed(client_ip(request), group(request.url.path))
+        if not ok:
+            return JSONResponse({"detail": f"Too many requests. Try again in {wait} s."}, status_code=429, headers={"Retry-After": str(wait)})
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    if not request.url.path.startswith(("/docs", "/openapi")):
+        resp.headers.setdefault("Content-Security-Policy", CSP)
+    if request.headers.get("x-forwarded-proto") == "https":
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return resp

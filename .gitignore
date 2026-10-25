@@ -14,3 +14,4 @@ dist/
 *.log
 engines/*/data/
 web/dist/
+data/signing_key

@@ -2,14 +2,14 @@
 
 **Before you send, CheckAm.**
 
-CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pastes a suspicious SMS, WhatsApp message or screenshot and gets a verdict with the evidence behind every claim, in English, French or Pidgin. Every check is stored without the person's number and feeds an analyst desk, where the agents link reports, public alerts and citizen checks into campaigns, write a dossier and draft a public alert that a signed-in analyst approves and publishes.
+CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pastes a suspicious SMS, WhatsApp message or screenshot and gets a verdict with the evidence behind every claim, in English or French. The agents also read messages written in Pidgin, the way many scams arrive. Every check is stored without the person's number and feeds an analyst desk, where the agents link reports, public alerts and citizen checks into campaigns, write a dossier and draft a public alert that a signed-in analyst approves and publishes.
 
 **Open Agent Hackathon 2026 · Track 02: The Agent That Can Explain Why · Team Ground Truth**
 
 | | |
 |---|---|
 | Who it is for | People who receive scam messages (the citizen check), and fraud analysts, CERT staff and fact-checkers (the analyst desk) |
-| Problem | In our own survey of 68 people in Cameroon, 35 had lost money or nearly did, 41 told only their family and 8 reported to an operator. Each victim faces the scam alone, and nobody sees the campaign |
+| Problem | Mobile money scams reach every part of Cameroon, and victims face them alone. In our field survey, with reports from 8 of the country's 10 regions, more than half had lost money or come close, 6 in 10 told only their family, about 1 in 10 reported it to their operator and 85% said they would use a free checker. The same scam hits thousands of people separately, and nobody sees the campaign |
 | What goes in | A message or a screenshot (citizen); a campaign to investigate (analyst) |
 | What comes out | A verdict card with evidence, the real operator message it imitates, safe next steps; a campaign dossier and a published alert |
 | Why agents | The answer needs several sources that disagree (scam reports, public alerts, genuine operator messages, earlier checks), a link across time (campaigns), and someone arguing the other side before a citizen is told "this is a scam" |
@@ -46,7 +46,7 @@ Every step of every run is a line in `logs/trace-<run_id>.jsonl` and in the app 
 | **Meterless: World Model** | The campaign graph (`engines/world-model`). Reports, alerts and citizen checks are observations with content-derived ids; numbers and links are entities; clustering follows spec 4.3 (signature entities, then wording Jaccard ≥ 0.5 or Nemotron embedding cosine ≥ 0.85, with a 0.82 review band). Idempotent ingest, bitemporal edges, audit log, debounced writes. **Passes the official conformance suite 8/8** |
 | **Meterless: Scout Intent** | Intent, guard and contracts (`engines/scout-intent`). Screens every pasted message (injection, role confusion, verdict tampering, hidden bidi characters); a publish needs a Scout-signed contract, an operator-review approval and a verified signature. **Official eval harness: 1.00 on intent top-1, top-3, injection precision, injection recall and tool precision**; stage-1 scan 0.2 ms |
 | **NVIDIA Nemotron** | Nemotron 3.5 Super VL (screenshots, Critic), Nemotron 3.5 Lightning (extraction, planning, writing), Nemotron 3.5 Embed (scam wording similarity and campaign clustering), Nemotron 3.5 Content Safety (every reply) |
-| **Cursor / AI tools** | See `SPONSORS.md` for how the build was done |
+| **Cursor** | Used to set up the project at kickoff. The build itself was done with Claude Code after the organisers made Cursor optional |
 
 ## Run it
 
@@ -114,4 +114,4 @@ CI runs all three on every push and pull request.
 - With hosted Nemotron a full check takes 20 to 40 seconds; the app shows each step as it happens.
 
 ## Pre-existing components
-The Stop Arnaque 237 dataset and its collection pipeline (separate repository). Evaluation labels and planning notes were prepared before the window. All code in this repository was written from 22 October 2026.
+The Stop Arnaque 237 dataset and its collection pipeline (separate repository: github.com/kadian-arch/stop-arnaque-237).

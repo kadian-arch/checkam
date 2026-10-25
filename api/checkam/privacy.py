@@ -5,6 +5,7 @@ import base64
 import hashlib
 import hmac
 import re
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -22,7 +23,24 @@ PIN_ASK = re.compile(r"(?i)\b(pin|code secret|mot de passe|password|otp|code de 
 
 # public operator lines printed in their own messages (kept as they are)
 OFFICIAL = {"650528787", "698717171", "690009500", "690009300", "690009200", "670362187"}
-OFFICIAL_DOMAINS = re.compile(r"(?i)(^|\.)(mtn\.cm|orange\.cm|camtel\.cm|mtnonline\.com)$")
+DOMAINS = {"mtn.cm", "orange.cm", "camtel.cm", "mtnonline.com"}
+SENDER_NAMES: set[str] = set()
+
+
+def load_channels(path: Path = Path(__file__).parent / "data" / "official_channels.json") -> None:
+    """Sourced operator channels from data/official_channels.json add to the built-in lists, never replace them."""
+    if not path.exists():
+        return
+    for op in json.loads(path.read_text(encoding="utf-8")).values():
+        if not isinstance(op, dict) or not op.get("sources"):
+            continue  # an entry without a source is not trusted
+        OFFICIAL.update(re.sub(r"\D", "", n)[-9:] for n in op.get("whatsapp", []) + op.get("numbers", []) if len(re.sub(r"\D", "", n)) >= 9)
+        DOMAINS.update(d.lower().removeprefix("www.").strip("/") for d in op.get("websites", []) if "." in d)
+        SENDER_NAMES.update(re.sub(r"[\s'_-]", "", s).lower() for s in op.get("sender_names", []) if s.strip())
+
+
+load_channels()
+OFFICIAL_DOMAINS = re.compile(r"(?i)(^|\.)(" + "|".join(re.escape(d) for d in sorted(DOMAINS)) + r")$")
 
 
 @lru_cache(maxsize=1)

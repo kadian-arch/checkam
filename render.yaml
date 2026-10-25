@@ -1,0 +1,43 @@
+# Render Blueprint: the always-on public copy. Runs the same agents and engines on the published
+# Stop Arnaque 237 files (sample mode, no Zetaris in the cloud) with Nemotron when MODEL_API_KEY is set.
+services:
+  - type: web
+    name: checkam
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /health
+    autoDeploy: true
+    disk:
+      name: checkam-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: SAMPLE_MODE
+        value: "true"
+      - key: CHECKAM_DB
+        value: /var/data/checkam.db
+      - key: CHECKAM_LOG_DIR
+        value: /var/data/logs
+      - key: WORLD_MODEL_FILE
+        value: /var/data/world.json
+      - key: MODEL_API_KEY
+        sync: false
+      - key: PSEUDONYM_KEY
+        sync: false
+      - key: CHECKAM_SECRET
+        sync: false
+      - key: CHECKAM_SIGNING_KEY
+        sync: false
+      - key: SCOUT_SECRET
+        sync: false
+      - key: CHECKAM_JUDGE_EMAIL
+        sync: false
+      - key: CHECKAM_JUDGE_PASSWORD
+        sync: false
+      - key: CHECKAM_PUBLIC_URL
+        value: https://checkam.me
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false

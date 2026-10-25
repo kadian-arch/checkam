@@ -36,6 +36,21 @@ def db() -> sqlite3.Connection:
     c = sqlite3.connect(config.DB_PATH, check_same_thread=False)
     c.row_factory = sqlite3.Row
     c.executescript(SCHEMA)
+    have = {r[1] for r in c.execute("PRAGMA table_info(alerts)")}
+    for col in ("contract_id", "prev_hash", "hash", "signature"):
+        if col not in have:
+            c.execute(f"ALTER TABLE alerts ADD COLUMN {col} TEXT")
+    have = {r[1] for r in c.execute("PRAGMA table_info(checks)")}
+    for col, kind in (("operator", "TEXT"), ("amount_fcfa", "INTEGER")):
+        if col not in have:
+            c.execute(f"ALTER TABLE checks ADD COLUMN {col} {kind}")
+    # checks saved before the operator column existed: read it back from the stored (masked) text
+    c.execute("""UPDATE checks SET operator = CASE
+        WHEN lower(masked_text) LIKE '%orange%' THEN 'orange'
+        WHEN lower(masked_text) LIKE '%camtel%' OR lower(masked_text) LIKE '%blue %' THEN 'camtel'
+        WHEN lower(masked_text) LIKE '%mtn%' OR lower(masked_text) LIKE '%momo%' OR lower(masked_text) LIKE '%mobile money%' OR lower(masked_text) LIKE '%mobilemoney%' THEN 'mtn'
+        ELSE 'other' END WHERE operator IS NULL""")
+    c.commit()
     return c
 
 
@@ -52,8 +67,9 @@ def conn() -> sqlite3.Connection:
 def save_check(row: dict) -> None:
     with _lock:
         conn().execute(
-            "INSERT OR REPLACE INTO checks VALUES (:id,:created,:masked_text,:verdict,:confidence,:language,:numbers,:links,:scam_types,:campaign_id,:run_id,:channel)",
-            {**row, "numbers": json.dumps(row.get("numbers", [])), "links": json.dumps(row.get("links", [])),
+            "INSERT OR REPLACE INTO checks (id, created, masked_text, verdict, confidence, language, numbers, links, scam_types, campaign_id, run_id, channel, operator, amount_fcfa) "
+            "VALUES (:id,:created,:masked_text,:verdict,:confidence,:language,:numbers,:links,:scam_types,:campaign_id,:run_id,:channel,:operator,:amount_fcfa)",
+            {"operator": "other", "amount_fcfa": None, **row, "numbers": json.dumps(row.get("numbers", [])), "links": json.dumps(row.get("links", [])),
              "scam_types": json.dumps(row.get("scam_types", []))})
         conn().commit()
 
@@ -74,6 +90,38 @@ def recent_checks(limit: int = 50) -> list[dict]:
     rows = conn().execute("SELECT * FROM checks ORDER BY created DESC LIMIT ?", (limit,)).fetchall()
     return [{**dict(r), "numbers": json.loads(r["numbers"]), "links": json.loads(r["links"]),
              "scam_types": json.loads(r["scam_types"])} for r in rows]
+
+
+OPERATORS = ("mtn", "orange", "camtel", "other")
+
+
+def analytics(days: int = 14, operator: str = "") -> dict:
+    """Desk figures, for one operator or all. Every number is counted from stored checks; nothing is estimated."""
+    c = conn()
+    where, args = ("WHERE operator = ?", (operator,)) if operator in OPERATORS else ("", ())
+    by_day = [dict(r) for r in c.execute(
+        f"SELECT substr(created,1,10) AS day, verdict, count(*) AS n FROM checks {where} GROUP BY day, verdict ORDER BY day DESC LIMIT ?", (*args, days * 4))]
+    by_operator = {r[0] or "other": {"checks": r[1], "flagged": r[2]} for r in c.execute(
+        "SELECT operator, count(*), sum(verdict IN ('scam','suspicious')) FROM checks GROUP BY operator")}
+    kept = c.execute(f"SELECT coalesce(sum(amount_fcfa), 0) FROM checks {where} {'AND' if where else 'WHERE'} verdict IN ('scam','suspicious')", args).fetchone()[0]
+    flagged = [{k: r[k] for k in ("id", "created", "verdict", "confidence", "operator", "amount_fcfa", "masked_text")} for r in c.execute(
+        f"SELECT * FROM checks {where} {'AND' if where else 'WHERE'} verdict IN ('scam','suspicious') ORDER BY created DESC LIMIT 8", args)]
+    numbers: dict[str, int] = {}
+    types: dict[str, int] = {}
+    channels: dict[str, int] = {}
+    for r in c.execute(f"SELECT numbers, scam_types, channel, verdict FROM checks {where}", args):
+        if r["verdict"] in ("scam", "suspicious"):
+            for n in json.loads(r["numbers"] or "[]"):
+                numbers[n] = numbers.get(n, 0) + 1
+            for t in json.loads(r["scam_types"] or "[]"):
+                types[t] = types.get(t, 0) + 1
+        channels[r["channel"] or "text"] = channels.get(r["channel"] or "text", 0) + 1
+    top = lambda d, k=8: sorted(({"key": a, "n": b} for a, b in d.items()), key=lambda x: -x["n"])[:k]
+    total = c.execute(f"SELECT count(*) FROM checks {where}", args).fetchone()[0]
+    by = {r[0]: r[1] for r in c.execute(f"SELECT verdict, count(*) FROM checks {where} GROUP BY verdict", args)}
+    return {"by_day": by_day, "top_numbers": top(numbers), "top_types": top(types), "channels": channels, "by_operator": by_operator,
+            "kept_fcfa": int(kept or 0), "flagged": flagged, "operator": operator if operator in OPERATORS else "",
+            "alerts": c.execute("SELECT count(*) FROM alerts WHERE status='published'").fetchone()[0], "total": total, "by_verdict": by}
 
 
 def check_stats() -> dict:
@@ -119,15 +167,25 @@ def read_token(token: str) -> str | None:
 
 
 # ---------- alerts ----------
+PUBLIC_ALERT_FIELDS = ("id", "created", "title", "body_en", "body_fr", "numbers", "campaign_id", "contract_id", "prev_hash", "hash", "signature")
+
+
 def publish_alert(row: dict) -> dict:
-    row = {"id": "AL-" + uuid.uuid4().hex[:8], "created": now(), "status": "published", **row}
+    from . import ledger
     with _lock:
-        conn().execute("INSERT INTO alerts VALUES (:id,:created,:published_by,:campaign_id,:title,:body_en,:body_fr,:body_pcm,:numbers,:status,:run_id)",
-                       {**row, "numbers": json.dumps(row.get("numbers", []))})
+        last = conn().execute("SELECT hash FROM alerts WHERE status='published' AND hash IS NOT NULL ORDER BY rowid DESC LIMIT 1").fetchone()
+        row = {"id": "AL-" + uuid.uuid4().hex[:8], "created": now(), "status": "published", "body_pcm": "", **row}
+        row["numbers"] = list(row.get("numbers") or [])
+        row = ledger.seal(row, last["hash"] if last else None)
+        conn().execute("INSERT INTO alerts (id, created, published_by, campaign_id, title, body_en, body_fr, body_pcm, numbers, status, run_id, contract_id, prev_hash, hash, signature) "
+                       "VALUES (:id,:created,:published_by,:campaign_id,:title,:body_en,:body_fr,:body_pcm,:numbers,:status,:run_id,:contract_id,:prev_hash,:hash,:signature)",
+                       {**row, "numbers": json.dumps(row["numbers"])})
         conn().commit()
     return row
 
 
-def alerts(limit: int = 50) -> list[dict]:
-    rows = conn().execute("SELECT * FROM alerts WHERE status='published' ORDER BY created DESC LIMIT ?", (limit,)).fetchall()
-    return [{**dict(r), "numbers": json.loads(r["numbers"])} for r in rows]
+def alerts(limit: int = 50, oldest_first: bool = False) -> list[dict]:
+    """Public view: never includes who published (analyst emails stay private)."""
+    order = "ASC" if oldest_first else "DESC"
+    rows = conn().execute(f"SELECT * FROM alerts WHERE status='published' ORDER BY rowid {order} LIMIT ?", (limit,)).fetchall()
+    return [{k: (json.loads(r[k]) if k == "numbers" else r[k]) for k in PUBLIC_ALERT_FIELDS} for r in rows]

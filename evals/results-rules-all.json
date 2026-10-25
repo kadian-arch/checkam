@@ -5,20 +5,21 @@
     "with_sender": true,
     "n": 267,
     "mode": "data=sample-duckdb, nemotron=off",
-    "seconds": 94,
-    "precision": 0.6129,
+    "seconds": 116,
+    "precision": 0.7403,
     "recall": 0.6552,
-    "f1": 0.6333,
-    "false_alarm_rate": 0.2,
-    "cant_tell": 116,
+    "f1": 0.6951,
+    "false_alarm_rate": 0.1111,
+    "cant_tell": 123,
     "confusion": {
-      "not_scam->cant_tell": 86,
-      "not_scam->looks_genuine": 58,
-      "not_scam->scam": 7,
-      "not_scam->suspicious": 29,
-      "scam->cant_tell": 30,
-      "scam->scam": 34,
-      "scam->suspicious": 23
+      "not_scam->cant_tell": 96,
+      "not_scam->looks_genuine": 64,
+      "not_scam->scam": 5,
+      "not_scam->suspicious": 15,
+      "scam->cant_tell": 27,
+      "scam->looks_genuine": 3,
+      "scam->scam": 36,
+      "scam->suspicious": 21
     },
     "recall_by_source": {
       "public_alert/verbatim": 44,
@@ -38,7 +39,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 3.2,
       "rounds": 1,
       "why": []
     },
@@ -52,7 +53,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 3.2,
+      "seconds": 4.1,
       "rounds": 2,
       "why": []
     },
@@ -66,7 +67,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.2,
+      "seconds": 3.2,
       "rounds": 1,
       "why": []
     },
@@ -80,7 +81,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 3.1,
+      "seconds": 4.0,
       "rounds": 1,
       "why": [
         "The message sends you to wa.me, which is not an official operator site"
@@ -96,7 +97,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 3.1,
+      "seconds": 4.0,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.46)"
@@ -112,7 +113,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.7,
+      "seconds": 3.7,
       "rounds": 1,
       "why": []
     },
@@ -126,7 +127,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 2.9,
+      "seconds": 3.0,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.40)"
@@ -142,7 +143,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.6,
+      "seconds": 2.9,
       "rounds": 1,
       "why": []
     },
@@ -156,7 +157,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 2.7,
+      "seconds": 3.2,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.35)"
@@ -186,7 +187,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -200,7 +201,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 2.8,
+      "seconds": 2.9,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.60)"
@@ -216,7 +217,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.2,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -230,7 +231,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 2.1,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.78)"
@@ -246,7 +247,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.0,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -260,7 +261,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.9,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.63)"
@@ -276,7 +277,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.8,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.35)"
@@ -292,7 +293,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.8,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -306,7 +307,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.39)"
@@ -322,7 +323,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.3,
       "rounds": 1,
       "why": []
     },
@@ -336,7 +337,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -350,7 +351,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.40)"
@@ -364,11 +365,14 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "test",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 1.4,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.7,
       "rounds": 2,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "A-601a9ea5",
@@ -380,7 +384,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -394,7 +398,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.5,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.48)"
@@ -410,7 +414,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.46)"
@@ -424,11 +428,14 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 1.4,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.5,
       "rounds": 2,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "A-692da1e1",
@@ -440,7 +447,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -454,7 +461,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.4,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.58)"
@@ -470,7 +477,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.4,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.63)"
@@ -486,7 +493,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.48)"
@@ -502,7 +509,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.78)"
@@ -518,7 +525,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -532,7 +539,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.4,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.40)"
@@ -548,7 +555,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.9,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.45)"
@@ -564,7 +571,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -578,7 +585,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -592,7 +599,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.2,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -606,7 +613,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -620,7 +627,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -634,7 +641,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.40)"
@@ -650,7 +657,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.37)"
@@ -666,7 +673,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -680,7 +687,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.60)"
@@ -696,7 +703,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
         "The message sends you to wa.me, which is not an official operator site"
@@ -712,7 +719,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -726,7 +733,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.94,
-      "seconds": 1.3,
+      "seconds": 2.7,
       "rounds": 1,
       "why": [
         "The message sends you to cameroon-grant.obtenir.org, which is not an official operator site"
@@ -742,7 +749,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -756,7 +763,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -770,7 +777,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -784,7 +791,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -798,7 +805,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.45)"
@@ -814,7 +821,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -828,7 +835,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 2,
       "why": []
     },
@@ -842,7 +849,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 2,
       "why": []
     },
@@ -856,7 +863,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.34)"
@@ -872,7 +879,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.58)"
@@ -888,7 +895,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -902,7 +909,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.5,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.37)"
@@ -918,7 +925,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -932,10 +939,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.5,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_received message (similarity 0.91)",
+        "Matches a real mtn money_received message (similarity 0.91) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -949,10 +956,11 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.5,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
-        "Matches a real mtn promo message (similarity 0.64)"
+        "Matches a real mtn promo message (similarity 0.64)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -965,9 +973,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-0a7068dc",
@@ -979,10 +989,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -995,9 +1005,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-0f1cab47",
@@ -1007,11 +1019,14 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 1.4,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.6,
       "rounds": 2,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-10dd2ef6",
@@ -1023,10 +1038,11 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.7,
+      "seconds": 2.3,
       "rounds": 1,
       "why": [
-        "Matches a real mtn account_notice message (similarity 0.77)"
+        "Matches a real mtn account_notice message (similarity 0.77)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -1039,10 +1055,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.8,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
-        "Matches a real mtn loan_offer message (similarity 0.91)"
+        "Matches a real mtn loan_offer message (similarity 0.91) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1055,7 +1071,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.1,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1069,10 +1085,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.1,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.95)",
+        "Matches a real mtn money_sent message (similarity 0.95) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1086,7 +1102,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.1,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1100,10 +1116,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.2,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_advance message (similarity 0.93)",
+        "Matches a real mtn loan_advance message (similarity 0.93) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1117,7 +1133,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.9,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1131,9 +1147,11 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.7,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-19f8f1e7",
@@ -1145,7 +1163,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.6,
+      "seconds": 2.6,
       "rounds": 1,
       "why": []
     },
@@ -1159,10 +1177,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.7,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real bank bank_alert message (similarity 0.96)",
+        "Matches a real bank bank_alert message (similarity 0.96) and asks nothing a real operator would not",
         "Sent under the official name ECOBANK and asks nothing risky"
       ]
     },
@@ -1174,11 +1192,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.5,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-1ba5b426",
@@ -1190,7 +1210,7 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Matches a real mtn money_received message (similarity 0.60)",
@@ -1207,7 +1227,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
         "Sent under the official name UBA and asks nothing risky"
@@ -1223,7 +1243,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
         "Sent under the official name MobileMoney and asks nothing risky"
@@ -1239,9 +1259,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.6,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-2235dedd",
@@ -1253,9 +1275,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-22807b0e",
@@ -1267,10 +1291,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.8,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn loan_offer message (similarity 0.93)"
+        "Matches a real mtn loan_offer message (similarity 0.93) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1283,9 +1307,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.7,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-259cfb28",
@@ -1297,7 +1323,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.2,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
         "The message sends you to imtncm-prod.mtn.auth0.com, which is not an official operator site"
@@ -1313,7 +1339,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1327,7 +1353,7 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Matches a real mtn agent_cash_in message (similarity 0.78)"
@@ -1343,10 +1369,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.99)",
+        "Matches a real mtn money_sent message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1360,7 +1386,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1374,7 +1400,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1386,12 +1412,12 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "test",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.5,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.7,
       "rounds": 1,
       "why": [
-        "It asks for a PIN or a secret code. No operator ever does that."
+        "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
     {
@@ -1404,10 +1430,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_advance message (similarity 0.93)",
+        "Matches a real mtn loan_advance message (similarity 0.93) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1419,11 +1445,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.4,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-2c0f9f07",
@@ -1433,11 +1461,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "test",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.3,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-2d10759b",
@@ -1449,9 +1479,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-2d384180",
@@ -1461,11 +1493,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.5,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-2e3d20c2",
@@ -1480,7 +1514,7 @@
       "seconds": 2.7,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.94)",
+        "Matches a real mtn money_sent message (similarity 0.94) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1497,7 +1531,7 @@
       "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1510,9 +1544,11 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-3443821c",
@@ -1524,9 +1560,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-36906596",
@@ -1538,10 +1576,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.8,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1554,9 +1592,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-39a70022",
@@ -1582,10 +1622,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn loan_offer message (similarity 0.91)"
+        "Matches a real mtn loan_offer message (similarity 0.91) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1615,7 +1655,7 @@
       "seconds": 2.7,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1629,10 +1669,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.7,
+      "seconds": 2.9,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_cash_in message (similarity 0.93)"
+        "Matches a real mtn agent_cash_in message (similarity 0.93) and asks nothing a real operator would not"
       ]
     },
     {
@@ -1645,10 +1685,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.8,
+      "seconds": 2.9,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_withdrawal message (similarity 0.91)",
+        "Matches a real mtn agent_withdrawal message (similarity 0.91) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1662,7 +1702,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.94,
-      "seconds": 2.8,
+      "seconds": 3.0,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.42)",
@@ -1677,11 +1717,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "test",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.7,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 3.0,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-4a4caf38",
@@ -1693,7 +1735,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.7,
+      "seconds": 2.9,
       "rounds": 1,
       "why": [
         "The message sends you to wa.me, which is not an official operator site"
@@ -1709,9 +1751,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.8,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-4ce9381f",
@@ -1723,10 +1767,11 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.7,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn promo message (similarity 0.58)"
+        "Matches a real mtn promo message (similarity 0.58)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -1739,7 +1784,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1753,9 +1798,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.7,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-4fd546ba",
@@ -1767,9 +1814,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.7,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-50f6baa3",
@@ -1779,12 +1828,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 2.4,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Sent under the official name MTN and asks nothing risky"
+        "Sent under the official name MTN and asks nothing risky",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -1797,7 +1847,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -1811,7 +1861,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -1827,7 +1877,9 @@
       "confidence": 0.4,
       "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-566fd34f",
@@ -1839,7 +1891,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -1851,13 +1903,11 @@
       "text_type": "verbatim",
       "language": "mixed",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
       "seconds": 2.7,
       "rounds": 1,
-      "why": [
-        "It asks for a PIN or a secret code. No operator ever does that."
-      ]
+      "why": []
     },
     {
       "id": "G-592e3da5",
@@ -1867,13 +1917,12 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "scam",
-      "confidence": 0.9,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
       "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "It asks for a PIN or a secret code. No operator ever does that.",
-        "Copies the style of a real online_service message (similarity 0.78) but differs where it matters"
+        "Matches a real online_service otp_code message (similarity 0.78)"
       ]
     },
     {
@@ -1886,10 +1935,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_repayment message (similarity 0.88)",
+        "Matches a real mtn loan_repayment message (similarity 0.88) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -1903,9 +1952,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-5cd7d108",
@@ -1917,7 +1968,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -1947,7 +1998,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.9,
       "rounds": 1,
       "why": [
         "Sent under the official name MTN and asks nothing risky"
@@ -1963,9 +2014,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-618bd0e2",
@@ -1977,7 +2030,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 2.5,
+      "seconds": 2.8,
       "rounds": 1,
       "why": [
         "The message sends you to mtnzik.cm, which is not an official operator site"
@@ -1993,9 +2046,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.8,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-66cfd563",
@@ -2007,7 +2062,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -2021,10 +2076,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.9,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2037,10 +2092,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.9,
       "rounds": 1,
       "why": [
-        "Matches a real mtn security_tip message (similarity 0.94)"
+        "Matches a real mtn security_tip message (similarity 0.94) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2051,12 +2106,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 2.5,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.8,
       "rounds": 1,
       "why": [
-        "Sent under the official name Orange and asks nothing risky"
+        "Sent under the official name Orange and asks nothing risky",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -2069,10 +2125,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.8,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2116,10 +2172,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.4,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.95)",
+        "Matches a real mtn money_sent message (similarity 0.95) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2135,7 +2191,9 @@
       "confidence": 0.4,
       "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-784103cc",
@@ -2147,10 +2205,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.4,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.98)"
+        "Matches a real mtn merchant_debit message (similarity 0.98) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2163,10 +2221,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
-        "Matches a real camtel airtime_topup message (similarity 0.86)"
+        "Matches a real camtel airtime_topup message (similarity 0.86) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2179,7 +2237,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.6,
       "rounds": 1,
       "why": []
     },
@@ -2196,7 +2254,7 @@
       "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_cash_in message (similarity 0.93)"
+        "Matches a real mtn agent_cash_in message (similarity 0.93) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2209,7 +2267,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.5,
+      "seconds": 2.6,
       "rounds": 1,
       "why": []
     },
@@ -2223,10 +2281,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn promo message (similarity 0.91)"
+        "Matches a real mtn promo message (similarity 0.91) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2241,7 +2299,9 @@
       "confidence": 0.4,
       "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-83ab2e4f",
@@ -2255,7 +2315,9 @@
       "confidence": 0.4,
       "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-843bb025",
@@ -2267,7 +2329,7 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Matches a real mtn money_received message (similarity 0.60)",
@@ -2284,7 +2346,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2296,11 +2358,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "test",
-      "verdict": "suspicious",
-      "confidence": 0.6,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
       "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-8beaf21f",
@@ -2315,7 +2379,7 @@
       "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2329,7 +2393,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.6,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -2346,7 +2410,7 @@
       "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_received message (similarity 0.91)",
+        "Matches a real mtn money_received message (similarity 0.91) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2360,9 +2424,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-939eb54c",
@@ -2388,9 +2454,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-9682a565",
@@ -2402,10 +2470,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_advance message (similarity 0.93)",
+        "Matches a real mtn loan_advance message (similarity 0.93) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2419,7 +2487,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
         "Sent under the official name UBA and asks nothing risky"
@@ -2435,7 +2503,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -2449,9 +2517,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-98b56f75",
@@ -2477,7 +2547,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
         "The message sends you to c-up.me, which is not an official operator site"
@@ -2495,7 +2565,9 @@
       "confidence": 0.4,
       "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-9ad85438",
@@ -2510,7 +2582,7 @@
       "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2524,10 +2596,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.3,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_repayment message (similarity 0.88)",
+        "Matches a real mtn loan_repayment message (similarity 0.88) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2539,11 +2611,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.0,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-a1f5b0f8",
@@ -2555,10 +2629,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.9,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2569,11 +2643,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.5,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-a6597cdf",
@@ -2583,12 +2659,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 1.3,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Sent under the official name MTN and asks nothing risky"
+        "Sent under the official name MTN and asks nothing risky",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -2601,10 +2678,11 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn account_notice message (similarity 0.75)"
+        "Matches a real mtn account_notice message (similarity 0.75)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -2617,9 +2695,11 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-a8f5516c",
@@ -2631,9 +2711,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-a9b55c73",
@@ -2645,10 +2727,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn promo message (similarity 0.91)"
+        "Matches a real mtn promo message (similarity 0.91) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2661,7 +2743,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -2675,10 +2757,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_received message (similarity 0.91)",
+        "Matches a real mtn money_received message (similarity 0.91) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2690,11 +2772,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.4,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-ae4f7ec6",
@@ -2706,7 +2790,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2720,9 +2804,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-b194094b",
@@ -2734,7 +2820,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2748,7 +2834,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 2,
       "why": []
     },
@@ -2762,7 +2848,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -2776,7 +2862,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.5,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2790,9 +2876,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-b4ea4290",
@@ -2804,9 +2892,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-b517b8c8",
@@ -2818,7 +2908,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -2832,10 +2922,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.94)",
+        "Matches a real mtn money_sent message (similarity 0.94) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -2849,9 +2939,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-b8e74749",
@@ -2863,7 +2955,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2875,11 +2967,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.4,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-be56843b",
@@ -2891,7 +2985,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.6,
       "rounds": 1,
       "why": []
     },
@@ -2905,10 +2999,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.8,
       "rounds": 1,
       "why": [
-        "Matches a real mtn loan_offer message (similarity 0.93)"
+        "Matches a real mtn loan_offer message (similarity 0.93) and asks nothing a real operator would not"
       ]
     },
     {
@@ -2921,9 +3015,11 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.7,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-c0dba087",
@@ -2935,10 +3031,11 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.2,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn promo message (similarity 0.64)"
+        "Matches a real mtn promo message (similarity 0.64)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
       ]
     },
     {
@@ -2951,7 +3048,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2965,7 +3062,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -2979,9 +3076,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-c6325310",
@@ -2993,9 +3092,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-c972ec7c",
@@ -3007,10 +3108,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.2,
+      "seconds": 2.7,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_cash_in message (similarity 0.83)"
+        "Matches a real mtn agent_cash_in message (similarity 0.83) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3023,7 +3124,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.2,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3037,10 +3138,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real mtn agent_cash_out message (similarity 0.97)"
+        "Matches a real mtn agent_cash_out message (similarity 0.97) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3053,10 +3154,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.5,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_withdrawal message (similarity 0.90)",
+        "Matches a real mtn agent_withdrawal message (similarity 0.90) and asks nothing a real operator would not",
         "Sent under the official name MobileMoney and asks nothing risky"
       ]
     },
@@ -3070,7 +3171,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.4,
+      "seconds": 2.3,
       "rounds": 1,
       "why": []
     },
@@ -3084,10 +3185,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.5,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn agent_cash_in message (similarity 0.83)"
+        "Matches a real mtn agent_cash_in message (similarity 0.83) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3098,11 +3199,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "test",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.4,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-d065e0fa",
@@ -3114,7 +3217,7 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
         "Matches a real mtn agent_cash_in message (similarity 0.78)"
@@ -3130,10 +3233,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.5,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.99)",
+        "Matches a real mtn money_sent message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -3147,10 +3250,10 @@
       "split": "test",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 1.3,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
-        "Matches a real camtel airtime_topup message (similarity 0.86)"
+        "Matches a real camtel airtime_topup message (similarity 0.86) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3163,7 +3266,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3177,7 +3280,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": []
     },
@@ -3189,13 +3292,12 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "test",
-      "verdict": "scam",
-      "confidence": 0.9,
-      "seconds": 1.4,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.3,
       "rounds": 1,
       "why": [
-        "It asks for a PIN or a secret code. No operator ever does that.",
-        "Copies the style of a real online_service message (similarity 0.78) but differs where it matters"
+        "Matches a real online_service otp_code message (similarity 0.78)"
       ]
     },
     {
@@ -3208,7 +3310,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": [
         "Sent under the official name UBA and asks nothing risky"
@@ -3222,11 +3324,13 @@
       "text_type": "verbatim",
       "language": "fr",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 1.5,
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-dc7ab420",
@@ -3238,7 +3342,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 1.7,
+      "seconds": 2.3,
       "rounds": 1,
       "why": [
         "The message sends you to mtnzik.cm, which is not an official operator site",
@@ -3255,7 +3359,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 1.8,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
         "Sent under the official name ECOBANK and asks nothing risky"
@@ -3271,9 +3375,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.1,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-e0ee5adf",
@@ -3285,7 +3391,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.2,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3299,7 +3405,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.2,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3313,10 +3419,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.7,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -3330,10 +3436,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn loan_repayment message (similarity 0.88)",
+        "Matches a real mtn loan_repayment message (similarity 0.88) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -3347,9 +3453,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-ead77025",
@@ -3361,9 +3469,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 3.0,
+      "seconds": 2.4,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-ecca2684",
@@ -3375,7 +3485,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.9,
+      "seconds": 2.6,
       "rounds": 1,
       "why": []
     },
@@ -3391,7 +3501,9 @@
       "confidence": 0.4,
       "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-f083f101",
@@ -3403,10 +3515,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.9,
+      "seconds": 2.6,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.99)",
+        "Matches a real mtn merchant_debit message (similarity 0.99) and asks nothing a real operator would not",
         "Sent under the official name Mobile Money and asks nothing risky"
       ]
     },
@@ -3420,7 +3532,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 2.9,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
         "The message sends you to mtnzik.cm, which is not an official operator site"
@@ -3436,10 +3548,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
-        "Matches a real bank bank_alert message (similarity 0.96)",
+        "Matches a real bank bank_alert message (similarity 0.96) and asks nothing a real operator would not",
         "Sent under the official name ECOBANK and asks nothing risky"
       ]
     },
@@ -3453,7 +3565,7 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "Matches a real mtn agent_cash_in message (similarity 0.76)"
@@ -3469,7 +3581,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3486,7 +3598,7 @@
       "seconds": 2.5,
       "rounds": 1,
       "why": [
-        "Matches a real mtn security_tip message (similarity 0.94)"
+        "Matches a real mtn security_tip message (similarity 0.94) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3499,7 +3611,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.8,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3513,7 +3625,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.3,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3527,10 +3639,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.8,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.98)"
+        "Matches a real mtn merchant_debit message (similarity 0.98) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3543,7 +3655,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3557,10 +3669,10 @@
       "split": "train",
       "verdict": "looks_genuine",
       "confidence": 0.75,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
-        "Matches a real mtn merchant_debit message (similarity 0.98)"
+        "Matches a real mtn merchant_debit message (similarity 0.98) and asks nothing a real operator would not"
       ]
     },
     {
@@ -3573,9 +3685,11 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-fa0db695",
@@ -3589,7 +3703,9 @@
       "confidence": 0.4,
       "seconds": 2.6,
       "rounds": 1,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "G-fb33728e",
@@ -3601,7 +3717,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -3615,7 +3731,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -3629,7 +3745,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 2,
       "why": []
     },
@@ -3643,7 +3759,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 2.8,
+      "seconds": 2.5,
       "rounds": 2,
       "why": [
         "It asks for a PIN or a secret code. No operator ever does that.",
@@ -3660,7 +3776,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3674,7 +3790,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 3.9,
+      "seconds": 3.6,
       "rounds": 2,
       "why": []
     },
@@ -3688,7 +3804,7 @@
       "split": "test",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.8,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3702,7 +3818,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.8,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3714,11 +3830,14 @@
       "text_type": "retold",
       "language": "en",
       "split": "train",
-      "verdict": "cant_tell",
-      "confidence": 0.4,
-      "seconds": 2.8,
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.7,
       "rounds": 2,
-      "why": []
+      "why": [
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)",
+        "Every action it suggests goes through official channels (USSD code, short code or the official app)"
+      ]
     },
     {
       "id": "R-3d9f783a",
@@ -3730,7 +3849,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.97,
-      "seconds": 2.9,
+      "seconds": 2.5,
       "rounds": 1,
       "why": [
         "The message hides instructions aimed at AI checkers (privilege escalation). Real operators never do that.",
@@ -3747,7 +3866,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3761,7 +3880,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 3.1,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
         "A personal number is asking you to act or promising you money"
@@ -3777,7 +3896,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 2,
       "why": []
     },
@@ -3791,7 +3910,7 @@
       "split": "test",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 2,
       "why": []
     },
@@ -3805,7 +3924,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.3,
       "rounds": 1,
       "why": []
     },
@@ -3817,13 +3936,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 2.9,
+      "verdict": "scam",
+      "confidence": 0.9,
+      "seconds": 2.8,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_received message (similarity 0.79)",
-        "It claims to be MTN but was sent from a personal number. Operators send from their official names"
+        "It claims to be MTN but was sent from a personal number. Operators send from their official names",
+        "Copies the style of a real mtn message (similarity 0.79) but differs where it matters"
       ]
     },
     {
@@ -3850,7 +3969,7 @@
       "split": "test",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 2.5,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
         "Wording matches a known scam message (similarity 0.34)"
@@ -3866,7 +3985,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.8,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3878,13 +3997,13 @@
       "text_type": "verbatim",
       "language": "en",
       "split": "train",
-      "verdict": "suspicious",
-      "confidence": 0.6,
-      "seconds": 3.1,
+      "verdict": "scam",
+      "confidence": 0.9,
+      "seconds": 2.4,
       "rounds": 2,
       "why": [
-        "Matches a real mtn money_sent message (similarity 0.93)",
-        "It claims to be MTN but was sent from a personal number. Operators send from their official names"
+        "It claims to be MTN but was sent from a personal number. Operators send from their official names",
+        "Copies the style of a real mtn message (similarity 0.93) but differs where it matters"
       ]
     },
     {
@@ -3897,7 +4016,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 2.6,
+      "seconds": 2.5,
       "rounds": 1,
       "why": []
     },
@@ -3911,7 +4030,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.8,
+      "seconds": 2.3,
       "rounds": 1,
       "why": []
     },
@@ -3925,7 +4044,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.9,
-      "seconds": 2.7,
+      "seconds": 2.6,
       "rounds": 1,
       "why": [
         "It asks for a PIN or a secret code. No operator ever does that."
@@ -3941,7 +4060,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.6,
+      "seconds": 2.8,
       "rounds": 1,
       "why": []
     },
@@ -3955,7 +4074,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.5,
+      "seconds": 2.7,
       "rounds": 1,
       "why": []
     },
@@ -3983,7 +4102,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.8,
+      "seconds": 2.4,
       "rounds": 1,
       "why": []
     },
@@ -3997,7 +4116,7 @@
       "split": "train",
       "verdict": "scam",
       "confidence": 0.86,
-      "seconds": 3.0,
+      "seconds": 2.3,
       "rounds": 1,
       "why": [
         "The message sends you to groq.click, which is not an official operator site"
@@ -4013,7 +4132,7 @@
       "split": "train",
       "verdict": "suspicious",
       "confidence": 0.6,
-      "seconds": 3.0,
+      "seconds": 2.3,
       "rounds": 1,
       "why": []
     },
@@ -4027,7 +4146,7 @@
       "split": "train",
       "verdict": "cant_tell",
       "confidence": 0.4,
-      "seconds": 2.7,
+      "seconds": 1.8,
       "rounds": 2,
       "why": []
     }

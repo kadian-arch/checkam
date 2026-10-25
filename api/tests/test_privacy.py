@@ -36,3 +36,17 @@ def test_dataset_tokens_are_read_as_codes():
 
 def test_pin_requests_are_flagged():
     assert privacy.extract("Confirm your PIN to receive the money")["asks_for_secret"]
+
+
+def test_channel_file_adds_only_sourced_entries(tmp_path):
+    f = tmp_path / "channels.json"
+    f.write_text('{"mtn": {"sender_names": ["Y\'ello Care"], "whatsapp": ["+237 651 00 00 00"], "sources": ["https://mtn.cm"]},'
+                 ' "fake": {"sender_names": ["FreeMoney"], "whatsapp": ["699999999"], "sources": []}}', encoding="utf-8")
+    before = (set(privacy.OFFICIAL), set(privacy.SENDER_NAMES))
+    try:
+        privacy.load_channels(f)
+        assert "651000000" in privacy.OFFICIAL and "yellocare" in privacy.SENDER_NAMES
+        assert "699999999" not in privacy.OFFICIAL and "freemoney" not in privacy.SENDER_NAMES
+    finally:
+        privacy.OFFICIAL.clear(); privacy.OFFICIAL.update(before[0])
+        privacy.SENDER_NAMES.clear(); privacy.SENDER_NAMES.update(before[1])

@@ -1,0 +1,269 @@
+{
+  "summary": {
+    "tag": "misses4",
+    "split": "test",
+    "with_sender": true,
+    "n": 14,
+    "mode": "data=zetaris-jdbc, nemotron=on",
+    "seconds": 520,
+    "precision": 0.75,
+    "recall": 0.75,
+    "f1": 0.75,
+    "false_alarm_rate": 0.1,
+    "cant_tell": 1,
+    "confusion": {
+      "not_scam->looks_genuine": 9,
+      "not_scam->scam": 1,
+      "scam->cant_tell": 1,
+      "scam->scam": 2,
+      "scam->suspicious": 1
+    },
+    "recall_by_source": {
+      "public_alert/verbatim": 1,
+      "report/retold": 1,
+      "report/verbatim": 2
+    }
+  },
+  "results": [
+    {
+      "id": "A-1228516d",
+      "text": "Mobile Money, vous avez reçu 56 500 FCFA de [NAME] ([PHONE:677-cvbmej]) le 2018-11-23. 10 : 13 :31. Transaction Id : [TXN_ID].",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 70.6,
+      "rounds": 2,
+      "why": []
+    },
+    {
+      "id": "G-259cfb28",
+      "text": "Your MTN Skills Academy OTP is: [CODE]. Do not share this OTP. MTN is not liable for incident that result from sharing your OTP. imtncm-prod[.]mtn[.]auth0[.]com #[CODE]",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 61.1,
+      "rounds": 2,
+      "why": [
+        "Nemotron reads it as genuine: Sender shown = \"MyMTNapp\"",
+        "It comes from MyMTNapp, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from MyMTNapp, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link"
+      ]
+    },
+    {
+      "id": "G-293acea7",
+      "text": "<#> Y'ello. Please enter the following code :[CODE] to complete your login. Be careful, do not share with anyone. RdbS6eMOXvx > N/RywfrtIZL> l+/DM+Y0kqw L9X0x07s5X9 +BQ+l2vBZvQ 071KQ0fm1I6",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 81.9,
+      "rounds": 2,
+      "why": [
+        "Sent under the official name Mobile Money and asks nothing risky",
+        "It comes from Mobile Money, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from Mobile Money, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link"
+      ]
+    },
+    {
+      "id": "G-39a70022",
+      "text": "Yello Bao ! Double your commisions with QR code ! Earn up to 30 000F/Month with MoMo by performing your cashouts everyday using QR code it's simple and fast",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 129.5,
+      "rounds": 2,
+      "why": [
+        "It comes from QRCOD BOOST, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from QRCOD BOOST, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "Sent under a registered sender name (QRCOD BOOST), which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-3d6333b0",
+      "text": "Limited stock: smartphone + free earphones with YaMo SmartPay. Flexible financing up to 12 months. Visit MTN Touch Buea soon!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 129.5,
+      "rounds": 2,
+      "why": [
+        "It comes from MTNSmartPay, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from MTNSmartPay, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "Sent under a registered sender name (MTNSmartPay), which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-46ccbae3",
+      "text": "A transaction of 200 XAF by LEEDTECH LTD ([PHONE:681-jmtnsq]) on your mobile money account successfully completed at 2026-09-15 22:34:01. The amount was subject to a discount of 0 and coupons worth 0. Message from debit receiver: Pay SMS Notification Fees. Your new balance:2528 XAF. Fee was 0 XAF, loyalty fee was 0 and loyalty reward was 0. Financial Transaction Id: [TXN_ID]. External Transaction Id: [TXN_ID].  Borrow up to 100,000 FCFA in advance in just seconds for your transactions. Dial *126*6# or access the new MoMo App here:link[.]mtn[.]cm/NewMoMoAppRef.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 92.3,
+      "rounds": 2,
+      "why": [
+        "Wording matches a known scam message (similarity 0.62)",
+        "Copies the style of a real mtn message (similarity 0.79) but differs where it matters",
+        "Nemotron reads it as scam (advance-fee scam): Sender shown as \"unknown\" instead of MTN"
+      ]
+    },
+    {
+      "id": "G-7fedfe3f",
+      "text": "CHALLENGE MOMO : TROP MOO! BOOST your commissions! Get customers to scan your QR Code on every CASH-OUT to DOUBLE your MONEY! More scans = More commissions!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 138.8,
+      "rounds": 2,
+      "why": [
+        "It comes from MOMO QRCOD, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from MOMO QRCOD, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "Sent under a registered sender name (MOMO QRCOD), which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "G-b3c68eae",
+      "text": "Good news! Instant referral payments are back. Earn 200F automatically for every successful referral. Reach 15 referrals and get an extra 5,000F bonus!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 113.4,
+      "rounds": 2,
+      "why": [
+        "Nemotron reads it as genuine (referral bonus promo): \"Instant referral payments are back\"",
+        "It comes from MoMo News, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from MoMo News, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link"
+      ]
+    },
+    {
+      "id": "G-db1d9056",
+      "text": "Carte [ID] Note:Chargement effectue par UNICS PLC Received Cr XAF 4.000 Date:25-09-2026 03:54 Solde XAF 3.500",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "mixed",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 143.3,
+      "rounds": 2,
+      "why": [
+        "Sent under the official name UBA and asks nothing risky",
+        "It comes from UBA, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from UBA, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link"
+      ]
+    },
+    {
+      "id": "G-f6a0460b",
+      "text": "Congratulations! You were among the first 1,000 activations for the Weekend Dose YouScribe promo. You have received your 1GB bonus yesterday!",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 111.8,
+      "rounds": 2,
+      "why": [
+        "Nemotron reads it as genuine: Congratulations! You were among the first 1,000 activations for the Weekend Dose YouScribe promo",
+        "It comes from Youscribe, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from Youscribe, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link"
+      ]
+    },
+    {
+      "id": "G-fb33728e",
+      "text": "Plenty bonus! 1GB njoh on the NewMoMoApp. Download, log in, make a transaction, then get 1GB valid for 24h the next day. Download: link[.]mtn[.]cm/NewMoMoAppRef",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 66.5,
+      "rounds": 2,
+      "why": [
+        "It comes from WeekendDose, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "It comes from WeekendDose, a sender name a personal phone cannot use, and asks for no payment, PIN, call or outside link",
+        "Sent under a registered sender name (WeekendDose), which a personal phone cannot use, and asks nothing risky"
+      ]
+    },
+    {
+      "id": "R-089218ec",
+      "text": "They asked to called a number that their car is bad with goods worth millions from Nigeria and the sim they bought from Nigeria can not call. After I called they appreciated  and they said they want to give me some good for my good car, big of rice tv, laptop that I should send transport but I declined",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.9,
+      "seconds": 107.8,
+      "rounds": 2,
+      "why": [
+        "Nemotron reads it as scam (advance-fee gift scam): They asked to called a number that their car is bad with goods worth millions from Nigeria"
+      ]
+    },
+    {
+      "id": "R-47025480",
+      "text": "MobileMoney    Vous avez recu 69500 XAF de [NAME] ([PHONE:670-takuxj]) sur votre compte Mobile Money 2026-02-30. Message de l'expediteur. Votre nouveau solde est de 142609 FCFA. frais: 0 XAF. Transaction ID:[TXN_ID] Economies avec! Juste pour cent frais de retraits transferts a Zero frais.",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "test",
+      "verdict": "suspicious",
+      "confidence": 0.6,
+      "seconds": 130.0,
+      "rounds": 2,
+      "why": []
+    },
+    {
+      "id": "R-639e6502",
+      "text": "Buy a machine for 5000frs,mine everyday for 1month and get 10500frs.",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "test",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 104.3,
+      "rounds": 2,
+      "why": [
+        "Nemotron reads it as scam (investment/mining scam): Buy a machine for 5000frs"
+      ]
+    }
+  ]
+}

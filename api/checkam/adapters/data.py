@@ -34,33 +34,39 @@ def _py(v):
 
 
 class ZetarisJDBC:
+    """One JDBC connection per worker thread, so the agents' parallel lookups run in parallel in Zetaris too."""
     name = "zetaris-jdbc"
 
     def __init__(self):
-        self._conn = None
-        self._lock = threading.Lock()
+        self._local = threading.local()
+        self._jvm_lock = threading.Lock()
 
     def _connect(self):
-        if self._conn is None:
+        conn = getattr(self._local, "conn", None)
+        if conn is None:
             import jaydebeapi
             if not os.environ.get("JAVA_HOME"):
                 jdk = Path(r"C:\Program Files\Java")
                 cand = sorted(jdk.glob("jdk-*")) if jdk.exists() else []
                 if cand:
                     os.environ["JAVA_HOME"] = str(cand[-1])
-            self._conn = jaydebeapi.connect("com.zetaris.lightning.jdbc.LightningDriver", config.ZETARIS_JDBC_URL,
-                                            [config.ZETARIS_USER, config.ZETARIS_PASSWORD], config.ZETARIS_JDBC_JAR)
-        return self._conn
+            with self._jvm_lock:  # the JVM starts once; connections after that are cheap
+                conn = jaydebeapi.connect("com.zetaris.lightning.jdbc.LightningDriver", config.ZETARIS_JDBC_URL,
+                                          [config.ZETARIS_USER, config.ZETARIS_PASSWORD], config.ZETARIS_JDBC_JAR)
+            self._local.conn = conn
+        return conn
 
     def query(self, sql: str) -> list[dict]:
-        with self._lock:
-            cur = self._connect().cursor()
-            try:
-                cur.execute(sql)
-                cols = [d[0] for d in cur.description] if cur.description else []
-                return [dict(zip(cols, map(_py, row))) for row in cur.fetchall()] if cols else []
-            finally:
-                cur.close()
+        import jpype
+        if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
+            jpype.attachThreadToJVM()
+        cur = self._connect().cursor()
+        try:
+            cur.execute(sql)
+            cols = [d[0] for d in cur.description] if cur.description else []
+            return [dict(zip(cols, map(_py, row))) for row in cur.fetchall()] if cols else []
+        finally:
+            cur.close()
 
 
 class ZetarisREST:
