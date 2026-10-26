@@ -29,10 +29,10 @@ def _startup():
     if config.env("CHECKAM_JUDGE_EMAIL"):
         store.add_analyst(config.env("CHECKAM_JUDGE_EMAIL"), config.env("CHECKAM_JUDGE_PASSWORD"), "Judge analyst", "Open Agent Hackathon")
     def warm():
+        from .trace import Trace
+        agents._scam_messages(Trace(echo=False))  # data session open and the meaning vectors on their way first
         if config.flag("CHECKAM_SEED_ON_START", True):
             seed.run()
-        from .trace import Trace
-        agents._scam_messages(Trace(echo=False))  # JDBC session + scam embeddings ready before the first citizen
 
     threading.Thread(target=warm, daemon=True).start()
 

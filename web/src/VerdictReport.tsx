@@ -113,6 +113,7 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
 
       <footer className="report-actions">
         <button className="ghost" onClick={share}>{t.share}</button>
+        {card.receipt && <a className="ghost" href={new URL(card.receipt.url).pathname} target="_blank" rel="noopener">{t.signed_answer}</a>}
         <button className="primary inline" onClick={onAgain}>{t.check_another}</button>
       </footer>
       {card.check_id && (

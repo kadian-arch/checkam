@@ -161,5 +161,6 @@
   "flag_is_scam": "It is a scam",
   "flag_is_genuine": "It is genuine",
   "flag_not_sure": "Not sure",
-  "flag_thanks": "Thank you. A fraud analyst will review it, and what they confirm helps the next person."
+  "flag_thanks": "Thank you. A fraud analyst will review it, and what they confirm helps the next person.",
+  "signed_answer": "Signed answer"
 }

@@ -22,6 +22,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "api"))
 os.environ.setdefault("CHECKAM_SEED_ON_START", "false")
+# the learned weights were trained on these very messages: scoring with them here would flatter us
+os.environ["CHECKAM_LEARNED"] = "off"
 
 from checkam import agents, config  # noqa: E402
 from checkam.adapters.data import data  # noqa: E402
@@ -78,12 +80,19 @@ def near_copies(r) -> tuple:
                               if o["id"] != r["id"] and difflib.SequenceMatcher(None, me, _norm(o["text"])).ratio() >= 0.75)
 
 
+# the meaning vectors are ready before the first message, so every message is scored the same way
+agents.warm_embeddings(data().sql(f"SELECT id, text, scam_types, channel, language FROM {config.ZETARIS_DB}.messages WHERE label = 'scam'", why="scam wording"))
+
+
 def one(r):
     t0 = time.time()
     try:
         c = agents.run_check(r["text"], sender=senders.get(r["id"], ""), holdout=near_copies(r), persist=False, echo=False)
         return {**r, "verdict": c.get("verdict", "error"), "confidence": c.get("confidence"), "seconds": round(time.time() - t0, 1),
-                "rounds": c.get("rounds"), "why": [w["text"] for w in c.get("why", [])][:3]}
+                "rounds": c.get("rounds"), "why": [w["text"] for w in c.get("why", [])][:3],
+                # what each agent found, so the evidence weights can be learned (api/scripts/learn_weights.py)
+                "signals": [{"tool": f["tool"], "direction": f["direction"], "weight": f["weight"], "status": f["status"]} for f in c.get("findings", [])],
+                "profile": c.get("profile"), "sender_given": bool(senders.get(r["id"]))}
     except Exception as e:
         return {**r, "verdict": "error", "error": str(e)[:200], "seconds": round(time.time() - t0, 1)}
 

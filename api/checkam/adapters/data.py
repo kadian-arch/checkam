@@ -113,6 +113,7 @@ class Data:
 
     def __init__(self):
         self.chain = [Sample()] if config.SAMPLE_MODE else [ZetarisJDBC(), ZetarisREST(), Sample()]
+        self._demote = threading.Lock()
 
     @property
     def mode(self) -> str:
@@ -120,7 +121,7 @@ class Data:
 
     def sql(self, sql: str, trace: Trace | None = None, agent: str = "Investigator", why: str = "") -> list[dict]:
         last = None
-        for i, backend in enumerate(self.chain):
+        for i, backend in enumerate(list(self.chain)):  # tools query in parallel: each walks its own copy
             with timer() as t:
                 try:
                     rows = backend.query(sql)
@@ -133,8 +134,10 @@ class Data:
                           status="ok" if rows is not None else "error", sponsor=sponsor, latency_ms=t.ms,
                           retry=i, backend=backend.name, why=why)
             if rows is not None:
-                if i:  # demote broken backends for the rest of the process
-                    self.chain = self.chain[i:]
+                if i:  # demote broken backends for the rest of the process, never past the one that answered
+                    with self._demote:
+                        if backend in self.chain:
+                            self.chain = self.chain[self.chain.index(backend):]
                 return rows
         raise RuntimeError(f"all data backends failed: {last}")
 

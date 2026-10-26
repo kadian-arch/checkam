@@ -1,0 +1,3 @@
+# Tools for learning the evidence weights offline (api/scripts/learn_weights.py); the server does not need them
+numpy==2.5.4
+scikit-learn==1.9.1

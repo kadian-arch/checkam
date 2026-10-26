@@ -161,5 +161,6 @@
   "flag_is_scam": "C'est une arnaque",
   "flag_is_genuine": "C'est authentique",
   "flag_not_sure": "Pas sûr",
-  "flag_thanks": "Merci. Un analyste anti-fraude va l'examiner, et ce qu'il confirme aidera la prochaine personne."
+  "flag_thanks": "Merci. Un analyste anti-fraude va l'examiner, et ce qu'il confirme aidera la prochaine personne.",
+  "signed_answer": "Réponse signée"
 }

@@ -30,7 +30,7 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 - **Signed, hash-chained public alerts.** Analysts publish alerts only with a Scout-signed contract and an approval; each alert is signed and chained to the one before, so nobody can quietly edit or remove one.
 - **Scam radar.** The home page shows which scams are going round this week, counted from people's own anonymous checks.
 - **It asks before it guesses.** When a message is too thin to judge, the answer says "need more details" and the agents ask the one or two questions that would settle it (who sent it, what it asks you to do, whether the money is really in your balance). The person answers in their own words, on the site or the bot, and the agents check again with the answer.
-- **A check you can do yourself, for every kind of scam.** Money received, account blocked, an agent who will call, a prize, a relative in trouble, a new number, a withdrawal to approve, a fine from the police or customs, threats, a SIM change, romance, a parcel held, a loan fee, an official communiqué, a job or scholarship: each claim comes with the one official check that settles it, such as dialing *126# yourself or calling the old number you know.
+- **A check you can do yourself, for every kind of scam.** Money received, account blocked, an agent who will call, a prize, a relative in trouble, a new number, a withdrawal to approve, a fake security alert, a fine from the police or customs, threats, a SIM change, romance, a parcel held, a loan fee, an official communiqué, a job or scholarship: each claim comes with the one official check that settles it, such as dialing *126# yourself or calling the old number you know.
 - **It learns from analysts (Meterless H-MEM).** Under any answer, a person can say it looks wrong. That waits for an analyst; what the analyst confirms is remembered, and similar messages later recall it as evidence. A scammer cannot teach it that their own message is fine.
 - **It answers like a person on Telegram.** It tells a question from a message to check, edits one message from "Checking…" to the answer with live progress, asks its follow-up questions when they would settle it, and in groups only speaks when called.
 - **Advice that fits the scam.** A visa scam gets "check canada.ca yourself, never pay a processing fee"; a "sent by mistake" message gets "dial *126# yourself to see your real balance". Official numbers come from a fixed, validated list, never from the model.
@@ -125,24 +125,44 @@ CI runs all three on every push and pull request.
 
 ## Evaluation
 
-`python api/scripts/evaluate.py --split test --with-sender` runs the full system (Zetaris, Nemotron, both engines) on the labelled messages of the Stop Arnaque 237 data. For each message the agents must work blind:
+All 267 labelled messages of the Stop Arnaque 237 data (87 scams, 180 genuine), checked by the full system. For each message the agents work blind:
 - its own record and its text are hidden from every tool and from the Critic's re-counts;
 - every near-copy of it (75% or more of the same wording: a report and the alert that quotes it, a reposted screenshot) is hidden too;
-- CheckAm's own stored checks are not consulted, and nothing is stored.
+- CheckAm's own stored checks and its H-MEM memory are not consulted, and nothing is stored.
 
 The sender shown on the phone is given, as a person would type it. Precision: of the messages CheckAm flags, how many are scams. Recall: of the scams, how many it flags. "Be careful" counts as flagged.
 
-| Set | Messages | Precision | Recall | False alarms | Can't tell |
-|---|---|---|---|---|---|
-| **Training messages we did not study** (fairest) | 148 (46 scams, 102 genuine) | **0.90** | **0.78** | **4 of 102** | 4 |
-| Training messages we studied to find rules | 70 (23 scams, 47 genuine) | 1.00 | 0.96 | 0 of 47 | 1 |
-| Test split, also studied during the build | 49 (18 scams, 31 genuine) | 1.00 | 1.00 | 0 of 31 | 0 |
+| Decision | Precision | Recall | False alarms | Scams missed |
+|---|---|---|---|---|
+| **CheckAm as it runs: rules and Critic, learned weights settle what they leave unsure** (nested 10-fold cross-validation) | **0.956** | **0.989** | **4 of 180** | 1 |
+| Rules and Critic alone, all 267 | 0.955 | 0.966 | 4 of 180 | 3 |
+| Learned weights alone (not used live, see below) | 0.966 | 0.977 | 3 of 180 | 2 |
+| First blind measurement, 26 Oct morning, 148 messages (before the fixes below) | 0.90 | 0.78 | 4 of 102 | 10 |
 
-- Read the first row. During the build we studied the mistakes on the test split and on 70 training messages to write general rules, so those two rows are optimistic. The 148 other training messages were only ever run once, in an early rules-only test on day one, and nobody studied them while writing the rules.
-- What the 148 taught us, after they were scored: of the 10 scams missed, 5 were victims retelling a call ("I was supposed to input my code"), 3 were job or scholarship announcements cut before the fee, 1 asked a fee without the word "pay" ("the 6,000 FCFA, it's for the application") and 1 was a credit notice cut after "You have just received...". The 4 false alarms were genuine operator and service promos with shortened links or log-in details. CheckAm now judges a retold story on what the person was asked, never calls a job or scholarship announcement harmless, reads "the fee is for the application" as a demand, and spots cash offered for nothing ("recevez 35 000 F CFA") even without a "you won". We did not re-score the 148 after these fixes: a set you tune on stops being a fair test. A fresh set from field users will give the next untouched score.
-- A "you received money" notice with no sender shown is never left at "can't tell": the answer tells the person to dial *126# (MTN) or #150# (Orange) themselves, because a credit that is not in the balance never came, and asks who sent it.
-- After those fixes we re-ran the two studied sets to make sure nothing broke: no new false alarm on either (test 0 of 31, studied training 0 of 47).
-- Results, with every verdict and reason: `evals/results-strict-train-train.json` (both training rows, as measured blind), `evals/results-strict-test-test.json`; the re-runs after the fixes are `evals/results-strict3-*.json`.
+How to read it, honestly:
+- The first row is the system as it runs. The rules and the Critic decide; the learned weights only settle the messages they left at "need more details", and on this data none is left unsure. Each message is scored by weights learned without it (outer 10-fold split; the regularisation and the threshold are chosen inside the training part only), so no message grades itself.
+- Why the weights do not decide alone, although they score a little better here: on 40 fresh messages written after the training (our field battery and a teammate's new set) they cleared an obvious bank phishing link and flagged a real Orange safety notice that the rules got right. They learned this data's patterns; the rules were written for each kind of claim. So the weights may settle the unsure, never overrule.
+- We studied mistakes on these messages while building the rules, so the second row is optimistic for messages unlike these. That is why we kept the first blind measurement in the table, and why the learned weights are scored by cross-validation and never by re-running the evaluation (the evaluation switches them off).
+- The learner is not allowed to use the kind of sender: in this data most scams arrived without one and most genuine messages came from operator names, so it would learn how the data was collected, not the message. With it, cross-validation showed 0.99 precision and 1.00 recall; we do not use or claim that.
+- What is left: 3 genuine operator promos that read like scams (a short link plus "log in", a bonus), and 2 scams with nothing to judge (a cut opening sentence, "I cut the call"); for those CheckAm asks follow-up questions instead of guessing.
+- Fresh messages from a teammate, never seen while building: 4 of 5 caught before the fixes of 26 Oct; the one missed (a fake "login attempt, cancel here" alert) became the security-alert claim.
+- Field battery (35 messages we wrote from public warnings and real operator messages) and the teammate's 5 fresh messages are re-run on every change; see `evals/battery.json`.
+- Results, with every verdict, reason and signal: `evals/results-v4-all-all.json`; the learned weights and their cross-validated report: `api/checkam/data/learned_weights.json`.
+
+### Methods
+
+| Method | Where | What it does |
+|---|---|---|
+| Multi-agent debate | Critic | A second agent re-counts every claim in Zetaris and argues the message is genuine; findings that do not hold are rejected and the Planner is sent back |
+| Retrieval-augmented few-shot classification | Investigator, Nemotron Super | The fraud analyst's reading compares the message with the closest real labelled scams and genuine messages from Zetaris (k nearest by wording), never its own record or near-copies |
+| Semantic similarity | Nemotron Embed | Scam wording found by meaning, not only by words |
+| Stacked classifier (logistic regression, scikit-learn) | Verdict gate | Learns how much each agent's evidence should weigh from the labelled data (nested cross-validation, sender kind excluded as a collection artifact); settles the messages the rules leave unsure; exported to JSON so the server applies it with one dot product |
+| Claims verification | Investigator | 17 kinds of claim across the scam taxonomy (money received, account blocked, prize, relative in trouble, security alert...), each with the official check that settles it |
+| Active questioning | Reporter | When the evidence is thin, the agents ask the questions that would settle it and check again with the answer |
+| Learning from analysts | Meterless H-MEM | Confirmed corrections are remembered with provenance and recalled on similar messages; a daily sleep cycle consolidates them |
+| Leakage-controlled evaluation | `evaluate.py` | Own record, near-copies (difflib ratio 0.75), stored checks and memory hidden for every message |
+| Dictionary language check | Reporter | Model text checked word by word against French and English dictionaries; wrong language or a garbled accent falls back to our own sentence |
+| OCR | Intake | Tesseract (English and French) reads a screenshot when the vision model cannot |
 
 ## When something fails
 | Failure | What CheckAm does |

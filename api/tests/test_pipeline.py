@@ -95,3 +95,36 @@ def test_the_critic_does_not_argue_twice_over_the_same_evidence():
     agents.critique(case, tr)
     assert agents.critique(case, tr) == []  # nothing new to argue about
     assert any(l["action"] == "argue_genuine" and "no new evidence" in str(l["output_summary"]) for l in tr.lines)
+
+
+def test_parallel_tools_never_empty_the_fallback_chain_when_zetaris_is_down():
+    import threading
+    from checkam.adapters import data as d
+
+    class Down:
+        name = "zetaris-down"
+
+        def query(self, sql):
+            raise ConnectionError("refused")
+
+    class Up:
+        name = "sample-duckdb"
+
+        def query(self, sql):
+            return [{"n": 1}]
+
+    store = d.Data.__new__(d.Data)
+    store.chain, store._demote = [Down(), Down(), Up()], threading.Lock()
+    errors = []
+
+    def hit():
+        try:
+            for _ in range(50):
+                assert store.sql("SELECT 1") == [{"n": 1}]
+        except Exception as e:
+            errors.append(e)
+
+    threads = [threading.Thread(target=hit) for _ in range(12)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert not errors and [b.name for b in store.chain] == ["sample-duckdb"]

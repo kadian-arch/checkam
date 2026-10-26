@@ -9,6 +9,7 @@ logs/
 data/world.json
 data/checkam.db
 data/embeddings*.json.tmp
+data/embeddings.json
 dist/
 .DS_Store
 *.log

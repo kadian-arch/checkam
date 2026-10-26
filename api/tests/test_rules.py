@@ -347,3 +347,16 @@ def test_naming_an_operator_is_not_claiming_to_be_it():
     assert agents.speaks_as({**f, "text": "Vous avez reçu 30 000 FCFA. Nouveau solde : 31 250 FCFA"}, "mtn")
     from checkam import claims
     assert claims.found("Hello, I mistakenly sent 25,000 FCFA to your MoMo number, it is my child's hospital money")[0] == "sent_by_mistake"
+
+
+def test_a_fake_security_alert_with_a_cancel_link_is_phishing():
+    m = "ALERTE: Tentative de connexion sur votre Blue Money. Si ce n'est pas vous, annulez ici: bit.ly"
+    from checkam import claims, privacy
+    assert "bit.ly" in privacy.extract(m)["links"]
+    assert "security_alert" in claims.found(m)
+    assert agents.run_check(m, persist=False)["verdict"] in ("suspicious", "scam")
+
+
+def test_a_short_link_from_a_registered_sender_is_not_a_red_flag_by_itself():
+    m = "YaMo Pitch registrations have been extended! Students, be among the 500 selected projects, apply before June 30 here: https://bit.ly/4vsdBlR"
+    assert agents.run_check(m, sender="YaMo Class", persist=False)["verdict"] == "looks_genuine"

@@ -15,6 +15,13 @@ CLAIMS = {
         "Composez vous-même le code de solde de votre opérateur (*126# pour MTN, #150# pour Orange). Si l'argent n'y est pas, il n'est jamais arrivé. S'il y est, une vraie erreur est annulée par l'opérateur : ne le renvoyez jamais vous-même",
         "Is the money really in your balance when you dial the code yourself?",
         "L'argent est-il vraiment dans votre solde quand vous composez le code vous-même ?"),
+    "security_alert": (
+        r"\b(tentative de connexion|connexion (?:inhabituelle|suspecte|non autoris[ée]e)|login attempt|sign-?in attempt|unusual (?:activity|login|sign-?in)|unauthori[sz]ed (?:login|access|transaction)|"
+        r"activit[ée] suspecte|suspicious activity|security alert|alerte de s[ée]curit[ée]|votre compte a [ée]t[ée] (?:pirat|compromis)|account (?:has been )?compromised)",
+        "Open the official app yourself, or dial your operator's code, to see your account. A real security alert never asks you to click a link or give a code",
+        "Ouvrez vous-même l'application officielle, ou composez le code de votre opérateur, pour voir votre compte. Une vraie alerte de sécurité ne demande jamais de cliquer un lien ni de donner un code",
+        "Does it ask you to click a link, log in or give a code to cancel or secure something?",
+        "Vous demande-t-il de cliquer un lien, de vous connecter ou de donner un code pour annuler ou sécuriser quelque chose ?"),
     "money_received": (
         r"\b(you have (?:just )?received|vous avez re[çc]u|vous venez de recevoir|received [\d .,]+ ?(?:xaf|fcfa|f)\b|cr[ée]dit[ée] sur votre compte|credited to your account)",
         "Dial your operator's balance code yourself (*126# for MTN, #150# for Orange): if the money is not in your balance, it never came",

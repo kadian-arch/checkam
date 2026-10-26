@@ -3,14 +3,16 @@
 Intake -> Planner -> Investigator -> Critic --(objections)--> Planner ... -> Reporter
 The Critic can reject findings and send work back; nothing reaches the Reporter without evidence.
 """
+import hashlib
 import json
 import re
+import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 
-from . import advice, claims, config, ledger, privacy, store, wording
+from . import advice, claims, config, learned, ledger, privacy, store, wording
 from .adapters import linkcheck, memory, nvidia, ocr, scout, world
 from .adapters.data import data
 from .similarity import containment, cosine, jaccard, norm, shingles, words
@@ -113,7 +115,7 @@ FEE_FOR = re.compile(r"(?i)(\d[\d .,]*\s?(?:f|fcfa|xaf|frs?)\b[^.]{0,40}\b(?:it'
 
 
 # a brand's name with a threat or a deadline sets up the call that comes next; a plain notice does not
-THREAT = re.compile(r"(?i)bloqu|block|suspen|d[ée]sactiv|deactivat|expir|cl[ôo]tur|closed|v[ée]rifi|verify|confirm|urgent|24 ?h|48 ?h|anomal|probl[èe]m|fraud|pirat|hack")
+THREAT = re.compile(r"(?i)bloqu|block|suspen|d[ée]sactiv|deactivat|expir|cl[ôo]tur|closed|v[ée]rifi|verify|confirm|urgent|24 ?h|48 ?h|anomal|probl[èe]m|fraud|pirat|hack|alert|tentative|connexion|login|sign-?in|unauthori|non autoris|suspect|suspicious|annul|cancel|s[ée]curis|secure")
 
 
 # cash handed out for nothing ("recevez 35 000 F CFA en espèces", "offre 10 000 FCFA à toute personne"); a bonus of
@@ -429,14 +431,43 @@ def _plan_hypotheses(case: Case, trace: Trace, applicable: list[str]) -> None:
 _cache: dict = {}
 
 
+_warming = threading.Lock()
+EMBED_FILE = config.DB_PATH.parent / "embeddings.json"
+
+
 def _scam_messages(trace: Trace) -> list[dict]:
+    """Known scam wording. A check never waits for the meaning vectors: until they are ready it compares
+    wording only, and the vectors are built once, in the background, and kept on disk across restarts."""
     rows = data().sql(f"SELECT id, text, scam_types, channel, language FROM {DB}.messages WHERE label = 'scam'", trace,
                       why="known scam wording")
-    if "scam_vecs" not in _cache and nvidia.enabled():
-        vecs = nvidia.embed([r["text"] for r in rows], trace)
-        if vecs:
-            _cache["scam_vecs"] = {r["id"]: v for r, v in zip(rows, vecs)}
+    if "scam_vecs" not in _cache and nvidia.enabled() and not _warming.locked():
+        threading.Thread(target=warm_embeddings, args=(rows,), daemon=True).start()
     return rows
+
+
+def warm_embeddings(rows: list[dict], trace: Trace | None = None) -> None:
+    if not _warming.acquire(blocking=False):
+        return
+    try:
+        key = lambda text: hashlib.sha1(f"{config.MODEL_EMBED}|{text}".encode()).hexdigest()
+        try:
+            saved = json.loads(EMBED_FILE.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            saved = {}
+        missing = [r for r in rows if key(r["text"]) not in saved]
+        if missing:
+            vecs = nvidia.embed([r["text"] for r in missing], trace)
+            if not vecs:
+                return
+            saved.update({key(r["text"]): v for r, v in zip(missing, vecs)})
+            try:
+                EMBED_FILE.parent.mkdir(parents=True, exist_ok=True)
+                EMBED_FILE.write_text(json.dumps(saved), encoding="utf-8")
+            except OSError:
+                pass  # a read-only disk only costs the next restart a rebuild
+        _cache["scam_vecs"] = {r["id"]: saved[key(r["text"])] for r in rows if key(r["text"]) in saved}
+    finally:
+        _warming.release()
 
 
 def _run_tool(case: Case, tool: str, trace: Trace) -> list:
@@ -531,7 +562,8 @@ def _tool_link_history(case: Case, trace: Trace) -> list[Finding]:
                                                         f"Le lien {host} apparaît dans {known} vrai(s) message(s) d'opérateur que nous avons, et dans aucun signalement"),
                                "genuine", "weak", [{"table": "genuine_messages", "id": host, "detail": f"{known} message(s)"}]))
         if not (reps or alr):
-            calm = (sender_ok and "click_link" not in case.facts["asks"] and not case.facts.get("promise")) or established
+            # a short link hides where it goes: from a sender a phone cannot use, it is how real promos link their terms
+            calm = (sender_ok and ("click_link" not in case.facts["asks"] and not case.facts.get("promise") or host in SHORTENERS)) or established
             out.append(Finding(_fid(), "link_history", L(case, f"The link {host} is not an operator website, and nobody has reported it yet", f"Le lien {host} n'est pas un site d'opérateur, et personne ne l'a encore signalé"),
                                "context" if calm else "scam", "weak" if calm else "medium", [{"table": "message", "id": host}]))
         out += _vet_site(case, host, age, established)
@@ -841,7 +873,8 @@ def red_flags(case: Case, twin_text: str = "") -> list[str]:
     # to claim something; a registered sender's terms link that asks nothing is not
     trusted_sender = f.get("sender_kind") in ("official", "registered")
     pushes_link = "click_link" in f["asks"] or bool(f.get("promise"))
-    flags += [f"outside link {h}" for h in f["links"] if h not in twin_hosts and h not in f.get("established", []) and (not trusted_sender or pushes_link)]
+    flags += [f"outside link {h}" for h in f["links"] if h not in twin_hosts and h not in f.get("established", [])
+              and (not trusted_sender or (pushes_link and h not in SHORTENERS))]
     if f.get("sender_kind") == "personal" and f["brands"]:
         flags.append("claims a brand from a personal number")
     if f.get("injection"):
@@ -987,7 +1020,7 @@ def critique(case: Case, trace: Trace) -> list[dict]:
                                                 "findings": [{"id": f.id, "claim": f.claim, "direction": f.direction, "weight": f.weight} for f in accepted],
                                                 "tools_run": case.tools_run, "tools_available": TOOLS}, ensure_ascii=False) +
          "\nReturn {\"genuine_case\": str, \"weak_findings\": [{\"id\": str, \"reason\": str}], \"missing\": [{\"tool\": tool name, \"reason\": str}]}"},
-    ], model=config.MODEL_FAST, trace=trace, agent="Critic", action="argue_genuine", max_tokens=700, timeout=25)
+    ], model=config.MODEL_FAST, trace=trace, agent="Critic", action="argue_genuine", max_tokens=400, timeout=25)
     if llm:
         for w in llm.get("weak_findings", []):
             for f in accepted:
@@ -1005,7 +1038,29 @@ def critique(case: Case, trace: Trace) -> list[dict]:
 
 
 # ======================= verdict + Reporter =======================
+def profile(case: Case, score: int = 0) -> dict:
+    """The message facts the verdict weighs directly, beside the findings: the row the learned weights read."""
+    f = case.facts
+    return {"pin": "pin" in f["asks"], "hidden": bool(f["hidden_characters"]), "injection": bool(f.get("injection")),
+            "forged_date": bool(f.get("impossible_date")), "ussd_to_person": bool(USSD_TO_PERSON.search(f["text"])),
+            "demands": len(risky_asks(f) - {"pin"}), "click": "click_link" in f["asks"], "promise": bool(f.get("promise")),
+            "links": len(f["links"]), "sender_kind": f.get("sender_kind"), "retold": bool(f.get("retold")),
+            "claims": claims.found(f["text"]), "official_route": bool(OFFICIAL_ROUTE.search(f["text"])), "score": score}
+
+
 def decide(case: Case) -> tuple[str, float, int]:
+    verdict, confidence, score = rule_verdict(case)
+    p = learned.probability([f.public() for f in case.findings], profile(case, score))
+    case.facts["learned_probability"] = p
+    # the rules and the Critic decide; the weights learned from the labelled messages only settle what they
+    # left unsure. They never clear a flag nor flag a message the rules cleared: on phrasings unlike our data
+    # (a new kind of claim) they are less sure than the rules that were written for it
+    if p is not None and verdict == "cant_tell" and p >= learned.threshold():
+        return "suspicious", round(max(0.6, min(p, 0.85)), 2), score
+    return verdict, confidence, score
+
+
+def rule_verdict(case: Case) -> tuple[str, float, int]:
     acc = [f for f in case.findings if f.status == "accepted"]
     score = sum(WEIGHT[f.weight] for f in acc if f.direction == "scam")
     if case.facts["asks"] and set(case.facts["asks"]) & {"pin"}:
@@ -1230,6 +1285,9 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) and 0 < facts["amount_fcfa"] < 50_000_000 else None,
                           "scheme": card.get("scheme")})
     card["findings"] = [f.public() for f in case.findings]
+    # the message facts the verdict weighs directly, beside the findings: what a learned weighting can use
+    card["profile"] = profile(case, score)
+    card["learned_probability"] = case.facts.get("learned_probability")
     card["rounds"] = case.rounds
     card["trace"] = trace.lines
     if persist and not holdout:
