@@ -463,3 +463,12 @@ textarea { resize: vertical; min-height: 132px; }
 .radar li i { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--danger), var(--signal)); }
 .radar li b { text-align: right; font-family: var(--mono); color: var(--paper); }
 @media (max-width: 520px) { .radar { margin: -30px 0 70px; padding: 18px 16px; } .radar li { grid-template-columns: minmax(0, 1fr) 70px 30px; font-size: 14px; } }
+a.primary, a.ghost { text-decoration: none; }
+.primary:disabled { filter: none; opacity: .45; box-shadow: none; }
+.alert .unsig { color: var(--danger); font-weight: 700; }
+
+.field-head { display: flex !important; align-items: center; justify-content: space-between; gap: 12px; }
+.chip-btn { font: inherit; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 4px 12px; min-height: 30px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--paper); cursor: pointer; }
+.chip-btn:hover { border-color: var(--signal); }
+.ios-hint { margin-top: 10px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.ios-hint a { color: var(--signal); }

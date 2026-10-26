@@ -18,6 +18,10 @@ import { fill, LANGS, pickLang, type Dict, type Lang } from "./i18n";
 import VerdictReport from "./VerdictReport";
 import Logo from "./Logo";
 
+// iPhones do not let a web app into the share sheet, so iPhone users share to Telegram and the bot instead
+const isIOS = typeof navigator !== "undefined" && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+const canPaste = typeof navigator !== "undefined" && !!navigator.clipboard?.readText;
+
 type InstallEvent = Event & { prompt: () => Promise<void> };
 
 function savedTheme(): "light" | "dark" | null {
@@ -152,7 +156,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     return (
       <section className="hero report-wrap" ref={top} id="check">
         <VerdictReport card={card} t={t} onAgain={() => { setCard(null); setText(""); setSender(""); setFile(null); }}
-          askSender={card.verdict === "cant_tell" && !sender.trim() ? (who) => { setSender(who); setCard(null); go(who); } : undefined} />
+          askSender={(card.verdict === "cant_tell" || card.verdict === "suspicious") && !sender.trim() ? (who) => { setSender(who); setCard(null); go(who); } : undefined} />
       </section>
     );
   }
@@ -168,7 +172,10 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
       <div className={`console ${busy ? "busy" : ""}`}>
         <div className="console-bar"><span /><span /><span /><code>checkam://check</code></div>
         <label className="field">
-          <span>{t.paste_label}</span>
+          <span className="field-head">{t.paste_label}
+            {canPaste && <button type="button" className="chip-btn" disabled={busy}
+              onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => {}); }}>{t.paste_btn}</button>}
+          </span>
           <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
         </label>
         <div className="row">
@@ -205,6 +212,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
         )}
         {err && <p className="error" role="alert">{err}</p>}
         <p className="privacy"><svg viewBox="0 0 24 24" aria-hidden><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>{t.privacy}</p>
+        {isIOS && <p className="ios-hint">{t.ios_share} <a href="https://t.me/checkam_bot" target="_blank" rel="noopener">@checkam_bot</a>.</p>}
       </div>
     </section>
   );
@@ -283,7 +291,7 @@ function Alerts({ t, lang }: { t: Dict; lang: Lang }) {
       <div className="alert-grid">
         {alerts?.slice(0, 6).map((a) => (
           <article key={a.id} className="alert">
-            <header><time>{a.created.slice(0, 10)}</time>{a.signature && <span className="sig" title={a.signature}>✓ {t.verified}</span>}</header>
+            <header><time>{a.created.slice(0, 10)}</time>{a.signature ? <span className="sig" title={a.signature}>✓ {t.verified}</span> : <span className="unsig">{t.not_signed}</span>}</header>
             <h3>{a.title}</h3>
             <p>{body(a)}</p>
             {a.numbers?.length > 0 && <footer>{a.numbers.map((n: string) => <code key={n}>{n}</code>)}</footer>}

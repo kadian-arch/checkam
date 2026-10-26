@@ -39,3 +39,10 @@ inv = {"mode": "investigate"}
 (EX / "inputs" / "03_investigate.json").write_text(json.dumps(inv, indent=2), encoding="utf-8")
 (EX / "outputs" / "03_investigate.json").write_text(json.dumps(post_json("/run", inv), indent=2, ensure_ascii=False), encoding="utf-8")
 print("03 done")
+
+real = {"mode": "check", "sender": "MTN",
+        "text": "1GB free + 3GB to stream at 200F to enjoy this football weekend, including tomorrow's Clasico. "
+                "Get your MTN TV bundle now and be one of the first. *280*16*#"}
+(EX / "inputs" / "04_real_operator.json").write_text(json.dumps(real, indent=2, ensure_ascii=False), encoding="utf-8")
+(EX / "outputs" / "04_real_operator.json").write_text(json.dumps(post_json("/run", real), indent=2, ensure_ascii=False), encoding="utf-8")
+print("04 done")

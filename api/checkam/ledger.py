@@ -64,6 +64,15 @@ def verify(alert: dict, public_key: str | None = None) -> dict:
 
 
 def verify_chain(alerts_oldest_first: list[dict]) -> dict:
+    """The chain is the signed alerts, in order. An alert with no signature at all (published before signing
+    existed, or slipped into the database by hand) never counts as CheckAm's: it is listed as unsigned."""
+    unsigned = [a["id"] for a in alerts_oldest_first if not a.get("signature") and not a.get("hash")]
+    signed = [a for a in alerts_oldest_first if a.get("signature") or a.get("hash")]
+    r = _verify_signed(signed)
+    return {**r, "unsigned": unsigned} if unsigned else r
+
+
+def _verify_signed(alerts_oldest_first: list[dict]) -> dict:
     prev = GENESIS
     for a in alerts_oldest_first:
         if a.get("prev_hash") != prev:

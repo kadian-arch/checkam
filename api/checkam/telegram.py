@@ -81,7 +81,7 @@ def _edit(chat_id: int, message_id: int | None, text: str, buttons: list | None 
 
 def render(card: dict, ui: str, seconds: float | None = None) -> str:
     lang = card.get("language") if card.get("language") in TEXT else ui
-    t, e = TEXT[lang], html.escape
+    t, e = TEXT[lang], (lambda s: html.escape(s, quote=False))  # Telegram needs only & < > escaped
     out = [f"<b>{LABEL[lang].get(card['verdict'], card['verdict'])}</b>  · {round(card.get('confidence', 0) * 100)}%", f"<b>{e(card.get('headline', ''))}</b>"]
     if card.get("explain"):
         out.append(e(card["explain"]))
@@ -158,10 +158,10 @@ def _check(chat_id: int, ui: str, text: str, photo_id: str, sender: str = "") ->
         image = _photo(photo_id) if photo_id else None
         card = agents.run_check(text, image=image, sender=sender, echo=False, on_line=_progress(chat_id, mid, lang))
         if "verdict" not in card:
-            _edit(chat_id, mid, html.escape(card.get("error", TEXT[lang]["error"])))
+            _edit(chat_id, mid, html.escape(card.get("error", TEXT[lang]["error"]), quote=False))
             return
         _edit(chat_id, mid, render(card, ui, time.monotonic() - started), buttons(card, ui))
-        if card["verdict"] == "cant_tell" and not sender and text:
+        if card["verdict"] in ("cant_tell", "suspicious") and not sender and text:
             _pending[chat_id] = (time.monotonic(), text)
             _send(chat_id, TEXT[card.get("language") if card.get("language") in TEXT else ui]["who"])
     except Exception:
@@ -171,7 +171,7 @@ def _check(chat_id: int, ui: str, text: str, photo_id: str, sender: str = "") ->
 def _chat(chat_id: int, ui: str, text: str) -> None:
     _call("sendChatAction", chat_id=chat_id, action="typing")
     lang = "fr" if agents._guess_lang(text) == "fr" else ui
-    _send(chat_id, html.escape(assistant.reply(text, lang) or TEXT[lang]["start"]))
+    _send(chat_id, html.escape(assistant.reply(text, lang) or TEXT[lang]["start"], quote=False))
 
 
 def handle(update: dict) -> None:

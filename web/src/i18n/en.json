@@ -59,8 +59,8 @@
   "analyst_sub": "Every check feeds a campaign graph. Analysts see linked reports, alerts and citizen checks, read an evidence dossier and publish signed alerts.",
   "analyst_cta": "Analyst sign-in",
   "install_title": "Keep CheckAm one tap away",
-  "install_sub": "Install it like an app. Then, from any SMS or WhatsApp message, tap Share → CheckAm.",
-  "install_ios": "On iPhone: tap Share, then Add to Home Screen.",
+  "install_sub": "Install it like an app. On Android, from any SMS or WhatsApp message, tap Share → CheckAm. On any phone, copy the message and tap Paste, or forward it to @checkam_bot on Telegram.",
+  "install_ios": "On iPhone: in Safari tap Share, then Add to Home Screen. To check a message, copy it and tap Paste, or forward it to @checkam_bot.",
   "footer_data": "Built on Stop Arnaque 237, an open dataset of real scams reported in Cameroon.",
   "error": "Something went wrong. Check your connection and try again.",
   "lang": "Français",
@@ -140,5 +140,8 @@
     "family": "a fake emergency from someone you know"
   },
   "radar_title": "Scam radar",
-  "radar_sub": "{n} scams caught in the last {days} days, by kind"
+  "radar_sub": "{n} scams caught in the last {days} days, by kind",
+  "not_signed": "Not signed by CheckAm",
+  "paste_btn": "Paste",
+  "ios_share": "On iPhone: press and hold the message, tap Forward or Share, choose Telegram and send it to"
 }

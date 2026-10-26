@@ -23,7 +23,7 @@ for lang, (about, desc, start, check) in {
          "CheckAm checks suspicious mobile money, job, scholarship and prize messages against real scam reports in Cameroon. "
          "Forward the message or send a screenshot: you get what it is, why, and what to do. Every answer is signed, so nobody can fake one.",
          "How to check a message", "Check the message you reply to (in groups)"),
-    "fr": ("Transférez un message d'argent suspect. Cinq agents IA le vérifient et vous disent pourquoi. Gratuit, français et anglais.",
+    "fr": ("Transférez un message d'argent suspect : 5 agents IA le vérifient et disent pourquoi. Gratuit, FR et EN.",
            "CheckAm vérifie les messages suspects (mobile money, emploi, bourse, gain) avec de vrais signalements d'arnaques au Cameroun. "
            "Transférez le message ou envoyez une capture : vous saurez ce que c'est, pourquoi, et quoi faire. Chaque réponse est signée, personne ne peut en inventer une.",
            "Comment vérifier un message", "Vérifier le message auquel vous répondez (en groupe)"),

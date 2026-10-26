@@ -9,8 +9,10 @@ campaign graph is not touched.
   MODEL_API_KEY= python api/scripts/evaluate.py --tag rules             # agents without Nemotron
 """
 import argparse
+import difflib
 import json
 import os
+import re
 import sys
 import time
 from collections import Counter
@@ -32,6 +34,7 @@ ap.add_argument("--limit", type=int, default=0)
 ap.add_argument("--sample", type=int, default=0, help="stratified random sample of this size (seed 7)")
 ap.add_argument("--ids", default="", help="comma-separated ids to re-run, e.g. the misses of a previous run")
 ap.add_argument("--with-sender", action="store_true", help="also give the sender the person saw on their phone")
+ap.add_argument("--loose", action="store_true", help="hide only the message's own record (default also hides near-copies of it)")
 args = ap.parse_args()
 
 where = "" if args.split == "all" else f" WHERE split = '{args.split}'"
@@ -58,10 +61,27 @@ if args.with_sender:
         senders[r["id"]] = f"[PHONE:{r['sender_phone_id']}]" if r["sender_phone_id"] else (r["sender"] or "")
 
 
+# the same scam often sits in the data twice (a report and the public alert that quotes it, a reposted
+# screenshot): hiding only the message's own record would let a near-copy answer for it
+everything = data().sql(f"SELECT id, text FROM {config.ZETARIS_DB}.messages", why="near-copies to hide")
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"\[[A-Z_]+(?::[^\]]*)?\]|[^\w]+", " ", s or "").lower().strip()
+
+
+def near_copies(r) -> tuple:
+    me = _norm(r["text"])
+    if args.loose or not me:
+        return (r["id"],)
+    return (r["id"],) + tuple(o["id"] for o in everything
+                              if o["id"] != r["id"] and difflib.SequenceMatcher(None, me, _norm(o["text"])).ratio() >= 0.75)
+
+
 def one(r):
     t0 = time.time()
     try:
-        c = agents.run_check(r["text"], sender=senders.get(r["id"], ""), holdout=(r["id"],), persist=False, echo=False)
+        c = agents.run_check(r["text"], sender=senders.get(r["id"], ""), holdout=near_copies(r), persist=False, echo=False)
         return {**r, "verdict": c.get("verdict", "error"), "confidence": c.get("confidence"), "seconds": round(time.time() - t0, 1),
                 "rounds": c.get("rounds"), "why": [w["text"] for w in c.get("why", [])][:3]}
     except Exception as e:
@@ -87,7 +107,7 @@ by = Counter((r["label"], r["verdict"]) for r in results)
 origin = Counter((r["origin"], r["text_type"], r["verdict"] in POS) for r in results if r["label"] == "scam")
 
 mode = f"data={data().mode}, nemotron={'on' if config.MODEL_API_KEY else 'off'}"
-summary = {"tag": args.tag, "split": args.split, "with_sender": args.with_sender, "n": len(results), "mode": mode, "seconds": round(elapsed), "precision": round(prec, 4),
+summary = {"tag": args.tag, "split": args.split, "with_sender": args.with_sender, "near_copies_hidden": not args.loose, "n": len(results), "mode": mode, "seconds": round(elapsed), "precision": round(prec, 4),
            "recall": round(rec, 4), "f1": round(f1, 4), "false_alarm_rate": round(fpr, 4), "cant_tell": cant,
            "confusion": {f"{k[0]}->{k[1]}": v for k, v in sorted(by.items())},
            "recall_by_source": {f"{k[0]}/{k[1]}": v for k, v in sorted(origin.items(), key=str)}}

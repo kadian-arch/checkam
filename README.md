@@ -32,7 +32,7 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 - **It answers like a person on Telegram.** It tells a question from a message to check, edits one message from "Checking…" to the answer with live progress, asks "who sent it?" when that would settle it, and in groups only speaks when called.
 - **Advice that fits the scam.** A visa scam gets "check canada.ca yourself, never pay a processing fee"; a "sent by mistake" message gets "dial *126# yourself to see your real balance". Official numbers come from a fixed, validated list, never from the model.
 - **Instant for repeats.** The same scam reaches thousands of phones; a message checked in the last hours is answered in about a second and says so.
-- **Built for every phone.** Works from 320 px screens up, light or dark following the phone, installs as an app with share-to-CheckAm, English or French following the phone.
+- **Built for every phone.** Works from 320 px screens up, light or dark following the phone, installs as an app with a one-tap Paste button (Android can share a message straight to it; on iPhone, Apple keeps web apps out of the share sheet, so you forward the message to the Telegram bot in two taps), English or French following the phone.
 
 ## How it works
 
@@ -116,6 +116,27 @@ cd engines/scout-intent && SCOUT_IMPL=$PWD/src/index.ts npm run evals
 ```
 CI runs all three on every push and pull request.
 
+## Evaluation
+
+`python api/scripts/evaluate.py --split test --with-sender` runs the full system (Zetaris, Nemotron, both engines) on the labelled messages of the Stop Arnaque 237 data. For each message the agents must work blind:
+- its own record and its text are hidden from every tool and from the Critic's re-counts;
+- every near-copy of it (75% or more of the same wording: a report and the alert that quotes it, a reposted screenshot) is hidden too;
+- CheckAm's own stored checks are not consulted, and nothing is stored.
+
+The sender shown on the phone is given, as a person would type it. Precision: of the messages CheckAm flags, how many are scams. Recall: of the scams, how many it flags. "Be careful" counts as flagged.
+
+| Set | Messages | Precision | Recall | False alarms | Can't tell |
+|---|---|---|---|---|---|
+| **Training messages we did not study** (fairest) | 148 (46 scams, 102 genuine) | **0.90** | **0.78** | **4 of 102** | 4 |
+| Training messages we studied to find rules | 70 (23 scams, 47 genuine) | 1.00 | 0.96 | 0 of 47 | 1 |
+| Test split, also studied during the build | 49 (18 scams, 31 genuine) | 1.00 | 1.00 | 0 of 31 | 0 |
+
+- Read the first row. During the build we studied the mistakes on the test split and on 70 training messages to write general rules, so those two rows are optimistic. The 148 other training messages were only ever run once, in an early rules-only test on day one, and nobody studied them while writing the rules.
+- What the 148 taught us, after they were scored: of the 10 scams missed, 5 were victims retelling a call ("I was supposed to input my code"), 3 were job or scholarship announcements cut before the fee, 1 asked a fee without the word "pay" ("the 6,000 FCFA, it's for the application") and 1 was a credit notice cut after "You have just received...". The 4 false alarms were genuine operator and service promos with shortened links or log-in details. CheckAm now judges a retold story on what the person was asked, never calls a job or scholarship announcement harmless, reads "the fee is for the application" as a demand, and spots cash offered for nothing ("recevez 35 000 F CFA") even without a "you won". We did not re-score the 148 after these fixes: a set you tune on stops being a fair test. A fresh set from field users will give the next untouched score.
+- A "you received money" notice with no sender shown is never left at "can't tell": the answer tells the person to dial *126# (MTN) or #150# (Orange) themselves, because a credit that is not in the balance never came, and asks who sent it.
+- After those fixes we re-ran the two studied sets to make sure nothing broke: no new false alarm on either (test 0 of 31, studied training 0 of 47).
+- Results, with every verdict and reason: `evals/results-strict-train-train.json` (both training rows, as measured blind), `evals/results-strict-test-test.json`; the re-runs after the fixes are `evals/results-strict3-*.json`.
+
 ## When something fails
 | Failure | What CheckAm does |
 |---|---|
@@ -144,7 +165,7 @@ CheckAm is a safety tool, so it is built to be attacked.
 ## Limitations
 - A campaign link shows a shared signal (number, link, wording), not proof that one person is behind it. Dossiers say so.
 - The dataset is small (60 reports, 160 alerts, 267 messages) and skews to the South West and Littoral. New checks grow it.
-- With hosted Nemotron a new message takes about 10 to 30 seconds (median 15 s in our test run with four checks at once); the verdict shows the moment the agents decide it, then the written explanation. Repeats answer in about a second.
+- With hosted Nemotron a new message takes about 10 to 40 seconds, depending on how busy the hosted models are (about 12 s for one check on its own; medians of 15 to 39 s in our evaluation runs with several checks at once). The verdict shows the moment the agents decide it, then the written explanation. Repeats answer in about a second.
 - A receipt or bank notice with no sender shown can be impossible to judge from the text; CheckAm then asks who sent it instead of guessing.
 
 ## Team

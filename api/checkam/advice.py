@@ -14,18 +14,20 @@ SCHEMES = {
     # name: (pattern over text + scam types + the model's scheme name, label en, label fr)
     "visa_scholarship": (r"visa|lottery|loterie|scholarship|bourse|immigra|study abroad|[ée]tudier [àa] l'[ée]tranger|work permit|permis de travail|green card|dv ?lottery|fake_scholarship_visa",
                          "a fake visa or scholarship offer", "une fausse offre de visa ou de bourse"),
-    "job": (r"recrut|recruit|job|emploi|hiring|embauche|stage|internship|salaire|salary|fake_job|concours|admission",
+    "job": (r"recrut|recruit|job|emploi|hiring|embauche|stage|internship|salaire|salary|fake_job|concours|admission|candidat|volontaire|volunteer|rejoign\w* (?:notre|nos|l'|la|le)|join our|type de contrat|temps plein|full[- ]time|former \d+ jeunes",
             "a fake job or exam offer", "une fausse offre d'emploi ou de concours"),
     "investment": (r"invest|ponzi|crypto|bitcoin|forex|trading|minage|mining|machine|doubl|retrait|withdraw|solde retirable|invitation[_ ]code|parrain|referral|rendement|profit",
                    "a fake investment", "un faux investissement"),
     "loan": (r"loan|pr[êe]t|cr[ée]dit rapide|borrow|emprunt|loan_scam", "a fake loan", "un faux prêt"),
-    "reversal": (r"par erreur|by mistake|wrong number|wrong_number_reversal|renvoy|send (?:it )?back|rembours", "money 'sent by mistake'", "l'argent « envoyé par erreur »"),
+    "reversal": (r"par erreur|by mistake|mistaken|wrong number|wrong_number_reversal|renvoy|send (?:it )?back|rembours|refund|accidental (?:transfer|deposit|payment)|"
+                 r"fake (?:credit|receipt|deposit)|faux re[çc]u|vous avez re[çc]u [\d .,]+ ?(?:xaf|fcfa|f) de|you have received [\d .,]+ ?(?:xaf|fcfa|f) from",
+                 "money 'sent by mistake'", "l'argent « envoyé par erreur »"),
     "credential": (r"\bpin\b|code secret|otp|mot de passe|password|credential_request|account_blocked|bloqu|suspend|fake_agent|agent|service client|customer care|sim_swap",
                    "someone after your PIN or account", "quelqu'un qui veut votre code ou votre compte"),
     "prize": (r"gagn|won|winner|prize|lot |cadeau|gift|promo|f[ée]licitations|congratulations|anniversaire|tirage|fake_prize_promo",
               "a fake prize", "un faux gain"),
     "seller": (r"livraison|delivery|colis|parcel|douane|customs|seller|vendeur|commande|order|fake_seller_delivery", "a fake seller or delivery", "un faux vendeur ou une fausse livraison"),
-    "family": (r"maman|papa|tonton|tata|my dear|ma ch[ée]rie|mon fr[èe]re|ma s[œo]e?ur|hospital|h[ôo]pital|accident|urgence|emergency|stuck|bloqu[ée]e? [àa]|border|fronti[èe]re|"
+    "family": (r"maman|papa|tonton|tata|my dear|ma ch[ée]rie|mon fr[èe]re|ma s[œo]e?ur|hospital|h[ôo]pital|accident(?!al)s?|urgence|emergency|stuck|bloqu[ée]e? [àa]|border|fronti[èe]re|"
                r"phone is (?:almost )?(?:off|dead)|batterie|family_emergency|hacked_account_money", "a fake emergency from someone you know",
                "une fausse urgence d'un proche"),
 }
@@ -86,6 +88,7 @@ def scheme_of(text: str, scam_types: list[str], model_scheme: str = "") -> str |
     reports only break ties, since a neighbour can be a different scheme."""
     best, top = None, 0
     for name, (rx, _, _) in SCHEMES.items():
+        rx = rf"(?<![^\W_])(?:{rx})"  # words start where a word starts; stems like "recrut" still take any ending
         direct = 2 * len(re.findall(rx, text, flags=re.I)) + 2 * len(re.findall(rx, model_scheme or "", flags=re.I))
         if not direct:
             continue  # neighbours can break a tie, never name a scheme the message itself does not show

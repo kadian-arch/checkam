@@ -87,7 +87,7 @@ def set_check_campaign(check_id: str, campaign_id: str | None) -> None:
 
 
 def checks_with_number(code: str, exclude: str | None = None) -> list[dict]:
-    rows = conn().execute("SELECT id, created, verdict FROM checks WHERE numbers LIKE ? AND id != ?",
+    rows = conn().execute("SELECT id, created, verdict, masked_text FROM checks WHERE numbers LIKE ? AND id != ?",
                           (f'%"{code}"%', exclude or "")).fetchall()
     return [dict(r) for r in rows]
 
@@ -200,10 +200,15 @@ def get_receipt(rid: str) -> dict | None:
 CACHE_HOURS = 6
 
 
+# answers given by older rules are never served after a change: the key carries the rules' own fingerprint
+_HERE = os.path.dirname(os.path.abspath(__file__))
+RULES = hashlib.sha256(b"".join(open(os.path.join(_HERE, f), "rb").read() for f in ("agents.py", "advice.py", "privacy.py"))).hexdigest()[:12]
+
+
 def cache_key(text: str, sender: str, language: str) -> str:
     """Same words, same sender, same language: spacing and case do not make a new message."""
     norm = " ".join(text.lower().split())
-    return hashlib.sha256(f"{norm}|{sender.strip().lower()}|{language}".encode()).hexdigest()
+    return hashlib.sha256(f"{RULES}|{norm}|{sender.strip().lower()}|{language}".encode()).hexdigest()
 
 
 def cache_get(key: str) -> dict | None:

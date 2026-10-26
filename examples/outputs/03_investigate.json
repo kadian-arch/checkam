@@ -1,15 +1,15 @@
 {
-  "run_id": "b6b6cf517263",
-  "campaign_id": "cmp_ec695e098dd7",
-  "name": "MTN Mobile Money Credit Reversal Scam",
-  "summary": "A fraud campaign targeting MTN Mobile Money users in Cameroon was active from January 1, 2026, to October 24, 2026. It involved six phone numbers and resulted in reported losses of 50,650 FCFA across two reports.",
-  "how_it_works": "Scammers send fake MobileMoney credit SMS messages mimicking real formats, then call claiming the funds were sent by mistake and request PINs to facilitate withdrawals.",
-  "limitations": "The dataset includes only 14 members, 2 reports, 3 alerts, and 1 citizen check.",
+  "run_id": "0f18a18bdbfd",
+  "campaign_id": "cmp_48d6896d3e5e",
+  "name": "MTN Mobile Money Fake Credit Reversal",
+  "summary": "A fraud campaign in Cameroon targeted MTN Mobile Money users between 2026-01-01 and 2026-10-26. It involved six phone numbers and resulted in reported losses of 50,650 FCFA across two reports and three alerts.",
+  "how_it_works": "Scammers sent fake MobileMoney credit SMS messages mimicking the real format in French, then called claiming the funds were sent by mistake and requested PINs to facilitate withdrawals.",
+  "limitations": "The dataset contains only 21 members, 2 reports, and 4 citizen checks.",
   "facts": {
-    "members": 14,
+    "members": 21,
     "reports": 2,
     "alerts": 3,
-    "citizen_checks": 1,
+    "citizen_checks": 4,
     "numbers": [
       "654-jwmukg",
       "670-pvakwe",
@@ -30,7 +30,7 @@
       "MTN Mobile Money"
     ],
     "first_seen": "2026-01-01",
-    "last_seen": "2026-10-24",
+    "last_seen": "2026-10-26",
     "reported_loss_fcfa": 50650,
     "links": [
       "same number 654-jwmukg",
@@ -99,9 +99,30 @@
     },
     {
       "kind": "check",
-      "id": "C-44ae4acb",
+      "id": "C-cd737cc3",
       "text": "Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast before they cut my line",
-      "date": "2026-10-24",
+      "date": "2026-10-26",
+      "verdict": "scam"
+    },
+    {
+      "kind": "check",
+      "id": "C-aec4cec0",
+      "text": "Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast before they cut my line",
+      "date": "2026-10-26",
+      "verdict": "scam"
+    },
+    {
+      "kind": "check",
+      "id": "C-71159145",
+      "text": "Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast before they cut my line",
+      "date": "2026-10-26",
+      "verdict": "scam"
+    },
+    {
+      "kind": "check",
+      "id": "C-02dc75d1",
+      "text": "Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast before they cut my line",
+      "date": "2026-10-26",
       "verdict": "scam"
     }
   ],
@@ -221,6 +242,55 @@
       "band": "auto-merge"
     },
     {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:stop-arnaque-237:R-b6d06c96",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "same number 654-jwmukg",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
       "a": "observation:stop-arnaque-237:A-f4d98ede",
       "b": "observation:stop-arnaque-237:A-665b9c6a",
       "why": "wording overlap 0.537",
@@ -305,6 +375,55 @@
       "band": "auto-merge"
     },
     {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a9715533",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
       "a": "observation:checkam-check:C-7af077db",
       "b": "observation:checkam-check:C-a81ed6b0",
       "why": "wording overlap 1.000",
@@ -333,6 +452,55 @@
       "band": "auto-merge"
     },
     {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-7af077db",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
       "a": "observation:checkam-check:C-a81ed6b0",
       "b": "observation:checkam-check:C-888c1b73",
       "why": "wording overlap 1.000",
@@ -354,6 +522,55 @@
       "band": "auto-merge"
     },
     {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-a81ed6b0",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
       "a": "observation:checkam-check:C-888c1b73",
       "b": "observation:checkam-check:C-82aa13a4",
       "why": "wording overlap 1.000",
@@ -368,8 +585,302 @@
       "band": "auto-merge"
     },
     {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-888c1b73",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
       "a": "observation:checkam-check:C-82aa13a4",
       "b": "observation:checkam-check:C-44ae4acb",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-82aa13a4",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-b01f2be1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-44ae4acb",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-cbee6d9c",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-b01f2be1",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-cbee6d9c",
+      "b": "observation:checkam-check:C-43087f1b",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-cbee6d9c",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-cbee6d9c",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-cbee6d9c",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-cbee6d9c",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-43087f1b",
+      "b": "observation:checkam-check:C-02dc75d1",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-43087f1b",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-43087f1b",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-43087f1b",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-02dc75d1",
+      "b": "observation:checkam-check:C-71159145",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-02dc75d1",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-02dc75d1",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-71159145",
+      "b": "observation:checkam-check:C-aec4cec0",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-71159145",
+      "b": "observation:checkam-check:C-cd737cc3",
+      "why": "wording overlap 1.000",
+      "score": 1,
+      "band": "auto-merge"
+    },
+    {
+      "a": "observation:checkam-check:C-aec4cec0",
+      "b": "observation:checkam-check:C-cd737cc3",
       "why": "wording overlap 1.000",
       "score": 1,
       "band": "auto-merge"
@@ -386,13 +897,12 @@
     "Ask operators to review number 654-jwmukg",
     "Ask operators to review number 670-pvakwe",
     "Ask operators to review number 670-takuxj",
-    "Publish the public alert below in English, French and Pidgin"
+    "Publish the public alert below in English and French"
   ],
   "alert": {
-    "title": "Beware of Fake Mobile Money Credit Reversals",
-    "body_en": "Do not share your MTN Mobile Money PIN. If you receive a fake credit SMS followed by a call asking for your PIN to reverse a 'mistake,' it is a scam. Report it immediately.",
-    "body_fr": "Ne partagez jamais votre code PIN MTN Mobile Money. Si vous recevez un faux SMS de crédit suivi d'un appel demandant votre PIN pour annuler une 'erreur', c'est une arnaque. Signalez-le.",
-    "body_pcm": "No share your MTN Mobile Money PIN. If person send you fake credit message and call say na mistake and ask for PIN, na scam. Report am.",
+    "title": "Beware of Fake Mobile Money Credit Scams",
+    "body_en": "Do not share your PIN with anyone claiming a mistaken Mobile Money transfer. MTN will never ask for your PIN. Verify any unexpected credit before taking action.",
+    "body_fr": "Ne communiquez jamais votre code PIN à quiconque prétendant un transfert Mobile Money erroné. MTN ne vous demandera jamais votre PIN. Vérifiez tout crédit inattendu avant d'agir.",
     "numbers": [
       "654-jwmukg",
       "670-pvakwe",
@@ -403,8 +913,8 @@
   },
   "trace": [
     {
-      "timestamp": "2026-10-24T19:27:42.053+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.188+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Planner",
       "action": "world_campaigns",
       "input_summary": "/campaigns",
@@ -414,15 +924,15 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "meterless",
-      "latency_ms": 1893
+      "latency_ms": 14
     },
     {
-      "timestamp": "2026-10-24T19:27:42.055+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.188+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Planner",
       "action": "plan",
-      "input_summary": "cmp_ec695e098dd7",
-      "output_summary": "{\"members\": 14, \"tools\": [\"members\", \"number_stats\", \"verify_links\", \"write_dossier\"]}",
+      "input_summary": "cmp_48d6896d3e5e",
+      "output_summary": "{\"members\": 21, \"tools\": [\"members\", \"number_stats\", \"verify_links\", \"write_dossier\"]}",
       "target_agent": "Investigator",
       "confidence": null,
       "retry_count": 0,
@@ -431,8 +941,8 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:27:42.401+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.326+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT id, message_text, call_description, scam_types, region, amount_lost_fcfa, channel FROM STOP_ARNAQUE.reports WHERE id IN ('A-5e480655','A-665b9c6a','A-f4d98ede','R-47025480','R-b6d06c96')",
@@ -442,13 +952,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 345,
+      "latency_ms": 137,
       "backend": "zetaris-jdbc",
       "why": "campaign reports"
     },
     {
-      "timestamp": "2026-10-24T19:27:42.620+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.461+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT id, title, summary, source, source_url, date_published, impersonated FROM STOP_ARNAQUE.public_alerts WHERE id IN ('A-5e480655','A-665b9c6a','A-f4d98ede','R-47025480','R-b6d06c96')",
@@ -458,17 +968,17 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 218,
+      "latency_ms": 134,
       "backend": "zetaris-jdbc",
       "why": "campaign alerts"
     },
     {
-      "timestamp": "2026-10-24T19:27:42.621+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.467+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "members",
       "input_summary": null,
-      "output_summary": "2 reports, 3 alerts, 1 citizen checks",
+      "output_summary": "2 reports, 3 alerts, 4 citizen checks",
       "target_agent": "Critic",
       "confidence": null,
       "retry_count": 0,
@@ -477,8 +987,8 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:27:42.892+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.590+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '654-jwmukg'",
@@ -488,13 +998,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 271,
+      "latency_ms": 123,
       "backend": "zetaris-jdbc",
       "why": "history of 654-jwmukg"
     },
     {
-      "timestamp": "2026-10-24T19:27:43.263+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.698+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '670-pvakwe'",
@@ -504,13 +1014,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 370,
+      "latency_ms": 108,
       "backend": "zetaris-jdbc",
       "why": "history of 670-pvakwe"
     },
     {
-      "timestamp": "2026-10-24T19:27:43.543+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.808+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '670-takuxj'",
@@ -520,13 +1030,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 279,
+      "latency_ms": 109,
       "backend": "zetaris-jdbc",
       "why": "history of 670-takuxj"
     },
     {
-      "timestamp": "2026-10-24T19:27:43.906+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:22.918+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '672-mmsacd'",
@@ -536,13 +1046,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 362,
+      "latency_ms": 109,
       "backend": "zetaris-jdbc",
       "why": "history of 672-mmsacd"
     },
     {
-      "timestamp": "2026-10-24T19:27:44.125+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:23.036+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '676-rrksmg'",
@@ -552,13 +1062,13 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 218,
+      "latency_ms": 118,
       "backend": "zetaris-jdbc",
       "why": "history of 676-rrksmg"
     },
     {
-      "timestamp": "2026-10-24T19:27:44.615+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:23.149+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT phone_id, times_reported, times_in_alerts, top_scam_types, first_seen FROM STOP_ARNAQUE.scam_numbers WHERE phone_id = '682-xazfwf'",
@@ -568,16 +1078,16 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 490,
+      "latency_ms": 112,
       "backend": "zetaris-jdbc",
       "why": "history of 682-xazfwf"
     },
     {
-      "timestamp": "2026-10-24T19:27:44.617+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:23.150+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Critic",
       "action": "verify_links",
-      "input_summary": "32 links",
+      "input_summary": "102 links",
       "output_summary": "all members supported",
       "target_agent": "Reporter",
       "confidence": null,
@@ -587,28 +1097,28 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:27:52.174+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:25.253+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Reporter",
       "action": "write_dossier",
-      "input_summary": "{\"members\": 14, \"reports\": 2, \"alerts\": 3, \"citizen_checks\": 1, \"numbers\": [\"654-jwmukg\", \"670-pvakwe\", \"670-takuxj\", \"672-mmsacd\", \"676-rrksmg\", \"682-xazfwf\"], \"scam_types\": [\"account_blocked\", \"c...",
-      "output_summary": "{\"name\": \"MTN Mobile Money Credit Reversal Scam\", \"summary\": \"A fraud campaign targeting MTN Mobile Money users in Cameroon was active from January 1, 2026, to October 24, 2026. It involved six pho...",
+      "input_summary": "{\"members\": 21, \"reports\": 2, \"alerts\": 3, \"citizen_checks\": 4, \"numbers\": [\"654-jwmukg\", \"670-pvakwe\", \"670-takuxj\", \"672-mmsacd\", \"676-rrksmg\", \"682-xazfwf\"], \"scam_types\": [\"account_blocked\", \"c...",
+      "output_summary": "{\"name\": \"MTN Mobile Money Fake Credit Reversal\", \"summary\": \"A fraud campaign in Cameroon targeted MTN Mobile Money users between 2026-01-01 and 2026-10-26. It involved six phone numbers and resul...",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "nvidia",
-      "latency_ms": 7556,
+      "latency_ms": 2101,
       "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
       "thinking": false
     },
     {
-      "timestamp": "2026-10-24T19:27:52.177+00:00",
-      "run_id": "b6b6cf517263",
+      "timestamp": "2026-10-26T03:58:25.254+00:00",
+      "run_id": "0f18a18bdbfd",
       "agent_name": "Reporter",
       "action": "dossier",
       "input_summary": null,
-      "output_summary": "{\"name\": \"MTN Mobile Money Credit Reversal Scam\", \"members\": 6}",
+      "output_summary": "{\"name\": \"MTN Mobile Money Fake Credit Reversal\", \"members\": 9}",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,

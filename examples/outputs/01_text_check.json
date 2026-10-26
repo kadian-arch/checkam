@@ -1,63 +1,88 @@
 {
-  "check_id": "C-44ae4acb",
-  "run_id": "fb639676226c",
+  "check_id": "C-cd737cc3",
+  "run_id": "72b2e7048c2a",
   "verdict": "scam",
   "confidence": 0.97,
-  "headline": "Number flagged in 2 scam reports",
-  "explain": "Number 654-jwmukg appears in 2 scam reports and matches known scam wording.",
+  "headline": "Scam: money sent by mistake to MTN",
+  "explain": "Message asks you to send back 25000 frs. Strongest evidence: number reported as scam 2 times and flagged 3 times in earlier checks.",
   "why": [
     {
-      "text": "Number 654-jwmukg is already in 2 scam report(s) and 0 public alert(s), and 7 earlier CheckAm check(s)",
+      "text": "The number starting 654 has already been reported as a scam 2 times and flagged as a scam in 3 earlier CheckAm check(s)",
       "weight": "strong",
       "evidence": [
         {
           "table": "reports",
           "id": "R-b6d06c96",
-          "detail": "fake_agent_support, credential_request, fake_prize_promo"
+          "detail": "a fake customer service agent, someone asking for your PIN or code, a fake prize or promo"
         },
         {
           "table": "reports",
           "id": "R-47025480",
-          "detail": "wrong_number_reversal"
+          "detail": "money 'sent by mistake'"
         },
         {
           "table": "checks",
           "id": "C-f3a8e630",
-          "detail": "checked 2026-10-24, scam"
+          "detail": "2026-10-24",
+          "verdict": "scam"
         }
       ]
     },
     {
-      "text": "Part of a campaign of 14 linked records (same number 654-jwmukg; wording overlap 0.537; wording overlap 0.695; wording overlap 0.809)",
+      "text": "Our AI fraud analyst reads it as a scam (money 'sent by mistake'): sent 25000 frs to your MTN number by mistake",
+      "weight": "strong",
+      "evidence": [
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "sent 25000 frs to your MTN number by mistake"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "send it back to me on this number [PHONE:654-jwmukg]"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Do it fast before they cut my line"
+        }
+      ]
+    },
+    {
+      "text": "It is part of a scam wave: 21 linked reports, warnings and checks",
       "weight": "strong",
       "evidence": [
         {
           "table": "world_model",
-          "id": "cmp_ec695e098dd7",
-          "detail": "13 other members",
+          "id": "cmp_48d6896d3e5e",
+          "count": 20,
           "members": [
+            "observation:checkam-check:C-02dc75d1",
+            "observation:checkam-check:C-43087f1b",
+            "observation:checkam-check:C-44ae4acb",
             "observation:checkam-check:C-49b73f64",
+            "observation:checkam-check:C-71159145",
             "observation:checkam-check:C-72733af5",
             "observation:checkam-check:C-7af077db",
             "observation:checkam-check:C-82aa13a4",
             "observation:checkam-check:C-888c1b73",
-            "observation:checkam-check:C-a81ed6b0",
-            "observation:checkam-check:C-a9715533",
-            "observation:checkam-check:C-f3a8e630",
-            "observation:stop-arnaque-237:A-5e480655",
-            "observation:stop-arnaque-237:A-665b9c6a"
+            "observation:checkam-check:C-a81ed6b0"
           ]
         }
       ]
     },
     {
-      "text": "Wording matches a known scam message (similarity 0.45)",
+      "text": "It is worded like a scam people have already reported",
       "weight": "medium",
       "evidence": [
         {
           "table": "messages",
           "id": "R-27c83474",
-          "detail": "similarity 0.45 (wording 0.16, meaning 0.45): It was just so funny and sudden. I was expecting some money from my sister and this money was to get into my mtn momo account but some netwo",
+          "detail": "It was just so funny and sudden. I was expecting some money from my sister and this money was to get into my mtn momo account but some netwo",
+          "score": 0.45,
+          "wording": 0.16,
+          "meaning": 0.45,
           "scam_types": [
             "wrong_number_reversal"
           ]
@@ -65,7 +90,10 @@
         {
           "table": "messages",
           "id": "R-649d902d",
-          "detail": "similarity 0.44 (wording 0.43, meaning 0.44): Please I have sent money to this number by mistake \nPlease refund it back",
+          "detail": "Please I have sent money to this number by mistake \nPlease refund it back",
+          "score": 0.44,
+          "wording": 0.43,
+          "meaning": 0.44,
           "scam_types": [
             "wrong_number_reversal"
           ]
@@ -73,7 +101,10 @@
         {
           "table": "messages",
           "id": "R-0003e2c0",
-          "detail": "similarity 0.39 (wording 0.20, meaning 0.39): Sorry but please I sent money to your number mistakenly \nCan you enter your pin code your number has been suspended",
+          "detail": "Sorry but please I sent money to your number mistakenly \nCan you enter your pin code your number has been suspended",
+          "score": 0.39,
+          "wording": 0.2,
+          "meaning": 0.39,
           "scam_types": [
             "wrong_number_reversal",
             "account_blocked",
@@ -85,18 +116,17 @@
   ],
   "language": "en",
   "do_now": [
-    "MTN MoMo: dial *126# yourself, or WhatsApp 650 52 87 87",
-    "Call your operator from the number printed on your SIM pack, never a number given in the message"
+    "MTN MoMo: dial *126# yourself to see your real balance, or WhatsApp MTN on 650 52 87 87",
+    "Warn the people who may have received it too"
   ],
   "dont": [
-    "Never give your PIN or a code you received by SMS",
-    "Do not send back money 'sent by mistake'; the operator reverses real mistakes",
-    "Do not call the number in the message"
+    "Do not send back money 'sent by mistake'. If it was real, the operator reverses it"
   ],
+  "scheme": "reversal",
   "genuine_twin": null,
   "campaign": {
-    "id": "cmp_ec695e098dd7",
-    "size": 14
+    "id": "cmp_48d6896d3e5e",
+    "size": 21
   },
   "facts": {
     "numbers": [
@@ -107,7 +137,6 @@
     ],
     "links": [],
     "asks": [
-      "call_back",
       "send_money"
     ],
     "brands": [
@@ -118,62 +147,58 @@
   },
   "findings": [
     {
-      "id": "F3236f1",
+      "id": "Fd51552",
       "tool": "number_history",
-      "claim": "Number 654-jwmukg is already in 2 scam report(s) and 0 public alert(s), and 7 earlier CheckAm check(s)",
+      "claim": "The number starting 654 has already been reported as a scam 2 times and flagged as a scam in 3 earlier CheckAm check(s)",
       "direction": "scam",
       "weight": "strong",
       "evidence": [
         {
           "table": "reports",
           "id": "R-b6d06c96",
-          "detail": "fake_agent_support, credential_request, fake_prize_promo"
+          "detail": "a fake customer service agent, someone asking for your PIN or code, a fake prize or promo"
         },
         {
           "table": "reports",
           "id": "R-47025480",
-          "detail": "wrong_number_reversal"
+          "detail": "money 'sent by mistake'"
         },
         {
           "table": "checks",
           "id": "C-f3a8e630",
-          "detail": "checked 2026-10-24, scam"
+          "detail": "2026-10-24",
+          "verdict": "scam"
         },
         {
           "table": "checks",
-          "id": "C-49b73f64",
-          "detail": "checked 2026-10-24, scam"
+          "id": "C-72733af5",
+          "detail": "2026-10-24",
+          "verdict": "scam"
         },
         {
           "table": "checks",
-          "id": "C-7af077db",
-          "detail": "checked 2026-10-24, scam"
-        },
-        {
-          "table": "checks",
-          "id": "C-a81ed6b0",
-          "detail": "checked 2026-10-24, scam"
-        },
-        {
-          "table": "checks",
-          "id": "C-888c1b73",
-          "detail": "checked 2026-10-24, scam"
+          "id": "C-9b0370ba",
+          "detail": "2026-10-24",
+          "verdict": "scam"
         }
       ],
       "status": "accepted",
       "critic_note": "re-counted in Zetaris: 2"
     },
     {
-      "id": "F813e4f",
+      "id": "F70554c",
       "tool": "similar_scams",
-      "claim": "Wording matches a known scam message (similarity 0.45)",
+      "claim": "It is worded like a scam people have already reported",
       "direction": "scam",
       "weight": "medium",
       "evidence": [
         {
           "table": "messages",
           "id": "R-27c83474",
-          "detail": "similarity 0.45 (wording 0.16, meaning 0.45): It was just so funny and sudden. I was expecting some money from my sister and this money was to get into my mtn momo account but some netwo",
+          "detail": "It was just so funny and sudden. I was expecting some money from my sister and this money was to get into my mtn momo account but some netwo",
+          "score": 0.45,
+          "wording": 0.16,
+          "meaning": 0.45,
           "scam_types": [
             "wrong_number_reversal"
           ]
@@ -181,7 +206,10 @@
         {
           "table": "messages",
           "id": "R-649d902d",
-          "detail": "similarity 0.44 (wording 0.43, meaning 0.44): Please I have sent money to this number by mistake \nPlease refund it back",
+          "detail": "Please I have sent money to this number by mistake \nPlease refund it back",
+          "score": 0.44,
+          "wording": 0.43,
+          "meaning": 0.44,
           "scam_types": [
             "wrong_number_reversal"
           ]
@@ -189,7 +217,10 @@
         {
           "table": "messages",
           "id": "R-0003e2c0",
-          "detail": "similarity 0.39 (wording 0.20, meaning 0.39): Sorry but please I sent money to your number mistakenly \nCan you enter your pin code your number has been suspended",
+          "detail": "Sorry but please I sent money to your number mistakenly \nCan you enter your pin code your number has been suspended",
+          "score": 0.39,
+          "wording": 0.2,
+          "meaning": 0.39,
           "scam_types": [
             "wrong_number_reversal",
             "account_blocked",
@@ -201,37 +232,9 @@
       "critic_note": ""
     },
     {
-      "id": "Fb72f9e",
-      "tool": "campaign",
-      "claim": "Part of a campaign of 14 linked records (same number 654-jwmukg; wording overlap 0.537; wording overlap 0.695; wording overlap 0.809)",
-      "direction": "scam",
-      "weight": "strong",
-      "evidence": [
-        {
-          "table": "world_model",
-          "id": "cmp_ec695e098dd7",
-          "detail": "13 other members",
-          "members": [
-            "observation:checkam-check:C-49b73f64",
-            "observation:checkam-check:C-72733af5",
-            "observation:checkam-check:C-7af077db",
-            "observation:checkam-check:C-82aa13a4",
-            "observation:checkam-check:C-888c1b73",
-            "observation:checkam-check:C-a81ed6b0",
-            "observation:checkam-check:C-a9715533",
-            "observation:checkam-check:C-f3a8e630",
-            "observation:stop-arnaque-237:A-5e480655",
-            "observation:stop-arnaque-237:A-665b9c6a"
-          ]
-        }
-      ],
-      "status": "accepted",
-      "critic_note": ""
-    },
-    {
-      "id": "Feb68bb",
+      "id": "F20bb66",
       "tool": "genuine_twin",
-      "claim": "It does not look like any real operator message we hold",
+      "claim": "It does not look like any real operator message we know",
       "direction": "context",
       "weight": "weak",
       "evidence": [],
@@ -239,16 +242,76 @@
       "critic_note": ""
     },
     {
-      "id": "Fd24727",
+      "id": "F139890",
+      "tool": "model_judgement",
+      "claim": "Our AI fraud analyst reads it as a scam (money 'sent by mistake'): sent 25000 frs to your MTN number by mistake",
+      "direction": "scam",
+      "weight": "strong",
+      "evidence": [
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "sent 25000 frs to your MTN number by mistake"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "send it back to me on this number [PHONE:654-jwmukg]"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Do it fast before they cut my line"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "The number starting 654 has already been reported as a scam 2 times and flagged as a scam in 3 earlier CheckAm check(s)"
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "F3cedfb",
+      "tool": "campaign",
+      "claim": "It is part of a scam wave: 21 linked reports, warnings and checks",
+      "direction": "scam",
+      "weight": "strong",
+      "evidence": [
+        {
+          "table": "world_model",
+          "id": "cmp_48d6896d3e5e",
+          "count": 20,
+          "members": [
+            "observation:checkam-check:C-02dc75d1",
+            "observation:checkam-check:C-43087f1b",
+            "observation:checkam-check:C-44ae4acb",
+            "observation:checkam-check:C-49b73f64",
+            "observation:checkam-check:C-71159145",
+            "observation:checkam-check:C-72733af5",
+            "observation:checkam-check:C-7af077db",
+            "observation:checkam-check:C-82aa13a4",
+            "observation:checkam-check:C-888c1b73",
+            "observation:checkam-check:C-a81ed6b0"
+          ]
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "Fcb95ea",
       "tool": "scam_type_stats",
-      "claim": "11 people reported this kind of scam (account_blocked); 80,000 FCFA lost in those reports",
+      "claim": "11 people have reported a 'your account is blocked' message; together they lost 80 000 FCFA",
       "direction": "context",
       "weight": "weak",
       "evidence": [
         {
           "table": "reports",
-          "id": "scam_types contains account_blocked",
-          "detail": "n=11"
+          "id": "account_blocked",
+          "detail": "a 'your account is blocked' message",
+          "count": 11
         }
       ],
       "status": "accepted",
@@ -258,42 +321,42 @@
   "rounds": 2,
   "trace": [
     {
-      "timestamp": "2026-10-24T19:21:27.536+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:53.298+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Intake",
       "action": "scout_decide",
       "input_summary": null,
-      "output_summary": "{\"intent\": \"check.message\", \"band\": \"low\", \"confidence\": 0.4259, \"risk\": \"low\", \"contract\": \"0mvmsbkku0003c77e05ed4\"}",
+      "output_summary": "{\"intent\": \"check.message\", \"band\": \"low\", \"confidence\": 0.4259, \"risk\": \"low\", \"contract\": \"0mvoq7k0h00000b65eefcd\"}",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "meterless",
-      "latency_ms": 1031
+      "latency_ms": 4
     },
     {
-      "timestamp": "2026-10-24T19:21:39.541+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.433+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Intake",
       "action": "extract",
       "input_summary": "Message between <msg> tags.\n<msg>\nHello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God wi...",
-      "output_summary": "{\n  \"language\": \"en\",\n  \"claimed_sender\": \"Cameroonian\",\n  \"asks\": [\"send_money\", \"call_back\"],\n  \"amount_fcfa\": 25000,\n  \"urgency\": \"high\",\n  \"story\": \"Sender claims they mistakenly sent 25000 frs...",
+      "output_summary": "{\n  \"language\": \"en\",\n  \"claimed_sender\": \"Cameroonian\",\n  \"asks\": [\"send_money\"],\n  \"promise\": false,\n  \"amount_fcfa\": 25000,\n  \"urgency\": \"high\",\n  \"story\": \"Sender claims they mistakenly sent 25...",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "nvidia",
-      "latency_ms": 12003,
+      "latency_ms": 2138,
       "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
       "thinking": false
     },
     {
-      "timestamp": "2026-10-24T19:21:39.581+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.454+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Intake",
       "action": "facts",
       "input_summary": "211 chars via text",
-      "output_summary": "{\"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"asks\": [\"call_back\", \"send_money\"], \"brands\": [\"mtn\"], \"language\": \"en\", \"hidden_characters\": 0}",
+      "output_summary": "{\"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"asks\": [\"send_money\"], \"brands\": [\"mtn\"], \"language\": \"en\", \"hidden_characters\": 0}",
       "target_agent": "Planner",
       "confidence": null,
       "retry_count": 0,
@@ -302,75 +365,13 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:21:51.821+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Planner",
-      "action": "plan",
-      "input_summary": "{\"facts\": {\"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"asks\": [\"call_back\", \"send_money\"], \"brands\": [\"mtn\"], \"story\": \"Sender claims they mistakenly sent 25000 frs and want...",
-      "output_summary": "{\n  \"hypotheses\": [\n    \"The sender is using a mistaken transfer story to pressure the victim into returning money.\",\n    \"The scam leverages the MTN brand to appear legitimate.\",\n    \"The phone co...",
-      "target_agent": null,
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "nvidia",
-      "latency_ms": 12237,
-      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
-      "thinking": false
-    },
-    {
-      "timestamp": "2026-10-24T19:21:51.823+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.457+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Planner",
       "action": "plan",
       "input_summary": "{\"round\": 0, \"objections\": 0}",
-      "output_summary": "{\"tools\": [\"number_history\", \"similar_scams\", \"campaign\", \"genuine_twin\"], \"hypotheses\": [\"The sender is using a mistaken transfer story to pressure the victim into returning money.\", \"The scam lev...",
+      "output_summary": "{\"tools\": [\"number_history\", \"similar_scams\", \"genuine_twin\", \"model_judgement\", \"campaign\"]}",
       "target_agent": "Investigator",
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "nvidia",
-      "latency_ms": null
-    },
-    {
-      "timestamp": "2026-10-24T19:21:52.491+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "sql",
-      "input_summary": "SELECT id, scam_types, region, amount_lost_fcfa FROM STOP_ARNAQUE.reports WHERE array_contains(phone_ids, '654-jwmukg') OR sender_phone_id = '654-jwmukg'",
-      "output_summary": "2 rows",
-      "target_agent": null,
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "zetaris",
-      "latency_ms": 667,
-      "backend": "zetaris-jdbc",
-      "why": "reports naming 654-jwmukg"
-    },
-    {
-      "timestamp": "2026-10-24T19:21:52.722+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "sql",
-      "input_summary": "SELECT id, title, source, date_published FROM STOP_ARNAQUE.public_alerts WHERE array_contains(phone_ids, '654-jwmukg')",
-      "output_summary": "0 rows",
-      "target_agent": null,
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "zetaris",
-      "latency_ms": 230,
-      "backend": "zetaris-jdbc",
-      "why": "alerts naming 654-jwmukg"
-    },
-    {
-      "timestamp": "2026-10-24T19:21:52.724+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "number_history",
-      "input_summary": null,
-      "output_summary": "[\"Number 654-jwmukg is already in 2 scam report(s) and 0 public alert(s), and 7 earlier CheckAm check(s)\"]",
-      "target_agent": "Critic",
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
@@ -378,8 +379,24 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:21:53.334+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.734+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, scam_types, region, amount_lost_fcfa FROM STOP_ARNAQUE.reports WHERE (array_contains(phone_ids, '654-jwmukg') OR sender_phone_id = '654-jwmukg')",
+      "output_summary": "2 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 271,
+      "backend": "zetaris-jdbc",
+      "why": "reports naming 654-jwmukg"
+    },
+    {
+      "timestamp": "2026-10-26T03:57:55.834+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT id, text, scam_types, channel, language FROM STOP_ARNAQUE.messages WHERE label = 'scam'",
@@ -389,84 +406,29 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 609,
+      "latency_ms": 370,
       "backend": "zetaris-jdbc",
       "why": "known scam wording"
     },
     {
-      "timestamp": "2026-10-24T19:21:56.937+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.850+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
-      "action": "embed",
-      "input_summary": "1 texts",
-      "output_summary": "1 vectors",
+      "action": "sql",
+      "input_summary": "SELECT id, title, source, date_published FROM STOP_ARNAQUE.public_alerts WHERE array_contains(phone_ids, '654-jwmukg')",
+      "output_summary": "0 rows",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
-      "sponsor": "nvidia",
-      "latency_ms": 3600,
-      "model": "nvidia/nemotron-3.5-embed-1b"
+      "sponsor": "zetaris",
+      "latency_ms": 115,
+      "backend": "zetaris-jdbc",
+      "why": "alerts naming 654-jwmukg"
     },
     {
-      "timestamp": "2026-10-24T19:21:57.130+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "similar_scams",
-      "input_summary": null,
-      "output_summary": "[\"Wording matches a known scam message (similarity 0.45)\"]",
-      "target_agent": "Critic",
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "none",
-      "latency_ms": null
-    },
-    {
-      "timestamp": "2026-10-24T19:21:58.453+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "world_ingest",
-      "input_summary": "/ingest",
-      "output_summary": "{\"changed\": true, \"added\": 1, \"updated\": 0, \"ms\": 2}",
-      "target_agent": null,
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "meterless",
-      "latency_ms": 1323
-    },
-    {
-      "timestamp": "2026-10-24T19:21:59.737+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "world_context",
-      "input_summary": "/context?source=checkam-check&id=C-44ae4acb",
-      "output_summary": "{\"observationId\": \"observation:checkam-check:C-44ae4acb\", \"mentioned\": [{\"type\": \"number\", \"name\": \"654-jwmukg\"}, {\"type\": \"scam_type\", \"name\": \"account_blocked\"}, {\"type\": \"scam_type\", \"name\": \"cr...",
-      "target_agent": null,
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "meterless",
-      "latency_ms": 1283
-    },
-    {
-      "timestamp": "2026-10-24T19:21:59.738+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Investigator",
-      "action": "campaign",
-      "input_summary": null,
-      "output_summary": "[\"Part of a campaign of 14 linked records (same number 654-jwmukg; wording overlap 0.537; wording overlap 0.695; wording overlap 0.809)\"]",
-      "target_agent": "Critic",
-      "confidence": null,
-      "retry_count": 0,
-      "status": "ok",
-      "sponsor": "none",
-      "latency_ms": null
-    },
-    {
-      "timestamp": "2026-10-24T19:22:00.125+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:55.943+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT id, operator, message_kind, message_text, sender_shown FROM STOP_ARNAQUE.genuine_messages",
@@ -476,17 +438,63 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 386,
+      "latency_ms": 478,
       "backend": "zetaris-jdbc",
       "why": "real operator messages"
     },
     {
-      "timestamp": "2026-10-24T19:22:00.158+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:56.552+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Planner",
+      "action": "hypotheses",
+      "input_summary": "{\"facts\": {\"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"asks\": [\"send_money\"], \"brands\": [\"mtn\"], \"story\": \"Sender claims they mistakenly sent 25000 frs and demands the money...",
+      "output_summary": "{\n  \"hypotheses\": [\n    \"The sender is impersonating MTN to demand a refund of mistakenly sent funds.\",\n    \"The message uses a common refund scam pattern to trick the recipient into sending money....",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1091,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:57:57.767+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
-      "action": "genuine_twin",
+      "action": "embed",
+      "input_summary": "87 texts",
+      "output_summary": "87 vectors",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1933,
+      "model": "nvidia/nemotron-3.5-embed-1b"
+    },
+    {
+      "timestamp": "2026-10-26T03:57:58.196+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "embed",
+      "input_summary": "1 texts",
+      "output_summary": "1 vectors",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 419,
+      "model": "nvidia/nemotron-3.5-embed-1b"
+    },
+    {
+      "timestamp": "2026-10-26T03:57:58.282+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "number_history",
       "input_summary": null,
-      "output_summary": "[\"It does not look like any real operator message we hold\"]",
+      "output_summary": "[\"The number starting 654 has already been reported as a scam 2 times and flagged as a scam in 3 earlier CheckAm check(s)\"]",
       "target_agent": "Critic",
       "confidence": null,
       "retry_count": 0,
@@ -495,24 +503,124 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:00.688+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:58.283+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "similar_scams",
+      "input_summary": null,
+      "output_summary": "[\"It is worded like a scam people have already reported\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:57:58.283+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "genuine_twin",
+      "input_summary": null,
+      "output_summary": "[\"It does not look like any real operator message we know\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:57:58.287+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "world_ingest",
+      "input_summary": "/ingest",
+      "output_summary": "{\"changed\": true, \"added\": 1, \"updated\": 0, \"ms\": 1}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 2
+    },
+    {
+      "timestamp": "2026-10-26T03:57:58.914+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "world_context",
+      "input_summary": "/context?source=checkam-check&id=C-cd737cc3",
+      "output_summary": "{\"observationId\": \"observation:checkam-check:C-cd737cc3\", \"mentioned\": [{\"type\": \"number\", \"name\": \"654-jwmukg\"}, {\"type\": \"scam_type\", \"name\": \"account_blocked\"}, {\"type\": \"scam_type\", \"name\": \"cr...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 627
+    },
+    {
+      "timestamp": "2026-10-26T03:57:59.345+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "model_judgement",
+      "input_summary": "<text>\nHello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill. Please send it back to me on this number [PHONE:654-jwmukg] God will bless you. Do it fast be...",
+      "output_summary": "{\"verdict\": \"scam\", \"confidence\": 0.95, \"signals\": [\"sent 25000 frs to your MTN number by mistake\", \"send it back to me on this number [PHONE:654-jwmukg]\", \"Do it fast before they cut my line\", \"Th...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1062,
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:57:59.356+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "model_judgement",
+      "input_summary": null,
+      "output_summary": "[\"Our AI fraud analyst reads it as a scam (money 'sent by mistake'): sent 25000 frs to your MTN number by mistake\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:57:59.356+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Investigator",
+      "action": "campaign",
+      "input_summary": null,
+      "output_summary": "[\"It is part of a scam wave: 21 linked reports, warnings and checks\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:57:59.579+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "sql",
-      "input_summary": "SELECT count(*) AS n FROM STOP_ARNAQUE.reports WHERE array_contains(phone_ids, '654-jwmukg') OR sender_phone_id = '654-jwmukg'",
+      "input_summary": "SELECT count(*) AS n FROM STOP_ARNAQUE.reports WHERE (array_contains(phone_ids, '654-jwmukg') OR sender_phone_id = '654-jwmukg')",
       "output_summary": "1 rows",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 529,
+      "latency_ms": 222,
       "backend": "zetaris-jdbc",
       "why": "re-count 654-jwmukg"
     },
     {
-      "timestamp": "2026-10-24T19:22:01.175+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.701+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "sql",
       "input_summary": "SELECT count(*) AS n FROM STOP_ARNAQUE.public_alerts WHERE array_contains(phone_ids, '654-jwmukg')",
@@ -522,16 +630,16 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 486,
+      "latency_ms": 121,
       "backend": "zetaris-jdbc",
       "why": "re-count 654-jwmukg"
     },
     {
-      "timestamp": "2026-10-24T19:22:01.177+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.701+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verify",
-      "input_summary": "Number 654-jwmukg is already in 2 scam report(s) and 0 public alert(s), and 7 earlier CheckAm check(s)",
+      "input_summary": "The number starting 654 has already been reported as a scam 2 times and flagged as a scam in 3 earlier CheckAm check(s)",
       "output_summary": "accepted: re-counted in Zetaris: 2",
       "target_agent": "Reporter",
       "confidence": null,
@@ -541,11 +649,11 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:01.178+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.701+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verify",
-      "input_summary": "Wording matches a known scam message (similarity 0.45)",
+      "input_summary": "It is worded like a scam people have already reported",
       "output_summary": "accepted",
       "target_agent": "Reporter",
       "confidence": null,
@@ -555,11 +663,11 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:01.178+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.702+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verify",
-      "input_summary": "Part of a campaign of 14 linked records (same number 654-jwmukg; wording overlap 0.537; wording overlap 0.695; wording overlap 0.809)",
+      "input_summary": "It does not look like any real operator message we know",
       "output_summary": "accepted",
       "target_agent": "Reporter",
       "confidence": null,
@@ -569,11 +677,11 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:01.179+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.703+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verify",
-      "input_summary": "It does not look like any real operator message we hold",
+      "input_summary": "Our AI fraud analyst reads it as a scam (money 'sent by mistake'): sent 25000 frs to your MTN number by mistake",
       "output_summary": "accepted",
       "target_agent": "Reporter",
       "confidence": null,
@@ -583,28 +691,42 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:31.736+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:57:59.703+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It is part of a scam wave: 21 linked reports, warnings and checks",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:04.053+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "argue_genuine",
-      "input_summary": "{\"facts\": {\"asks\": [\"call_back\", \"send_money\"], \"brands\": [\"mtn\"], \"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"official_numbers\": [], \"story\": \"Sender claims they mistakenly...",
-      "output_summary": "{\n  \"genuine_case\": \"The message may be a genuine case of accidental transfer where the sender is requesting a refund. The sender's request to return 25000 frs is a plausible scenario that occurs i...",
+      "input_summary": "{\"facts\": {\"asks\": [\"send_money\"], \"brands\": [\"mtn\"], \"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"official_numbers\": [], \"story\": \"Sender claims they mistakenly sent 25000 f...",
+      "output_summary": "{\n  \"genuine_case\": \"The sender's claim of a mistaken transfer of 25,000 frs to an MTN number, while highly suspicious given the pattern of reports, lacks definitive proof of malicious intent. The ...",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "nvidia",
-      "latency_ms": 30557,
-      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "latency_ms": 4349,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
       "thinking": false
     },
     {
-      "timestamp": "2026-10-24T19:22:31.737+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.054+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "send_back",
       "input_summary": null,
-      "output_summary": "[{\"tool\": \"link_history\", \"reason\": \"No links were provided in the message, so link history analysis is not applicable.\"}, {\"tool\": \"scam_type_stats\", \"reason\": \"Statistical data on this specific s...",
+      "output_summary": "[{\"tool\": \"sender\", \"reason\": \"The identity and actual transaction history of the sender are unknown; verifying who initiated the 'mistaken send' is critical to determining the message's authentici...",
       "target_agent": "Planner",
       "confidence": null,
       "retry_count": 0,
@@ -613,12 +735,12 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:31.738+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.055+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Planner",
       "action": "plan",
-      "input_summary": "{\"round\": 1, \"objections\": 3}",
-      "output_summary": "{\"tools\": [\"scam_type_stats\"], \"hypotheses\": null}",
+      "input_summary": "{\"round\": 1, \"objections\": 2}",
+      "output_summary": "{\"tools\": [\"scam_type_stats\"]}",
       "target_agent": "Investigator",
       "confidence": null,
       "retry_count": 0,
@@ -627,8 +749,8 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:32.390+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.278+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
       "action": "sql",
       "input_summary": "SELECT count(*) AS n, sum(amount_lost_fcfa) AS lost FROM STOP_ARNAQUE.reports WHERE array_contains(scam_types, 'account_blocked')",
@@ -638,17 +760,17 @@
       "retry_count": 0,
       "status": "ok",
       "sponsor": "zetaris",
-      "latency_ms": 650,
+      "latency_ms": 221,
       "backend": "zetaris-jdbc",
       "why": "impact of account_blocked"
     },
     {
-      "timestamp": "2026-10-24T19:22:32.390+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.278+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Investigator",
       "action": "scam_type_stats",
       "input_summary": null,
-      "output_summary": "[\"11 people reported this kind of scam (account_blocked); 80,000 FCFA lost in those reports\"]",
+      "output_summary": "[\"11 people have reported a 'your account is blocked' message; together they lost 80 000 FCFA\"]",
       "target_agent": "Critic",
       "confidence": null,
       "retry_count": 0,
@@ -657,11 +779,11 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:32.391+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.279+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verify",
-      "input_summary": "11 people reported this kind of scam (account_blocked); 80,000 FCFA lost in those reports",
+      "input_summary": "11 people have reported a 'your account is blocked' message; together they lost 80 000 FCFA",
       "output_summary": "accepted",
       "target_agent": "Reporter",
       "confidence": null,
@@ -671,12 +793,12 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:32.392+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.280+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
-      "action": "review_round",
-      "input_summary": "round 2",
-      "output_summary": "5 findings stand",
+      "action": "argue_genuine",
+      "input_summary": null,
+      "output_summary": "no new evidence since the last argument",
       "target_agent": "Reporter",
       "confidence": null,
       "retry_count": 0,
@@ -685,12 +807,12 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:32.392+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:04.281+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Critic",
       "action": "verdict_gate",
       "input_summary": null,
-      "output_summary": "{\"verdict\": \"scam\", \"score\": 8, \"rounds\": 2}",
+      "output_summary": "{\"verdict\": \"scam\", \"score\": 13, \"rounds\": 2}",
       "target_agent": "Reporter",
       "confidence": 0.97,
       "retry_count": 0,
@@ -699,44 +821,60 @@
       "latency_ms": null
     },
     {
-      "timestamp": "2026-10-24T19:22:36.610+00:00",
-      "run_id": "fb639676226c",
-      "agent_name": "Reporter",
-      "action": "write_card",
-      "input_summary": "{\"verdict\": \"scam\", \"language\": \"en\", \"findings\": [\"Number 654-jwmukg is already in 2 scam report(s) and 0 public alert(s), and 7 earlier CheckAm check(s)\", \"Part of a campaign of 14 linked records...",
-      "output_summary": "{\"headline\": \"Number flagged in 2 scam reports\", \"explain\": \"Number 654-jwmukg appears in 2 scam reports and matches known scam wording.\"}",
+      "timestamp": "2026-10-26T03:58:05.254+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Planner",
+      "action": "hypotheses",
+      "input_summary": "{\"facts\": {\"numbers\": [{\"code\": \"654-jwmukg\", \"prefix\": \"654\"}], \"links\": [], \"asks\": [\"send_money\"], \"brands\": [\"mtn\"], \"story\": \"Sender claims they mistakenly sent 25000 frs and demands the money...",
+      "output_summary": "{\n  \"hypotheses\": [\n    \"The sender is a scammer using a fake 'mistaken send' story to trick the recipient into returning money.\",\n    \"The sender may have actually made a mistake and is legitimate...",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "nvidia",
-      "latency_ms": 4218,
+      "latency_ms": 1198,
       "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
       "thinking": false
     },
     {
-      "timestamp": "2026-10-24T19:22:57.004+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:06.929+00:00",
+      "run_id": "72b2e7048c2a",
+      "agent_name": "Reporter",
+      "action": "write_card",
+      "input_summary": "{\"verdict\": \"scam\", \"language\": \"en\", \"kind_of_message\": \"money 'sent by mistake'\", \"message_start\": \"Hello please I sent 25000 frs to your MTN number by mistake, it was for my mother hospital bill...",
+      "output_summary": "{\n  \"headline\": \"Scam: money sent by mistake to MTN\",\n  \"explain\": \"Message asks you to send back 25000 frs. Strongest evidence: number reported as scam 2 times and flagged 3 times in earlier check...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 2648,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:09.082+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Reporter",
       "action": "safety_check",
-      "input_summary": "Number flagged in 2 scam reports\nNumber 654-jwmukg appears in 2 scam reports and matches known scam wording.",
+      "input_summary": "Scam: money sent by mistake to MTN\nMessage asks you to send back 25000 frs. Strongest evidence: number reported as scam 2 times and flagged 3 times in earlier checks.\nThe number starting 654 has al...",
       "output_summary": "User Safety: unsafe\nResponse Safety: safe",
       "target_agent": null,
       "confidence": null,
       "retry_count": 0,
       "status": "ok",
       "sponsor": "nvidia",
-      "latency_ms": 20393,
+      "latency_ms": 2151,
       "model": "nvidia/nemotron-3.5-content-safety",
       "thinking": false
     },
     {
-      "timestamp": "2026-10-24T19:22:57.006+00:00",
-      "run_id": "fb639676226c",
+      "timestamp": "2026-10-26T03:58:09.086+00:00",
+      "run_id": "72b2e7048c2a",
       "agent_name": "Reporter",
       "action": "card",
       "input_summary": null,
-      "output_summary": "{\"verdict\": \"scam\", \"confidence\": 0.97, \"headline\": \"Number flagged in 2 scam reports\"}",
+      "output_summary": "{\"verdict\": \"scam\", \"confidence\": 0.97, \"headline\": \"Scam: money sent by mistake to MTN\"}",
       "target_agent": null,
       "confidence": 0.97,
       "retry_count": 0,
@@ -744,5 +882,9 @@
       "sponsor": "none",
       "latency_ms": null
     }
-  ]
+  ],
+  "receipt": {
+    "id": "C-cd737cc3",
+    "url": "http://localhost:8000/v/C-cd737cc3"
+  }
 }

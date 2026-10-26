@@ -56,3 +56,11 @@ def test_a_checkam_answer_can_be_verified_and_a_faked_one_cannot():
     assert not ledger.verify_receipt(forged)["valid"]
     assert c.get("/receipts/C-00000000").status_code == 404
     assert "MODEL_API_KEY" not in c.get("/receipts/..%2f..%2f.env").text
+
+
+def test_an_unsigned_alert_never_counts_and_never_hides_the_signed_chain():
+    from checkam import ledger
+    a1 = ledger.seal({"id": "A1", "created": "2026-10-25", "title": "t", "body_en": "b", "numbers": [], "campaign_id": "c"}, None)
+    planted = {"id": "X", "created": "2026-10-25", "title": "fake", "body_en": "pay here", "numbers": []}  # slipped in by hand
+    r = ledger.verify_chain([planted, a1])
+    assert r["valid"] and r["length"] == 1 and r["unsigned"] == ["X"]

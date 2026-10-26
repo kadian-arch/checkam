@@ -59,8 +59,8 @@
   "analyst_sub": "Chaque vérification alimente un graphe de campagnes. Les analystes voient les signalements, alertes et vérifications liés, lisent un dossier de preuves et publient des alertes signées.",
   "analyst_cta": "Connexion analyste",
   "install_title": "Gardez CheckAm à portée de main",
-  "install_sub": "Installez-le comme une application. Ensuite, depuis n'importe quel SMS ou message WhatsApp, touchez Partager → CheckAm.",
-  "install_ios": "Sur iPhone : touchez Partager, puis Sur l'écran d'accueil.",
+  "install_sub": "Installez-le comme une application. Sur Android, depuis n'importe quel SMS ou message WhatsApp, touchez Partager → CheckAm. Sur tout téléphone, copiez le message et touchez Coller, ou transférez-le à @checkam_bot sur Telegram.",
+  "install_ios": "Sur iPhone : dans Safari, touchez Partager, puis Sur l'écran d'accueil. Pour vérifier un message, copiez-le et touchez Coller, ou transférez-le à @checkam_bot.",
   "footer_data": "Construit sur Stop Arnaque 237, un jeu de données ouvert de vraies arnaques signalées au Cameroun.",
   "error": "Un problème est survenu. Vérifiez votre connexion et réessayez.",
   "lang": "English",
@@ -140,5 +140,8 @@
     "family": "une fausse urgence d'un proche"
   },
   "radar_title": "Radar des arnaques",
-  "radar_sub": "{n} arnaques repérées ces {days} derniers jours, par type"
+  "radar_sub": "{n} arnaques repérées ces {days} derniers jours, par type",
+  "not_signed": "Non signée par CheckAm",
+  "paste_btn": "Coller",
+  "ios_share": "Sur iPhone : appuyez longuement sur le message, touchez Transférer ou Partager, choisissez Telegram et envoyez-le à"
 }

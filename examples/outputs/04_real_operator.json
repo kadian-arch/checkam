@@ -1,0 +1,747 @@
+{
+  "check_id": "C-c4bf59eb",
+  "run_id": "b93b6e28789a",
+  "verdict": "looks_genuine",
+  "confidence": 0.75,
+  "headline": "MTN offers free data for football weekend",
+  "explain": "Message comes from MTN, asks you to dial a code yourself, no links to click",
+  "why": [
+    {
+      "text": "Our AI fraud analyst reads it as a real message: Official USSD route present: *280*16*#",
+      "weight": "strong",
+      "evidence": [
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Sender shown = \"MTN\""
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Official USSD route present: *280*16*#"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "No demands detected: no request for money, PIN, code, or personal number"
+        }
+      ]
+    },
+    {
+      "text": "It comes from the official name MTN and asks nothing risky",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "message",
+          "id": "sender",
+          "detail": "MTN"
+        }
+      ]
+    },
+    {
+      "text": "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "message",
+          "id": "route",
+          "detail": "*280*16*#"
+        }
+      ]
+    },
+    {
+      "text": "Nothing in the message asks you to open a link.",
+      "weight": "weak",
+      "evidence": []
+    }
+  ],
+  "language": "en",
+  "do_now": [
+    "You can use it through the official route it gives (*280*16*#), typed by you",
+    "If anyone later asks for your PIN or a code about it, stop: that part would be a scam"
+  ],
+  "dont": [],
+  "scheme": null,
+  "genuine_twin": null,
+  "campaign": null,
+  "facts": {
+    "numbers": [],
+    "links": [],
+    "asks": [],
+    "brands": [
+      "mtn"
+    ],
+    "hidden_characters": 0,
+    "channel": "text"
+  },
+  "findings": [
+    {
+      "id": "F1c9651",
+      "tool": "similar_scams",
+      "claim": "It looks a bit like a known scam, but it asks nothing of you. If someone follows up asking for money back or a code, that follow-up is the scam",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [
+        {
+          "table": "messages",
+          "id": "A-3ddde545",
+          "detail": "Félicitations à tous les anciens clients de MTN. Cher client, veuillez confirmer votre numéro MTN pour activer vos données gratuites. Date l",
+          "score": 0.37,
+          "wording": 0.01,
+          "meaning": 0.37,
+          "scam_types": [
+            "fake_prize_promo",
+            "phishing_link",
+            "official_impersonation"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "A-efd89527",
+          "detail": "Félicitations! MTN – Cadeau 26e anniversaire. Participez à notre sondage spécial 26e anniversaire et gagnez 26 000 FCFA offerts par MTN!",
+          "score": 0.31,
+          "wording": 0.02,
+          "meaning": 0.31,
+          "scam_types": [
+            "fake_prize_promo",
+            "phishing_link",
+            "official_impersonation"
+          ]
+        },
+        {
+          "table": "messages",
+          "id": "A-596d59a6",
+          "detail": "MTN Cameroon offre 10 000 FCFA à toute personne souscrivant au code #237#",
+          "score": 0.31,
+          "wording": 0.01,
+          "meaning": 0.31,
+          "scam_types": [
+            "credential_request",
+            "fake_prize_promo",
+            "official_impersonation"
+          ]
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "F3a9863",
+      "tool": "genuine_twin",
+      "claim": "It does not look like any real operator message we know",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "Fe581c6",
+      "tool": "sender",
+      "claim": "It comes from the official name MTN and asks nothing risky",
+      "direction": "genuine",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "message",
+          "id": "sender",
+          "detail": "MTN"
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "Fab83c0",
+      "tool": "model_judgement",
+      "claim": "Our AI fraud analyst reads it as a real message: Official USSD route present: *280*16*#",
+      "direction": "genuine",
+      "weight": "strong",
+      "evidence": [
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Sender shown = \"MTN\""
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Official USSD route present: *280*16*#"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "No demands detected: no request for money, PIN, code, or personal number"
+        },
+        {
+          "table": "nemotron",
+          "id": "nemotron-3.5-super-vl-120b-a12b",
+          "detail": "Promo offer matches standard MTN TV bundle marketing style"
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "Fa78819",
+      "tool": "campaign",
+      "claim": "It is not linked to a known scam wave yet; fraud analysts can now see it",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "F8dae0d",
+      "tool": "official_route",
+      "claim": "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app",
+      "direction": "genuine",
+      "weight": "medium",
+      "evidence": [
+        {
+          "table": "message",
+          "id": "route",
+          "detail": "*280*16*#"
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    },
+    {
+      "id": "F983098",
+      "tool": "scam_type_stats",
+      "claim": "14 people have reported someone asking for your PIN or code; together they lost 295 000 FCFA",
+      "direction": "context",
+      "weight": "weak",
+      "evidence": [
+        {
+          "table": "reports",
+          "id": "credential_request",
+          "detail": "someone asking for your PIN or code",
+          "count": 14
+        }
+      ],
+      "status": "accepted",
+      "critic_note": ""
+    }
+  ],
+  "rounds": 2,
+  "trace": [
+    {
+      "timestamp": "2026-10-26T03:58:25.281+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Intake",
+      "action": "scout_decide",
+      "input_summary": null,
+      "output_summary": "{\"intent\": \"GENERAL\", \"band\": \"reject\", \"confidence\": 0.175, \"risk\": \"low\", \"contract\": \"0mvoq88ow0002e7039ba2b\"}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 4
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.353+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Intake",
+      "action": "extract",
+      "input_summary": "Message between <msg> tags.\n<msg>\nMTN\n1GB free + 3GB to stream at 200F to enjoy this football weekend, including tomorrow's Clasico. Get your MTN TV bundle now and be one of the first. *280*16*#\n</...",
+      "output_summary": "{\n  \"language\": \"en\",\n  \"claimed_sender\": \"MTN\",\n  \"asks\": [\"click_link\"],\n  \"promise\": false,\n  \"amount_fcfa\": null,\n  \"urgency\": \"some\",\n  \"story\": \"MTN claims the reader can get a football weeke...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1074,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.365+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Intake",
+      "action": "ignored_demand",
+      "input_summary": "[\"click_link\"]",
+      "output_summary": "the model read demands the message has no words for",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "rejected",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.365+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Intake",
+      "action": "facts",
+      "input_summary": "160 chars via text",
+      "output_summary": "{\"numbers\": [], \"links\": [], \"asks\": [], \"brands\": [\"mtn\"], \"language\": \"en\", \"hidden_characters\": 0}",
+      "target_agent": "Planner",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.366+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "{\"round\": 0, \"objections\": 0}",
+      "output_summary": "{\"tools\": [\"similar_scams\", \"genuine_twin\", \"model_judgement\", \"campaign\", \"sender\"]}",
+      "target_agent": "Investigator",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.594+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, text, scam_types, channel, language FROM STOP_ARNAQUE.messages WHERE label = 'scam'",
+      "output_summary": "87 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 226,
+      "backend": "zetaris-jdbc",
+      "why": "known scam wording"
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.715+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT id, operator, message_kind, message_text, sender_shown FROM STOP_ARNAQUE.genuine_messages",
+      "output_summary": "180 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 346,
+      "backend": "zetaris-jdbc",
+      "why": "real operator messages"
+    },
+    {
+      "timestamp": "2026-10-26T03:58:26.999+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "embed",
+      "input_summary": "1 texts",
+      "output_summary": "1 vectors",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 397,
+      "model": "nvidia/nemotron-3.5-embed-1b"
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.059+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "similar_scams",
+      "input_summary": null,
+      "output_summary": "[\"It looks a bit like a known scam, but it asks nothing of you. If someone follows up asking for money back or a code, that follow-up is the scam\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.060+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "genuine_twin",
+      "input_summary": null,
+      "output_summary": "[\"It does not look like any real operator message we know\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.060+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "sender",
+      "input_summary": null,
+      "output_summary": "[\"It comes from the official name MTN and asks nothing risky\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.063+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "world_ingest",
+      "input_summary": "/ingest",
+      "output_summary": "{\"changed\": true, \"added\": 1, \"updated\": 0, \"ms\": 1}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 2
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.532+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Planner",
+      "action": "hypotheses",
+      "input_summary": "{\"facts\": {\"numbers\": [], \"links\": [], \"asks\": [], \"brands\": [\"mtn\"], \"story\": \"MTN claims the reader can get a football weekend bundle with free data by dialing a code.\", \"hidden_characters\": 0, \"...",
+      "output_summary": "{\n  \"hypotheses\": [\n    \"The MTN weekend bundle code is a phishing attempt to steal data or money\",\n    \"The message mimics legitimate MTN promotions to trick users into dialing premium-rate codes\"...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1165,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:27.653+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "world_context",
+      "input_summary": "/context?source=checkam-check&id=C-c4bf59eb",
+      "output_summary": "{\"observationId\": \"observation:checkam-check:C-c4bf59eb\", \"mentioned\": [{\"type\": \"scam_type\", \"name\": \"credential_request\"}, {\"type\": \"scam_type\", \"name\": \"fake_prize_promo\"}, {\"type\": \"scam_type\",...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 589
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.223+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "model_judgement",
+      "input_summary": "<text>\nMTN\n1GB free + 3GB to stream at 200F to enjoy this football weekend, including tomorrow's Clasico. Get your MTN TV bundle now and be one of the first. *280*16*#\n</text>\nReturn {\"verdict\": \"s...",
+      "output_summary": "{\"verdict\": \"genuine\", \"confidence\": 0.9, \"signals\": [\"Sender shown = \\\"MTN\\\"\", \"Official USSD route present: *280*16*#\", \"No demands detected: no request for money, PIN, code, or personal number\",...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 1162,
+      "model": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.228+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "model_judgement",
+      "input_summary": null,
+      "output_summary": "[\"Our AI fraud analyst reads it as a real message: Official USSD route present: *280*16*#\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.228+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "campaign",
+      "input_summary": null,
+      "output_summary": "[\"It is not linked to a known scam wave yet; fraud analysts can now see it\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.229+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It looks a bit like a known scam, but it asks nothing of you. If someone follows up asking for money back or a code, that follow-up is the scam",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.229+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It does not look like any real operator message we know",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.230+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It comes from the official name MTN and asks nothing risky",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.230+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "Our AI fraud analyst reads it as a real message: Official USSD route present: *280*16*#",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:28.231+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "It is not linked to a known scam wave yet; fraud analysts can now see it",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.344+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "argue_genuine",
+      "input_summary": "{\"facts\": {\"asks\": [], \"brands\": [\"mtn\"], \"numbers\": [], \"links\": [], \"official_numbers\": [], \"story\": \"MTN claims the reader can get a football weekend bundle with free data by dialing a code.\"}, ...",
+      "output_summary": "{\n  \"genuine_case\": \"The message appears genuine based on the analysis of its structure and origin. It originates from the official MTN brand and utilizes an official USSD code (*280*16*#) to deliv...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 7111,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.348+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "send_back",
+      "input_summary": null,
+      "output_summary": "[{\"tool\": \"number_history\", \"reason\": \"The sender's phone number or short code was not provided in the facts, preventing a full historical analysis of whether this number has been associated with p...",
+      "target_agent": "Planner",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "needs_revision",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.349+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Planner",
+      "action": "plan",
+      "input_summary": "{\"round\": 1, \"objections\": 2}",
+      "output_summary": "{\"tools\": [\"scam_type_stats\"]}",
+      "target_agent": "Investigator",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.576+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "sql",
+      "input_summary": "SELECT count(*) AS n, sum(amount_lost_fcfa) AS lost FROM STOP_ARNAQUE.reports WHERE array_contains(scam_types, 'credential_request')",
+      "output_summary": "1 rows",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "zetaris",
+      "latency_ms": 226,
+      "backend": "zetaris-jdbc",
+      "why": "impact of credential_request"
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.578+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Investigator",
+      "action": "scam_type_stats",
+      "input_summary": null,
+      "output_summary": "[\"14 people have reported someone asking for your PIN or code; together they lost 295 000 FCFA\"]",
+      "target_agent": "Critic",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.578+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verify",
+      "input_summary": "14 people have reported someone asking for your PIN or code; together they lost 295 000 FCFA",
+      "output_summary": "accepted",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.579+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "argue_genuine",
+      "input_summary": null,
+      "output_summary": "no new evidence since the last argument",
+      "target_agent": "Reporter",
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.579+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Critic",
+      "action": "verdict_gate",
+      "input_summary": null,
+      "output_summary": "{\"verdict\": \"looks_genuine\", \"score\": 0, \"rounds\": 2}",
+      "target_agent": "Reporter",
+      "confidence": 0.75,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    },
+    {
+      "timestamp": "2026-10-26T03:58:35.594+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Reporter",
+      "action": "world_ingest",
+      "input_summary": "/ingest",
+      "output_summary": "{\"changed\": true, \"added\": 0, \"updated\": 1, \"ms\": 1}",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "meterless",
+      "latency_ms": 15
+    },
+    {
+      "timestamp": "2026-10-26T03:58:38.552+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Planner",
+      "action": "hypotheses",
+      "input_summary": "{\"facts\": {\"numbers\": [], \"links\": [], \"asks\": [], \"brands\": [\"mtn\"], \"story\": \"MTN claims the reader can get a football weekend bundle with free data by dialing a code.\", \"hidden_characters\": 0, \"...",
+      "output_summary": "{\n  \"hypotheses\": [\n    \"The MTN weekend bundle code is a phishing attempt to steal user data\",\n    \"The free data offer is a lure to install malware on the user's device\",\n    \"The code may charge...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 3203,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:39.613+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Reporter",
+      "action": "write_card",
+      "input_summary": "{\"verdict\": \"looks_genuine\", \"language\": \"en\", \"kind_of_message\": null, \"message_start\": \"MTN\\n1GB free + 3GB to stream at 200F to enjoy this football weekend, including tomorrow's Clasico. Get you...",
+      "output_summary": "{\"headline\": \"MTN offers free data for football weekend\", \"explain\": \"Message comes from MTN, asks you to dial a code yourself, no links to click\", \"findings\": [\"Our AI fraud analyst reads it as a ...",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 4017,
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:40.043+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Reporter",
+      "action": "safety_check",
+      "input_summary": "MTN offers free data for football weekend\nMessage comes from MTN, asks you to dial a code yourself, no links to click\nOur AI fraud analyst reads it as a real message: Official USSD route present: *...",
+      "output_summary": "User Safety: safe\nResponse Safety: safe",
+      "target_agent": null,
+      "confidence": null,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "nvidia",
+      "latency_ms": 429,
+      "model": "nvidia/nemotron-3.5-content-safety",
+      "thinking": false
+    },
+    {
+      "timestamp": "2026-10-26T03:58:40.043+00:00",
+      "run_id": "b93b6e28789a",
+      "agent_name": "Reporter",
+      "action": "card",
+      "input_summary": null,
+      "output_summary": "{\"verdict\": \"looks_genuine\", \"confidence\": 0.75, \"headline\": \"MTN offers free data for football weekend\"}",
+      "target_agent": null,
+      "confidence": 0.75,
+      "retry_count": 0,
+      "status": "ok",
+      "sponsor": "none",
+      "latency_ms": null
+    }
+  ],
+  "receipt": {
+    "id": "C-c4bf59eb",
+    "url": "http://localhost:8000/v/C-c4bf59eb"
+  }
+}
