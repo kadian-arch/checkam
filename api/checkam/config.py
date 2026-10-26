@@ -53,6 +53,7 @@ MODEL_EMBED = env("NEMOTRON_EMBED_MODEL", "nvidia/nemotron-3.5-embed-1b")
 MODEL_SAFETY = env("NEMOTRON_SAFETY_MODEL", "nvidia/nemotron-3.5-content-safety")
 
 WORLD_MODEL_URL = os.environ.get("WORLD_MODEL_URL", "http://127.0.0.1:8790")
+HMEM_URL = os.environ.get("HMEM_URL", "http://127.0.0.1:8792")
 SCOUT_URL = os.environ.get("SCOUT_URL", "http://127.0.0.1:8791")
 
 # HMAC key of the Stop Arnaque 237 pseudonyms. Lets a pasted real number match the dataset codes.

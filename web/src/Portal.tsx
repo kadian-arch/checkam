@@ -5,7 +5,7 @@ import TraceView from "./TraceView";
 
 const KEY = "checkam.analyst";
 type Session = { token: string; name: string; org: string };
-type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "alerts" };
+type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "memory" } | { name: "alerts" };
 
 export default function Portal() {
   const [s, setS] = useState<Session | null>(() => {
@@ -64,7 +64,7 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
 
 function Desk({ s, out }: { s: Session; out: () => void }) {
   const [view, setView] = useState<View>({ name: "overview" });
-  const nav: [View["name"], string][] = [["overview", "Overview"], ["campaigns", "Campaigns"], ["checks", "Citizen checks"], ["alerts", "Published alerts"]];
+  const nav: [View["name"], string][] = [["overview", "Overview"], ["campaigns", "Campaigns"], ["checks", "Citizen checks"], ["memory", "Review & memory"], ["alerts", "Published alerts"]];
   const guard = (p: Promise<any>) => p.catch((e) => { if (e.status === 401) out(); throw e; });
   return (
     <div className="desk">
@@ -82,6 +82,7 @@ function Desk({ s, out }: { s: Session; out: () => void }) {
         {view.name === "campaigns" && <Campaigns token={s.token} guard={guard} open={(id) => setView({ name: "dossier", id })} />}
         {view.name === "dossier" && <Dossier token={s.token} guard={guard} id={view.id} back={() => setView({ name: "campaigns" })} />}
         {view.name === "checks" && <Checks token={s.token} guard={guard} />}
+        {view.name === "memory" && <Memory token={s.token} guard={guard} />}
         {view.name === "alerts" && <PublishedAlerts />}
       </main>
     </div>
@@ -347,6 +348,63 @@ function Checks({ token, guard }: { token: string; guard: G }) {
               <tr key={c.id}><td className="mono">{c.created.slice(0, 16).replace("T", " ")}</td><td><span className={`chip v-${c.verdict}`}>{VLABEL[c.verdict]}</span></td>
                 <td className="clip">{c.masked_text}</td><td className="mono">{c.numbers.join(" ") || "–"}</td><td className="mono">{c.campaign_id ? c.campaign_id.slice(-6) : "–"}</td>
                 <td className="mono"><a href={`/traces/${c.run_id}`} target="_blank" rel="noreferrer">{c.run_id}</a></td></tr>
+            ))}</tbody>
+          </table>
+        )}
+      </section>
+    </>
+  );
+}
+
+// people's "this looks wrong" waits here; what an analyst confirms becomes memory (Meterless H-MEM) and
+// later checks of similar messages recall it as evidence
+function Memory({ token, guard }: { token: string; guard: G }) {
+  const [flags, setFlags] = useState<any[] | null>(null);
+  const [mem, setMem] = useState<{ health: any; memories: any[] } | null>(null);
+  const [note, setNote] = useState<Record<string, string>>({});
+  const [msg, setMsg] = useState("");
+  const load = () => {
+    guard(api.flags(token)).then((r) => setFlags(r.flags)).catch(() => setFlags([]));
+    guard(api.memory(token)).then(setMem).catch(() => setMem(null));
+  };
+  useEffect(load, [token]);
+  const act = (f: any, action: "confirm" | "dismiss", verdict = "") =>
+    guard(api.review(token, f.id, action, verdict, note[f.id] ?? "")).then(() => { setMsg(action === "confirm" ? "Saved to memory. Similar checks will recall it." : "Dismissed."); load(); }).catch(() => setMsg("Could not save."));
+  const sleep = () => guard(api.sleep(token)).then((r) => { setMsg(`Sleep cycle done: ${r.report.consolidated} consolidated, ${r.report.archived} archived.`); load(); }).catch(() => setMsg("Memory engine unavailable."));
+  return (
+    <>
+      <header className="pane-head"><h1>Review & memory</h1>
+        <p className="muted">When people say an answer looks wrong, it waits here. What you confirm is remembered by the Meterless H-MEM engine, and the agents recall it on similar messages. Nothing a citizen sends changes an answer by itself.</p></header>
+      {msg && <p className="note">{msg}</p>}
+      <section className="card wide flat">
+        <h3>Waiting for review {flags ? `(${flags.length})` : ""}</h3>
+        {!flags ? <p className="muted">Loading…</p> : flags.length === 0 ? <p className="muted">Nothing waiting.</p> : (
+          <table className="tbl">
+            <thead><tr><th>When</th><th>Answer given</th><th>Person says</th><th>Message (masked)</th><th>Note</th><th>Decide</th></tr></thead>
+            <tbody>{flags.map((f) => (
+              <tr key={f.id}><td className="mono">{f.created.slice(0, 16).replace("T", " ")}</td>
+                <td><span className={`chip v-${f.verdict}`}>{VLABEL[f.verdict] ?? f.verdict}</span></td>
+                <td>{VLABEL[f.suggested] ?? "Not sure"}</td><td className="clip">{f.masked_text}</td>
+                <td><input className="mini" defaultValue={f.note} onChange={(e) => setNote({ ...note, [f.id]: e.target.value })} aria-label="Analyst note" /></td>
+                <td className="actions">
+                  <button className="ghost small" onClick={() => act(f, "confirm", "scam")}>Scam</button>
+                  <button className="ghost small" onClick={() => act(f, "confirm", "looks_genuine")}>Genuine</button>
+                  <button className="link small" onClick={() => act(f, "dismiss")}>Dismiss</button>
+                </td></tr>
+            ))}</tbody>
+          </table>
+        )}
+      </section>
+      <section className="card wide flat">
+        <h3>What CheckAm remembers {mem?.health ? `(${mem.health.memories}, ${mem.health.long_term} settled)` : ""}</h3>
+        <p className="muted small">Corrections start in working memory; the daily sleep cycle settles the ones that keep proving right and lets one-offs fade. Every change is in the H-MEM trust ledger.</p>
+        <button className="ghost small" onClick={sleep}>Run the sleep cycle now</button>
+        {!mem ? <p className="muted">Memory engine unavailable.</p> : (
+          <table className="tbl">
+            <thead><tr><th>Kind</th><th>Verdict</th><th>Layer</th><th>What was learned</th><th>From</th></tr></thead>
+            <tbody>{mem.memories.slice().reverse().map((m) => (
+              <tr key={m.id}><td>{m.kind}</td><td><span className={`chip v-${m.verdict}`}>{VLABEL[m.verdict] ?? m.verdict}</span></td>
+                <td className="mono">{m.layer}</td><td className="clip">{m.content}</td><td className="mono small">{m.source}</td></tr>
             ))}</tbody>
           </table>
         )}

@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import agents, config, dossier, ledger, security, seed, store, telegram
-from .adapters import nvidia, scout, world
+from .adapters import memory, nvidia, scout, world
 from .adapters.data import data
 
 app = FastAPI(title="CheckAm", version="0.1.0", description="Before you send, CheckAm.")
@@ -200,7 +200,81 @@ def publish(body: AlertIn, email: str = Depends(analyst)):
         raise HTTPException(403, "Publish contract failed verification")
     row = store.publish_alert({**body.model_dump(), "published_by": email, "run_id": body.run_id, "contract_id": approved["contractId"]})
     trace.log("Reporter", "alert_published", output={"alert": row["id"], "contract": approved["contractId"], "approvals": approved["risk"]["approvals"]}, sponsor="meterless")
+    # what the analyst confirmed becomes memory: later checks of the same scheme start from it
+    memory.remember(f"{body.title}. {body.body_en}", "alert", "scam", f"analyst:{email}", [row["id"], body.campaign_id], trace, label="published alert")
+    store.cache_clear()
     return {**row, "contract": {k: approved[k] for k in ("contractId", "parentId", "expiresAt", "signedBy")}, "approvals": approved["risk"]["approvals"]}
+
+
+VERDICTS = ("scam", "suspicious", "looks_genuine")
+
+
+class FlagIn(BaseModel):
+    suggested: str = Field("not_sure", max_length=20)
+    note: str = Field("", max_length=500)
+
+
+@app.post("/checks/{check_id}/flag")
+def flag(check_id: str, body: FlagIn):
+    """'This answer looks wrong.' It goes to the analysts' queue; it never changes an answer or the memory by itself."""
+    if not re.fullmatch(r"C-[0-9a-f]{8}", check_id) or body.suggested not in VERDICTS + ("not_sure",):
+        raise HTTPException(400, "Unknown check or suggestion")
+    row = store.add_flag(check_id, body.suggested, body.note)
+    if not row:
+        raise HTTPException(404, "Unknown check")
+    return {"ok": True, "flag": row["id"]}
+
+
+@app.get("/analyst/flags")
+def flags(_: str = Depends(analyst)):
+    return {"flags": store.open_flags()}
+
+
+class ReviewIn(BaseModel):
+    action: str = Field(max_length=10)
+    verdict: str = Field("", max_length=20)
+    note: str = Field("", max_length=500)
+
+
+def _correct(check_id: str, verdict: str, note: str, email: str, refs: list[str]) -> dict:
+    c = store.get_check(check_id)
+    if not c or verdict not in VERDICTS:
+        raise HTTPException(400, "Unknown check or verdict")
+    content = f"{c['masked_text'][:600]}" + (f" | Analyst note: {note}" if note else "")
+    m = memory.remember(content, "correction", verdict, f"analyst:{email}", refs, label=f"correction of {check_id}")
+    if not m:
+        raise HTTPException(503, "Memory engine unavailable")
+    store.cache_clear()  # the next check of a similar message must hear the correction
+    return m["memory"]
+
+
+@app.post("/analyst/flags/{flag_id}")
+def review_flag(flag_id: str, body: ReviewIn, email: str = Depends(analyst)):
+    if body.action not in ("confirm", "dismiss"):
+        raise HTTPException(400, "action is confirm or dismiss")
+    row = store.close_flag(flag_id, "confirmed" if body.action == "confirm" else "dismissed", email)
+    if not row:
+        raise HTTPException(404, "Unknown flag")
+    mem = _correct(row["check_id"], body.verdict or row["suggested"], body.note or row["note"], email, [row["check_id"], flag_id]) if body.action == "confirm" else None
+    return {"flag": row, "memory": mem}
+
+
+@app.post("/analyst/checks/{check_id}/correct")
+def correct(check_id: str, body: ReviewIn, email: str = Depends(analyst)):
+    return {"memory": _correct(check_id, body.verdict, body.note, email, [check_id])}
+
+
+@app.get("/analyst/memory")
+def memory_view(_: str = Depends(analyst)):
+    return {"health": memory.health(), "memories": memory.memories(50)}
+
+
+@app.post("/analyst/memory/sleep")
+def memory_sleep(_: str = Depends(analyst)):
+    out = memory.sleep()
+    if out is None:
+        raise HTTPException(503, "Memory engine unavailable")
+    return out
 
 
 @app.get("/alerts")

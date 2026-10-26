@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS receipts (
 CREATE TABLE IF NOT EXISTS answers (
   key TEXT PRIMARY KEY, created TEXT, card TEXT, hits INTEGER DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS flags (
+  id TEXT PRIMARY KEY, created TEXT, check_id TEXT, verdict TEXT, suggested TEXT, note TEXT, status TEXT, reviewed_by TEXT
+);
 CREATE TABLE IF NOT EXISTS alerts (
   id TEXT PRIMARY KEY, created TEXT, published_by TEXT, campaign_id TEXT, title TEXT, body_en TEXT,
   body_fr TEXT, body_pcm TEXT, numbers TEXT, status TEXT, run_id TEXT
@@ -231,6 +234,38 @@ def cache_clear() -> None:
     with _lock:
         conn().execute("DELETE FROM answers")
         conn().commit()
+
+
+def add_flag(check_id: str, suggested: str, note: str) -> dict | None:
+    """A person says an answer looks wrong. It waits for an analyst; it never changes an answer by itself."""
+    c = conn().execute("SELECT verdict FROM checks WHERE id = ?", (check_id,)).fetchone()
+    if not c:
+        return None
+    row = {"id": "F-" + uuid.uuid4().hex[:8], "created": now(), "check_id": check_id, "verdict": c["verdict"], "suggested": suggested,
+           "note": note[:500], "status": "open", "reviewed_by": None}
+    with _lock:
+        conn().execute("INSERT INTO flags VALUES (:id, :created, :check_id, :verdict, :suggested, :note, :status, :reviewed_by)", row)
+        conn().commit()
+    return row
+
+
+def open_flags(limit: int = 50) -> list[dict]:
+    rows = conn().execute("SELECT f.*, c.masked_text FROM flags f LEFT JOIN checks c ON c.id = f.check_id WHERE f.status = 'open' ORDER BY f.created DESC LIMIT ?",
+                          (limit,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def close_flag(flag_id: str, status: str, analyst: str) -> dict | None:
+    with _lock:
+        conn().execute("UPDATE flags SET status = ?, reviewed_by = ? WHERE id = ? AND status = 'open'", (status, analyst, flag_id))
+        conn().commit()
+    r = conn().execute("SELECT f.*, c.masked_text FROM flags f LEFT JOIN checks c ON c.id = f.check_id WHERE f.id = ?", (flag_id,)).fetchone()
+    return dict(r) if r else None
+
+
+def get_check(check_id: str) -> dict | None:
+    r = conn().execute("SELECT * FROM checks WHERE id = ?", (check_id,)).fetchone()
+    return dict(r) if r else None
 
 
 def publish_alert(row: dict) -> dict:

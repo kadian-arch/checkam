@@ -9,7 +9,7 @@ export type Radar = { days: number; checks: number; flagged: number; top: { sche
 export type PublicStats = { checks: number; flagged: number; alerts: number; radar?: Radar };
 export type Card = {
   check_id: string; run_id: string; verdict: Verdict; confidence: number; headline: string;
-  explain: string; why: Why[]; language: string; do_now: string[]; dont: string[]; genuine_twin: Evidence | null;
+  explain: string; why: Why[]; language: string; do_now: string[]; dont: string[]; questions?: string[]; ask_sender?: boolean; genuine_twin: Evidence | null;
   campaign: { id: string; size: number } | null; rounds: number; trace: TraceLine[]; error?: string;
   receipt?: { id: string; url: string }; cached?: number; scheme?: string | null;
 };
@@ -83,4 +83,13 @@ export const api = {
   dossier: (t: string, id: string) => call<any>(`/analyst/campaigns/${id}`, {}, t),
   checks: (t: string) => call<{ checks: any[]; stats: any }>("/analyst/checks", {}, t),
   publish: (t: string, body: any) => call<any>("/analyst/alerts", { method: "POST", body: JSON.stringify(body) }, t),
+  flag: (checkId: string, suggested: string, note: string) =>
+    call<{ ok: boolean }>(`/checks/${checkId}/flag`, { method: "POST", body: JSON.stringify({ suggested, note }) }),
+  flags: (t: string) => call<{ flags: any[] }>("/analyst/flags", {}, t),
+  review: (t: string, id: string, action: "confirm" | "dismiss", verdict: string, note: string) =>
+    call<any>(`/analyst/flags/${id}`, { method: "POST", body: JSON.stringify({ action, verdict, note }) }, t),
+  correct: (t: string, checkId: string, verdict: string, note: string) =>
+    call<any>(`/analyst/checks/${checkId}/correct`, { method: "POST", body: JSON.stringify({ action: "confirm", verdict, note }) }, t),
+  memory: (t: string) => call<{ health: any; memories: any[] }>("/analyst/memory", {}, t),
+  sleep: (t: string) => call<any>("/analyst/memory/sleep", { method: "POST" }, t),
 };

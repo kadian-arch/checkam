@@ -31,3 +31,14 @@ def test_placeholders_survive_translation():
 
 def test_progress_steps_line_up():
     assert len(load("fr")["steps"]) == len(load("en")["steps"])
+
+
+def test_the_language_check_uses_real_dictionaries_not_guesses():
+    from checkam import wording
+    for s, lang in [("N'importe qui peut taper un message « vous avez reçu de l'argent »", "fr"), ("Arnaque : argent « envoyé par erreur »", "fr"),
+                    ("Où est passé l'argent ? Une boîte de réception pleine", "fr"), ("Dial *126# yourself to see your real balance", "en")]:
+        assert wording.well_written(s, lang), s
+    for s, lang in [("vous avez reù de l'argent", "fr"), ("Composez vous-mîme le code", "fr"), ("Vous devez verifier votre compte immediatement", "fr"),
+                    ("ne demande ni argent, ni code, ni lien exterior", "fr"), ("Follow-up message asks to return 25000 XAF", "fr"),
+                    ("Il demande des frais avant de verser un gain", "en")]:
+        assert not wording.well_written(s, lang), s

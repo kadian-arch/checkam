@@ -1,5 +1,6 @@
 """Abuse limits and response headers. Checks call paid models, so every client gets a fair share;
 sign-in is throttled against password guessing."""
+import os
 import threading
 import time
 from collections import defaultdict, deque
@@ -36,7 +37,9 @@ def client_ip(request: Request) -> str:
     """The address our own proxy saw. A client can put anything at the start of X-Forwarded-For, so only
     the last entry (added by Render's proxy) is trusted; locally there is no proxy and the socket is used."""
     fwd = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
-    return fwd[-1] if fwd else (request.client.host if request.client else "?")
+    # each proxy we run appends one address; with our own Cloudflare in front of Render there are two
+    hops = max(1, int(os.environ.get("CHECKAM_PROXY_HOPS", "1") or 1))
+    return fwd[-hops] if len(fwd) >= hops else (fwd[0] if fwd else (request.client.host if request.client else "?"))
 
 
 MAX_BODY = 8_000_000

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Card, Evidence } from "./api";
+import { api, type Card, type Evidence } from "./api";
 import { fill, type Dict } from "./i18n";
 import TraceView from "./TraceView";
 
@@ -19,8 +19,14 @@ function plain(e: Evidence, t: Dict): string {
   return e.detail ?? "";
 }
 
-export default function VerdictReport({ card, t, onAgain, askSender }: { card: Card; t: Dict; onAgain: () => void; askSender?: (who: string) => void }) {
+export default function VerdictReport({ card, t, onAgain, askSender, followUp }: { card: Card; t: Dict; onAgain: () => void; askSender?: (who: string) => void; followUp?: (answer: string) => void }) {
   const [who, setWho] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [flagged, setFlagged] = useState(false);
+  const [flagNote, setFlagNote] = useState("");
+  const sendFlag = (suggested: string) =>
+    api.flag(card.check_id, suggested, flagNote).then(() => setFlagged(true)).catch(() => setFlagged(true));
   const label = t[`verdict_${card.verdict}` as keyof Dict] as string;
   const twin = card.genuine_twin;
   const share = () => {
@@ -51,6 +57,15 @@ export default function VerdictReport({ card, t, onAgain, askSender }: { card: C
             <input value={who} onChange={(e) => setWho(e.target.value)} maxLength={80} placeholder={t.sender_placeholder} aria-label={t.ask_sender_title} />
             <button className="primary inline" disabled={!who.trim()}>{t.check_again}</button>
           </div>
+        </form>
+      )}
+
+      {followUp && card.questions && card.questions.length > 0 && (
+        <form className="sheet ask" onSubmit={(e) => { e.preventDefault(); if (answer.trim()) followUp(answer.trim()); }}>
+          <h2>{t.followup_title}</h2>
+          <ul className="questions">{card.questions.map((q) => <li key={q}>{q}</li>)}</ul>
+          <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={3} maxLength={1000} placeholder={t.followup_placeholder} aria-label={t.followup_title} />
+          <button className="primary inline" disabled={!answer.trim()}>{t.check_again}</button>
         </form>
       )}
 
@@ -100,6 +115,23 @@ export default function VerdictReport({ card, t, onAgain, askSender }: { card: C
         <button className="ghost" onClick={share}>{t.share}</button>
         <button className="primary inline" onClick={onAgain}>{t.check_another}</button>
       </footer>
+      {card.check_id && (
+        <div className="flag">
+          {flagged ? <p className="muted small">{t.flag_thanks}</p> : !flagOpen ? (
+            <button className="link small" onClick={() => setFlagOpen(true)}>{t.flag_open}</button>
+          ) : (
+            <div className="flag-box">
+              <p className="small">{t.flag_ask}</p>
+              <input value={flagNote} onChange={(e) => setFlagNote(e.target.value)} maxLength={300} placeholder={t.flag_note} aria-label={t.flag_note} />
+              <div className="row">
+                <button className="ghost small" onClick={() => sendFlag("scam")}>{t.flag_is_scam}</button>
+                <button className="ghost small" onClick={() => sendFlag("looks_genuine")}>{t.flag_is_genuine}</button>
+                <button className="ghost small" onClick={() => sendFlag("not_sure")}>{t.flag_not_sure}</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }

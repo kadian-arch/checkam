@@ -31,7 +31,7 @@
   "verdict_scam": "Scam",
   "verdict_suspicious": "Be careful",
   "verdict_looks_genuine": "Looks genuine",
-  "verdict_cant_tell": "Can't tell yet",
+  "verdict_cant_tell": "Need more details",
   "confidence": "confidence",
   "why": "Why we say this",
   "do_now": "What to do now",
@@ -60,7 +60,7 @@
   "analyst_cta": "Analyst sign-in",
   "install_title": "Keep CheckAm one tap away",
   "install_sub": "Install it like an app. On Android, from any SMS or WhatsApp message, tap Share → CheckAm. On any phone, copy the message and tap Paste, or forward it to @checkam_bot on Telegram.",
-  "install_ios": "On iPhone: in Safari tap Share, then Add to Home Screen. To check a message, copy it and tap Paste, or forward it to @checkam_bot.",
+  "install_ios": "On iPhone: in Safari tap Share, then Add to Home Screen. To check a message, copy it and tap Paste, send a screenshot, or add CheckAm to your Share menu (steps under the message box).",
   "footer_data": "Built on Stop Arnaque 237, an open dataset of real scams reported in Cameroon.",
   "error": "Something went wrong. Check your connection and try again.",
   "lang": "Français",
@@ -143,5 +143,23 @@
   "radar_sub": "{n} scams caught in the last {days} days, by kind",
   "not_signed": "Not signed by CheckAm",
   "paste_btn": "Paste",
-  "ios_share": "On iPhone: press and hold the message, tap Forward or Share, choose Telegram and send it to"
+  "followup_title": "A few questions so the agents can decide",
+  "followup_placeholder": "Answer in your own words, even briefly",
+  "followup_prefix": "(What I can add:",
+  "ios_share_title": "Add CheckAm to your iPhone Share menu (once, 1 minute)",
+  "ios_share_steps": [
+    "Open the Shortcuts app and tap + to make a new shortcut.",
+    "Tap the ⓘ button and turn on Show in Share Sheet. Under Receive, keep only Text.",
+    "Add the action URL Encode. It encodes the Shortcut Input.",
+    "Add the action Open URLs and type https://checkam.me/?text= then insert URL Encoded Text right after it.",
+    "Name it CheckAm. Now in Messages, WhatsApp or Mail: press and hold a message, tap Share, then CheckAm."
+  ],
+  "ios_share_other": "No time now? Copy the message and tap Paste above, send a screenshot, or forward it to",
+  "flag_open": "Does this answer look wrong?",
+  "flag_ask": "Tell us what you know. A fraud analyst will review it; your answer stays as it is until then.",
+  "flag_note": "Optional: what makes you think so",
+  "flag_is_scam": "It is a scam",
+  "flag_is_genuine": "It is genuine",
+  "flag_not_sure": "Not sure",
+  "flag_thanks": "Thank you. A fraud analyst will review it, and what they confirm helps the next person."
 }

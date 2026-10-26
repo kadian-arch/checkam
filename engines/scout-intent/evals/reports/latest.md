@@ -1,6 +1,6 @@
 # Scout eval report
 
-_Generated: 2026-10-24T18:48:06.175Z · corpus v1 · 32 examples_
+_Generated: 2026-10-26T06:16:50.817Z · corpus v1 · 32 examples_
 
 ## Verdict: ✅ PASS
 

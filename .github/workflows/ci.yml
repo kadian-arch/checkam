@@ -28,6 +28,9 @@ jobs:
       - name: Scout Intent evals
         working-directory: engines/scout-intent
         run: npm ci && SCOUT_IMPL="$PWD/src/index.ts" npm run -s evals
+      - name: H-MEM conformance
+        working-directory: engines/h-mem
+        run: npm ci && HMEM_IMPL="$PWD/reference/index.ts" npm run -s conformance
 
   web:
     name: phone app (type check + build)

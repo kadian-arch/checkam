@@ -10,15 +10,15 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 
-from . import advice, config, ledger, privacy, store
-from .adapters import linkcheck, nvidia, scout, world
+from . import advice, claims, config, ledger, privacy, store, wording
+from .adapters import linkcheck, memory, nvidia, ocr, scout, world
 from .adapters.data import data
 from .similarity import containment, cosine, jaccard, norm, shingles, words
 from .trace import Trace, timer
 
 DB = config.ZETARIS_DB
 WEIGHT = {"strong": 3, "medium": 2, "weak": 1}
-TOOLS = ["number_history", "link_history", "similar_scams", "genuine_twin", "sender", "model_judgement", "campaign", "scam_type_stats"]
+TOOLS = ["number_history", "link_history", "similar_scams", "genuine_twin", "sender", "model_judgement", "campaign", "scam_type_stats", "memory"]
 
 
 # What the message DEMANDS of the reader. Notifications ("you have transferred", "do not share this
@@ -293,7 +293,8 @@ def _q(v: str) -> str:
 def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "") -> dict:
     channel = "text"
     if image:
-        read = nvidia.read_image(image[0], image[1], trace) or nvidia.read_image(image[0], image[1], trace)  # one more try when busy
+        # the vision model reads layout best; OCR on the server reads when the model cannot
+        read = nvidia.read_image(image[0], image[1], trace) or ocr.read(image[0], trace)
         if read:
             text = (read + "\n" + (text or "")).strip()
             channel = "screenshot"
@@ -376,7 +377,7 @@ def _guess_lang(t: str) -> str:
 # ======================= Planner =======================
 def plan(case: Case, trace: Trace) -> list[str]:
     f = case.facts
-    applicable = ["similar_scams", "genuine_twin"] + (["model_judgement"] if nvidia.enabled() else []) + ([] if case.holdout else ["campaign"])
+    applicable = ["similar_scams", "genuine_twin"] + (["model_judgement"] if nvidia.enabled() else []) + ([] if case.holdout else ["campaign", "memory"])
     if f.get("sender"):
         applicable.append("sender")
     if f["numbers"]:
@@ -655,10 +656,28 @@ def _tool_genuine_twin(case: Case, trace: Trace) -> list[Finding]:
                     "medium" if red else "weak", [twin])]
 
 
+# the message speaks AS the operator: a header, a greeting or a signature only the operator would use.
+# Naming it ("your MoMo number", "send to my Orange Money") is not claiming to be it.
+SPEAKS_AS = {
+    "mtn": r"^\W*(mtn|y'?ello|momo|mobile ?money|mtn mobile money)\b|\b(mtn cameroon|mtn cameroun|service client mtn|mtn customer (?:care|service)|votre op[ée]rateur mtn|your mtn)\b[^.\n]{0,40}\b(team|[ée]quipe|service)|[-—]\s*mtn\b",
+    "orange": r"^\W*(orange|orange money)\b|\b(orange cameroun|orange cameroon|service client orange|orange customer (?:care|service))\b|[-—]\s*orange( money)?\b",
+    "camtel": r"^\W*camtel\b|\b(service client camtel|camtel customer)\b",
+}
+GREETS_AS_OPERATOR = r"(?i)^\W*(dear (?:valued )?customer|cher\(?e?\)? client|ch[èe]re? abonn[ée]|dear subscriber|bonjour cher client)"
+
+
+def speaks_as(f: dict, brand: str) -> bool:
+    text = f["text"].strip()
+    claimed = str(f.get("claimed_sender") or "").lower()
+    receipt = bool(CREDIT.search(text) and RECEIPT_WORDS.search(text))  # a receipt is written in the operator's own voice
+    return bool(re.search("(?i)" + SPEAKS_AS.get(brand, r"$^"), text) or brand in claimed or receipt
+                or re.search(GREETS_AS_OPERATOR, text))
+
+
 def _tool_sender(case: Case, trace: Trace) -> list[Finding]:
     f = case.facts
     who = (f.get("sender") or "").strip()
-    brand = next((b for b in f["brands"] if b not in ("government",)), None)
+    brand = next((b for b in f["brands"] if b not in ("government",) and speaks_as(f, b)), None)
     if f["sender_kind"] == "personal" and brand:
         return [Finding(_fid(), "sender", L(case, f"It claims to be {brand.upper()} but was sent from a personal number. Operators send from their official names",
                           f"Il prétend être {brand.upper()} mais vient d'un numéro personnel. Les opérateurs envoient depuis leurs noms officiels"),
@@ -688,6 +707,21 @@ def _evidence_brief(case: Case) -> str:
     return "\n".join(lines[:8]) or "- nothing found"
 
 
+def _worked_examples(case: Case, trace: Trace, k: int = 3) -> str:
+    """The closest real messages we hold, scams and genuine ones, with their labels: the analyst compares
+    instead of guessing. The message's own record and its near-copies stay hidden in an evaluation."""
+    if "labelled" not in _cache:
+        _cache["labelled"] = data().sql(f"SELECT id, text, label FROM {DB}.messages", trace, why="labelled examples to compare with")
+    held = norm(case.holdout_text) if case.holdout_text else None
+    mine = shingles(case.facts["text"])
+    pool = [r for r in _cache["labelled"] if r["id"] not in case.holdout and norm(r["text"]) != held and r["text"]]
+    lines = []
+    for label, name in (("scam", "SCAM"), ("not_scam", "GENUINE")):
+        ranked = sorted((r for r in pool if r["label"] == label), key=lambda r: -jaccard(mine, shingles(r["text"])))[:k]
+        lines += [f"[{name}] {r['text'][:280]}" for r in ranked if jaccard(mine, shingles(r["text"])) > 0.03]
+    return "\n".join(lines) or "(none close enough)"
+
+
 def _tool_model_judgement(case: Case, trace: Trace) -> list[Finding]:
     """Nemotron reads the whole message as an experienced Cameroonian fraud analyst would. It catches
     stories no table holds (romance, investment, a victim retelling a call); the Critic can overrule it."""
@@ -701,7 +735,9 @@ def _tool_model_judgement(case: Case, trace: Trace) -> list[Finding]:
          "unofficial link to claim something. Paying money now for a larger fixed return later (machines, mining, doubling, investment clubs) is a scam, "
          "and so is paying transport, delivery or customs to receive a gift or parcel. A victim retelling such a story is describing a scam. Say unclear when the text alone cannot tell. "
          "Context: sender shown = " + json.dumps(case.facts.get("sender") or "unknown") + "; official route present = " + str(bool(OFFICIAL_ROUTE.search(case.facts["text"]))) +
-         "; demands detected = " + json.dumps(case.facts["asks"]) + ". Evidence the investigators already found (from real records):\n" + _evidence_brief(case)},
+         "; demands detected = " + json.dumps(case.facts["asks"]) + ". Evidence the investigators already found (from real records):\n" + _evidence_brief(case) +
+         "\nThe closest real Cameroonian messages we hold, with their true labels. Compare the scheme and the ask, not the wording alone:\n" + _worked_examples(case, trace) +
+         "\nWrite the signals in " + ("French, with every accent" if case.language == "fr" else "English") + ", in plain words a non-technical person understands."},
     ], model=config.MODEL_REASON, trace=trace, agent="Investigator", action="model_judgement", max_tokens=400)
     if not out or out.get("verdict") not in ("scam", "genuine"):
         return []
@@ -724,6 +760,24 @@ def _tool_model_judgement(case: Case, trace: Trace) -> list[Finding]:
     return [Finding(_fid(), "model_judgement", (L(case, "Our AI fraud analyst reads it as a scam", "Notre analyste IA y voit une arnaque") if out["verdict"] == "scam"
                      else L(case, "Our AI fraud analyst reads it as a real message", "Notre analyste IA y voit un vrai message")) + (L(case, f"{scheme}: {note}", f"{scheme} : {note}") if note else scheme), out["verdict"], weight,
                     [{"table": "nemotron", "id": config.MODEL_REASON.split("/")[-1], "detail": s} for s in signals])]
+
+
+def _tool_memory(case: Case, trace: Trace) -> list[Finding]:
+    """What fraud analysts already decided about messages like this one (Meterless H-MEM). Only analyst-approved
+    knowledge is in memory, so a scammer cannot teach CheckAm that their message is fine."""
+    out = []
+    for m in memory.recall(case.facts["text"], trace):
+        if (m.get("relevance") or 0) < 0.45 or m.get("verdict") not in ("scam", "suspicious", "looks_genuine"):
+            continue
+        genuine = m["verdict"] == "looks_genuine"
+        settled = m.get("layer") == "long_term" and (m.get("relevance") or 0) >= 0.6
+        out.append(Finding(_fid(), "memory", L(case,
+            f"A fraud analyst already reviewed a message like this one and found it {'genuine' if genuine else 'a scam'}",
+            f"Un analyste anti-fraude a déjà examiné un message comme celui-ci et l'a jugé {'authentique' if genuine else 'frauduleux'}"),
+            "genuine" if genuine else "scam", "strong" if settled else "medium",
+            [{"table": "memory", "id": m["id"], "detail": m["content"][:200], "relevance": m.get("relevance")}]))
+        break  # the closest decision speaks; the rest are in the trace
+    return out
 
 
 def _tool_scam_type_stats(case: Case, trace: Trace) -> list[Finding]:
@@ -838,6 +892,14 @@ def arbitrate(case: Case, trace: Trace) -> None:
                 "Job, training and scholarship announcements are the most common bait in Cameroon. Real ones are published on the employer's or ministry's own website and never ask for a fee. Check there before you apply or pay anything",
                 "Les annonces d'emploi, de formation et de bourse sont l'appât le plus courant au Cameroun. Les vraies sont publiées sur le site de l'employeur ou du ministère et ne demandent jamais de frais. Vérifiez là-bas avant de postuler ou de payer quoi que ce soit"),
                 "scam", "medium", [{"table": "message", "id": "scheme", "detail": "job or scholarship announcement"}], status="accepted"))
+    # any other claim the person cannot see behind, from a sender anyone can type: never cleared on wording alone
+    said = [c for c in claims.found(case.facts["text"]) if c not in ("money_received", "opportunity")]
+    if said and not trusted and not any(f.tool == "claim" for f in case.findings):
+        case.findings.append(Finding(_fid(), "claim", L(case,
+            f"It makes a claim you cannot see behind, the kind scams are built on. Check it yourself: {claims.check(said[0], 'en')}",
+            f"Il affirme quelque chose que vous ne pouvez pas vérifier dans le message, ce sur quoi les arnaques reposent. Vérifiez vous-même : {claims.check(said[0], 'fr')}"),
+            "scam", "medium", [{"table": "message", "id": "claim", "detail": said[0]}], status="accepted"))
+    claimed_any = bool(said) or credit or opportunity
     official_only = bool(OFFICIAL_ROUTE.search(case.facts["text"])) and not flags and not credit and (trusted or not case.facts.get("promise"))
     if flags:
         if twin and twin.direction == "genuine":
@@ -855,7 +917,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
     # the "sent by mistake" opener cannot cost the reader money (a relative's news, a meeting time)
     quiet = (not f_["asks"] and not f_.get("promise") and not f_["links"] and not f_.get("body_numbers", len(f_["numbers"]))
              and not (f_["brands"] and THREAT.search(f_["text"]))
-             and not credit and not f_.get("retold") and not opportunity
+             and not claimed_any and not f_.get("retold")
              and not re.search(r"(?i)erreur|mistake|wrong number|mauvais num", f_["text"]))
     harmless = harmless or quiet
     if not (strong_twin or official_only or harmless):
@@ -972,36 +1034,13 @@ def decide(case: Case) -> tuple[str, float, int]:
     return "cant_tell", 0.4, score
 
 
-ENGLISH_IN_FR = re.compile(r"(?i)\b(the|and|with|from|your|you|this|exterior|money|link|number|phone)\b")
-
-
-# common words that are misspelled without their accent
-ACCENT_LOST = re.compile(r"(?i)\b(telephone|numero|recu|deja|verifi\w*|exterieur|systeme|operateur|reseau|securite|ete|tres|apres|premiere|interet|depot|cree|frere|soeur|evenement|etranger|derniere|reponse|detail|celebr\w*|liberte|ecole|etudiant)\b")
-
-
-FRENCH_WORDS = re.compile(r"(?i)(?<![\w'])(le|la|les|un|une|des|de|du|et|au|aux|pour|que|qui|il|elle|vous|votre|est|sont|ne|pas|avec|dans|sur|ce|cette|par|en|à|ou|mais|son|sa|ses)(?![\w'])|\b[dlj]'")
-
-
-# letters French uses only in a few words: anywhere else they are a model's garbled accent ("reù", "vous-mîme")
-REAL_CIRCUMFLEX_I = ("île", "maîtr", "connaî", "paraî", "apparaî", "disparaî", "reconnaî", "boîte", "dîn", "abîm", "gîte", "chaîn", "traîn", "naî", "plaî", "fraîch", "entraî", "aîné", "huître", "épître")
-
-
 def garbled(s: str) -> bool:
-    for w in re.findall(r"[^\W\d_]+", s.lower()):
-        if re.search(r"[ìòÌÒ]", w) or ("ù" in w and w != "où"):
-            return True
-        if "î" in w and not any(k in w for k in REAL_CIRCUMFLEX_I):
-            return True
-    return False
+    return wording.garbled(s, "fr")
 
 
 def well_written(s: str, lang: str) -> bool:
-    """Model French that lost its accents or slipped into English reads as fake to the person; the template is used instead."""
-    if lang != "fr":
-        return True
-    if len(s.split()) >= 4 and not FRENCH_WORDS.search(s):
-        return False  # four words or more and not one ordinary French word: it is not French
-    return not ENGLISH_IN_FR.search(s) and not ACCENT_LOST.search(s) and not garbled(s)
+    """Model text in the wrong language or misspelled reads as fake to the person; our own sentence is used instead."""
+    return wording.well_written(s, lang)
 
 
 def accents_kept(before: str, after: str, lang: str) -> bool:
@@ -1017,17 +1056,15 @@ def plain_note(s: str, lang: str) -> bool:
         return False  # a masked number or a code is not a reason a person can read
     if re.search(r"[=_{}<>]|\b(sender|field|flag|token|regex|json)\b", s, re.I):
         return False
-    if lang == "en":
-        return not re.search(r"(?i)\b(vous|votre|le|la|les|est|avez)\b", s)
-    return well_written(s, "fr")
+    return well_written(s, lang)
 
 
 TEXT = {
     "scam": {"en": "This is a scam. Do not send money or any code.", "fr": "C'est une arnaque. N'envoyez ni argent ni code."},
     "suspicious": {"en": "Be careful: this message has signs of a scam.", "fr": "Attention : ce message a des signes d'arnaque."},
     "looks_genuine": {"en": "Nothing in this message can cost you money.", "fr": "Rien dans ce message ne peut vous coûter de l'argent."},
-    "cant_tell": {"en": "We cannot tell for sure. Check with your operator before you act.",
-                  "fr": "Impossible d'être sûr. Vérifiez auprès de votre opérateur avant d'agir."},
+    "cant_tell": {"en": "Not enough to go on yet. Answer a question below and the agents will look again.",
+                  "fr": "Pas encore assez d'éléments. Répondez à une question ci-dessous et les agents regarderont à nouveau."},
 }
 
 
@@ -1113,6 +1150,9 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
         "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2),
         "headline": headline, "explain": explain, "why": why, "language": lang,
         "do_now": do_now, "dont": dont, "scheme": scheme,
+        # when the agents cannot decide yet, the questions that would let them
+        "questions": claims.questions(case.facts, lang) if verdict in ("cant_tell", "suspicious") else [],
+        "ask_sender": verdict in ("cant_tell", "suspicious") and not (case.facts.get("sender") or "").strip(),
         "genuine_twin": next((e for f in case.findings if f.tool == "genuine_twin" for e in f.evidence if "text" in e), None),
         "campaign": {"id": case.campaign["id"], "size": len(case.campaign["members"])} if case.campaign else None,
         "facts": {k: case.facts[k] for k in ("numbers", "links", "asks", "brands", "hidden_characters", "channel")},

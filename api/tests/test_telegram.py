@@ -40,6 +40,10 @@ def test_short_reply_after_who_sent_it_rechecks_with_that_sender(monkeypatch):
     monkeypatch.setattr(telegram, "_send", lambda *a, **k: None)
     monkeypatch.setattr(telegram, "_check", lambda *a: ran.append(a))
     monkeypatch.setattr(telegram.threading, "Thread", lambda target, args, daemon: type("T", (), {"start": lambda self: target(*args)})())
-    telegram._pending[77] = (telegram.time.monotonic(), "You have received 30 000 FCFA, transaction 123")
+    telegram._pending[77] = (telegram.time.monotonic(), "You have received 30 000 FCFA, transaction 123", "")
     telegram.handle({"message": {"chat": {"id": 77}, "from": {"language_code": "en"}, "text": "MobileMoney"}})
     assert ran and ran[-1][2].startswith("You have received") and ran[-1][4] == "MobileMoney"
+    # a longer answer is what the person adds, checked together with the message
+    telegram._pending[77] = (telegram.time.monotonic(), "You have received 30 000 FCFA, transaction 123", "")
+    telegram.handle({"message": {"chat": {"id": 77}, "from": {"language_code": "en"}, "text": "Then a man called asking me to send it back to him"}})
+    assert "send it back" in ran[-1][2] and ran[-1][2].startswith("You have received") and ran[-1][4] == ""

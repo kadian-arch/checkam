@@ -21,6 +21,8 @@ services:
         value: /var/data/logs
       - key: WORLD_MODEL_FILE
         value: /var/data/world.json
+      - key: HMEM_DIR
+        value: /var/data/hmem
       - key: MODEL_API_KEY
         sync: false
       - key: PSEUDONYM_KEY

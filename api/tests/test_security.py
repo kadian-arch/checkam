@@ -142,3 +142,28 @@ def test_the_scam_radar_counts_this_weeks_flagged_checks_by_kind(tmp_path, monke
     r = store.radar()
     assert r["top"] == [{"scheme": "job", "n": 2}] and r["checks"] == 3 and r["flagged"] == 2
     monkeypatch.setattr(store, "_conn", None)
+
+
+def test_a_citizen_flag_waits_for_an_analyst_and_bad_ids_are_refused():
+    from fastapi.testclient import TestClient
+    from checkam import store
+    from checkam.app import app
+    c = TestClient(app)
+    assert c.post("/checks/../etc/flag", json={"suggested": "scam"}).status_code in (400, 404, 405)
+    assert c.post("/checks/C-0000000Z/flag", json={"suggested": "scam"}).status_code == 400
+    assert c.post("/checks/C-00000000/flag", json={"suggested": "looks_genuine"}).status_code == 404
+    store.save_check({"id": "C-f1a90000", "created": store.now(), "masked_text": "x", "verdict": "scam", "confidence": 0.9, "language": "en",
+                      "numbers": [], "links": [], "scam_types": [], "campaign_id": None, "run_id": "r", "channel": "text"})
+    r = c.post("/checks/C-f1a90000/flag", json={"suggested": "looks_genuine", "note": "this is my bank"})
+    assert r.status_code == 200
+    assert store.get_check("C-f1a90000")["verdict"] == "scam"  # nothing changes until an analyst confirms
+    assert c.get("/analyst/flags").status_code == 401
+
+
+def test_the_trusted_proxy_depth_follows_the_setting(monkeypatch):
+    from types import SimpleNamespace
+    from checkam import security
+    req = SimpleNamespace(headers={"x-forwarded-for": "6.6.6.6, 41.202.1.1, 172.70.1.1"}, client=None)
+    assert security.client_ip(req) == "172.70.1.1"            # Render only: its proxy adds the last address
+    monkeypatch.setenv("CHECKAM_PROXY_HOPS", "2")
+    assert security.client_ip(req) == "41.202.1.1"            # Cloudflare in front: one hop further in

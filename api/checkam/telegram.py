@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 import httpx
 
-from . import agents, assistant, config, security
+from . import agents, assistant, claims, config, security
 
 TOKEN = config.env("TELEGRAM_BOT_TOKEN")
 SECRET = config.env("TELEGRAM_WEBHOOK_SECRET")
@@ -18,8 +18,8 @@ _client = httpx.Client(timeout=30)
 SITE = config.env("CHECKAM_PUBLIC_URL", "https://checkam.me")
 
 LABEL = {
-    "en": {"scam": "🔴 SCAM", "suspicious": "🟠 BE CAREFUL", "looks_genuine": "🟢 LOOKS GENUINE", "cant_tell": "⚪ CAN'T TELL YET"},
-    "fr": {"scam": "🔴 ARNAQUE", "suspicious": "🟠 PRUDENCE", "looks_genuine": "🟢 SEMBLE AUTHENTIQUE", "cant_tell": "⚪ IMPOSSIBLE DE TRANCHER"},
+    "en": {"scam": "🔴 SCAM", "suspicious": "🟠 BE CAREFUL", "looks_genuine": "🟢 LOOKS GENUINE", "cant_tell": "⚪ NEED MORE DETAILS"},
+    "fr": {"scam": "🔴 ARNAQUE", "suspicious": "🟠 PRUDENCE", "looks_genuine": "🟢 SEMBLE AUTHENTIQUE", "cant_tell": "⚪ IL FAUT PLUS DE DÉTAILS"},
 }
 TEXT = {
     "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me any message about money that feels off (SMS, WhatsApp, a job, a scholarship, a prize), or send a screenshot. "
@@ -28,7 +28,8 @@ TEXT = {
            "why": "Why", "do": "What to do", "dont": "Don't", "error": "The check failed. Please try again in a minute.",
            "web": "🔏 Signed answer", "warn": "📣 Warn a friend", "share": "I checked this message with CheckAm: {v}. Check yours before you send money:",
            "who": "Who sent it? Reply with the name or number shown at the top of the message on your phone, and I'll check again.",
-           "seconds": "checked in {s} s", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
+           "ask": "To decide, I need to know:", "reply": "Just reply here in your own words and I'll check again with your answer.",
+           "seconds": "checked in {s} s", "more": "(What I can add:", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
            "stage": {"Intake": "📖 Reading the message", "Planner": "🧭 Planning the checks", "Investigator": "🔍 Searching scam reports and real operator messages",
                      "Critic": "⚖️ The critic is arguing the other side", "Reporter": "✍️ Writing your answer"}},
     "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi un message d'argent qui vous paraît louche (SMS, WhatsApp, emploi, bourse, gain), ou une capture d'écran. "
@@ -37,6 +38,8 @@ TEXT = {
            "why": "Pourquoi", "do": "Que faire", "dont": "À ne pas faire", "error": "La vérification a échoué. Réessayez dans une minute.",
            "web": "🔏 Réponse signée", "warn": "📣 Prévenir un proche", "share": "J'ai vérifié ce message avec CheckAm : {v}. Vérifiez les vôtres avant d'envoyer de l'argent :",
            "who": "Qui l'a envoyé ? Répondez avec le nom ou le numéro affiché en haut du message sur votre téléphone, et je vérifie à nouveau.",
+           "ask": "Pour trancher, j'ai besoin de savoir :", "reply": "Répondez simplement ici avec vos mots et je vérifie à nouveau avec votre réponse.",
+           "more": "(Ce que je peux ajouter :",
            "seconds": "vérifié en {s} s", "unsupported": "Je vérifie les textes et les captures d'écran. Transférez le message lui-même, ou envoyez-en une capture.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
            "stage": {"Intake": "📖 Lecture du message", "Planner": "🧭 Choix des vérifications", "Investigator": "🔍 Recherche dans les signalements et les vrais messages",
                      "Critic": "⚖️ Le critique défend l'autre hypothèse", "Reporter": "✍️ Rédaction de votre réponse"}},
@@ -44,7 +47,7 @@ TEXT = {
 # a message worth checking carries something that can cost money: a link, a number, an amount, a code, a demand
 SIGNALS = re.compile(r"(?i)https?://|www\.|\b[a-z0-9-]+\.(com|cm|net|org|me|xyz|top|online|site|link|info|app)\b|[*#]\d{2,4}|\b[26]\d{8}\b|\d[\d .,]*\s*(f|fcfa|xaf|frs?|francs?)\b|"
                      r"\b(pin|otp|code|momo|mobile money|orange money|transf|envoy|send|pay|pai|gagn|won|prize|visa|bourse|scholarship|recrut|job|emploi|loan|pr[êe]t|invest|bonus|cadeau|promo)\b")
-_pending: dict[int, tuple[float, str]] = {}  # chat -> (when, message waiting for its sender)
+_pending: dict[int, tuple[float, str, str]] = {}  # chat -> (when, message waiting for more, sender known so far)
 
 
 def enabled() -> bool:
@@ -120,6 +123,12 @@ def _photo(file_id: str) -> tuple[str, str] | None:
     return base64.b64encode(raw).decode(), "image/jpeg"
 
 
+def is_sender(text: str) -> bool:
+    """A phone number, or a short name like "MTN" or "Customer Care": what the top of a message shows."""
+    s = text.strip()
+    return bool(re.fullmatch(r"[+\d\s().-]{6,20}", s)) or (len(s.split()) <= 3 and not re.search(r"(?i)\b(yes|no|oui|non|il|elle|he|she|they|asked|demand\w*|pay|code)\b", s))
+
+
 def wants_check(msg: dict, text: str) -> bool:
     """Forwarded messages and screenshots are always checked; a sentence typed to the bot is a conversation
     unless it carries something that can cost money."""
@@ -161,9 +170,13 @@ def _check(chat_id: int, ui: str, text: str, photo_id: str, sender: str = "") ->
             _edit(chat_id, mid, html.escape(card.get("error", TEXT[lang]["error"]), quote=False))
             return
         _edit(chat_id, mid, render(card, ui, time.monotonic() - started), buttons(card, ui))
-        if card["verdict"] in ("cant_tell", "suspicious") and not sender and text:
-            _pending[chat_id] = (time.monotonic(), text)
-            _send(chat_id, TEXT[card.get("language") if card.get("language") in TEXT else ui]["who"])
+        if card["verdict"] in ("cant_tell", "suspicious") and text and (card.get("questions") or card.get("ask_sender")):
+            # the agents ask what they need to decide; the next reply goes back to them with the message
+            lang_ = card.get("language") if card.get("language") in TEXT else ui
+            t = TEXT[lang_]
+            asked = ([claims.GENERAL["sender"][1 if lang_ == "fr" else 0]] if card.get("ask_sender") else []) + card.get("questions", [])
+            _pending[chat_id] = (time.monotonic(), text, sender)
+            _send(chat_id, "\n".join([t["ask"]] + [f"❓ {html.escape(q, quote=False)}" for q in asked[:3]] + ["", t["reply"]]))
     except Exception:
         _edit(chat_id, mid, TEXT[lang]["error"])
 
@@ -208,11 +221,16 @@ def handle(update: dict) -> None:
     if text.startswith("/start") or text.startswith("/help") or (not text and not photo_id):
         _send(chat_id, TEXT[ui]["start"])
         return
-    # a short reply right after "who sent it?" is the sender of the message waiting for a second check
+    # a reply right after the agents' questions answers them: a bare name or number is the sender,
+    # anything longer is what the person adds, checked together with the message
     waiting = _pending.pop(chat_id, None)
-    if waiting and time.monotonic() - waiting[0] < 900 and not photo_id and len(text.split()) <= 5 and "forward_origin" not in msg:
-        sender = text.strip()
-        target, args = _check, (chat_id, ui, waiting[1], "", sender)
+    if waiting and time.monotonic() - waiting[0] < 900 and not photo_id and "forward_origin" not in msg and len(text.split()) < 40:
+        when, held, known = waiting
+        if not known and is_sender(text):
+            target, args = _check, (chat_id, ui, held, "", text.strip())
+        else:
+            more = f"{held}\n\n{TEXT['fr' if agents._guess_lang(held) == 'fr' else ui]['more']} {text.strip()})"
+            target, args = _check, (chat_id, ui, more, "", known)
     elif wants_check(msg, text):
         target, args = _check, (chat_id, ui, text, photo_id)
     else:

@@ -135,13 +135,13 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const gate = live.find((l) => l.action === "verdict_gate");
   const early = gate ? (() => { try { return JSON.parse(gate.output_summary || "{}").verdict as string; } catch { return ""; } })() : "";
 
-  async function go(who = sender) {
-    if (!text.trim() && !file) return;
+  async function go(who = sender, body = text) {
+    if (!body.trim() && !file) return;
     setBusy(true);
     setErr("");
     setLive([]);
     try {
-      const c = await streamCheck({ text, sender: who, language: lang, file }, (l) => setLive((x) => [...x, l]));
+      const c = await streamCheck({ text: body, sender: who, language: lang, file }, (l) => setLive((x) => [...x, l]));
       if (c.error) setErr(c.error);
       else setCard(c);
       top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -156,7 +156,11 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     return (
       <section className="hero report-wrap" ref={top} id="check">
         <VerdictReport card={card} t={t} onAgain={() => { setCard(null); setText(""); setSender(""); setFile(null); }}
-          askSender={(card.verdict === "cant_tell" || card.verdict === "suspicious") && !sender.trim() ? (who) => { setSender(who); setCard(null); go(who); } : undefined} />
+          askSender={card.ask_sender && !sender.trim() ? (who) => { setSender(who); setCard(null); go(who); } : undefined}
+          // the person's answer goes back to the agents with the message, so they judge both together
+          followUp={(a) => { const more = `${text}
+
+${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} />
       </section>
     );
   }
@@ -212,7 +216,14 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
         )}
         {err && <p className="error" role="alert">{err}</p>}
         <p className="privacy"><svg viewBox="0 0 24 24" aria-hidden><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>{t.privacy}</p>
-        {isIOS && <p className="ios-hint">{t.ios_share} <a href="https://t.me/checkam_bot" target="_blank" rel="noopener">@checkam_bot</a>.</p>}
+        {isIOS && (
+          // Apple keeps web apps out of the share menu; a one-time Shortcut puts CheckAm there for every app
+          <details className="ios-hint">
+            <summary>{t.ios_share_title}</summary>
+            <ol>{t.ios_share_steps.map((s) => <li key={s}>{s}</li>)}</ol>
+            <p>{t.ios_share_other} <a href="https://t.me/checkam_bot" target="_blank" rel="noopener">@checkam_bot</a>.</p>
+          </details>
+        )}
       </div>
     </section>
   );

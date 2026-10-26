@@ -26,7 +26,7 @@ class Pacer:
 
     def __init__(self, key: str, rpm: float):
         self.key, self.gap, self.base = key, 60.0 / rpm, 60.0 / rpm
-        self.next = 0.0
+        self.next, self.strikes = 0.0, 0
         self.lock = threading.Lock()
 
     def wait(self, deadline: float) -> bool:
@@ -40,9 +40,16 @@ class Pacer:
         time.sleep(start - now)
         return True
 
-    def refused(self) -> None:
+    def refused(self, retry_after: float | None = None) -> None:
+        """A refused key sits out its cooldown, so the next try goes to another key instead of knocking again."""
         with self.lock:
             self.gap = min(self.gap * 2, 10.0)
+            self.strikes += 1
+            rest = retry_after if retry_after else min(5.0 * 2 ** (self.strikes - 1), 60.0)
+            self.next = max(self.next, time.monotonic() + rest)
+
+    def served(self) -> None:
+        self.strikes = 0
 
 
 # several keys (comma-separated) share the load, each at its own pace
@@ -74,13 +81,17 @@ def _post(path: str, body: dict, timeout: float) -> dict:
                 r = _client.post(f"{config.MODEL_BASE_URL.rstrip('/')}{path}", json=body, timeout=left,
                                  headers={"Authorization": f"Bearer {pacer.key}"})
             if r.status_code == 429:
-                pacer.refused()
-            if r.status_code == 429 or r.status_code >= 500:
+                wait = r.headers.get("retry-after", "")
+                pacer.refused(float(wait) if wait.replace(".", "", 1).isdigit() else None)
+                last = "429 on one key, trying the next"
+                continue  # the refused key is benched; the next turn goes to another key at once
+            if r.status_code >= 500:
                 raise httpx.HTTPStatusError(f"{r.status_code}", request=r.request, response=r)
             r.raise_for_status()
             out = r.json()
             if "choices" not in out and "data" not in out:
                 raise ValueError(f"no choices in reply: {str(out)[:120]}")
+            pacer.served()
             return out
         except httpx.HTTPStatusError as e:
             last = e

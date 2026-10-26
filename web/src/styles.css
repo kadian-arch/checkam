@@ -472,3 +472,15 @@ a.primary, a.ghost { text-decoration: none; }
 .chip-btn:hover { border-color: var(--signal); }
 .ios-hint { margin-top: 10px; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .ios-hint a { color: var(--signal); }
+
+.questions { margin: 4px 0 12px; padding-left: 20px; display: grid; gap: 6px; color: var(--paper); }
+.ask textarea { width: 100%; margin-bottom: 10px; }
+
+.ios-hint summary { cursor: pointer; color: var(--paper); font-weight: 600; }
+.ios-hint ol { margin: 10px 0; padding-left: 20px; display: grid; gap: 6px; }
+
+.flag { margin-top: 18px; text-align: center; }
+.flag-box { display: grid; gap: 8px; max-width: 520px; margin: 0 auto; }
+.flag-box .row { justify-content: center; flex-wrap: wrap; gap: 8px; }
+.tbl .actions { white-space: nowrap; display: flex; gap: 6px; }
+.tbl input.mini { width: 100%; min-width: 120px; }

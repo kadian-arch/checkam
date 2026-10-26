@@ -16,7 +16,7 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 | | |
 |---|---|
 | Who it is for | People who receive scam messages (the citizen check), and fraud analysts, CERT staff and fact-checkers (the analyst desk) |
-| Problem | Mobile money scams reach every part of Cameroon, and victims face them alone. In our field survey, with reports from 8 of the country's 10 regions, more than half had lost money or come close, 6 in 10 told only their family, about 1 in 10 reported it to their operator and 85% said they would use a free checker. The same scam hits thousands of people separately, and nobody sees the campaign |
+| Problem | Mobile money scams reach every part of Cameroon, and victims face them alone. In our field survey (68 people, most in the South-West, 8 regions in all), 32 of the 60 who described a scam had lost money or nearly did, 38 told their family, only 7 told their operator, and 43 said they would use a free checker (15 more said maybe). The same scam hits thousands of people separately, and nobody sees the campaign |
 | What goes in | A message or a screenshot (citizen); a campaign to investigate (analyst) |
 | What comes out | A verdict card with evidence, the real operator message it imitates, safe next steps; a campaign dossier and a published alert |
 | Why agents | The answer needs several sources that disagree (scam reports, public alerts, genuine operator messages, earlier checks), a link across time (campaigns), and someone arguing the other side before a citizen is told "this is a scam" |
@@ -29,10 +29,14 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 - **Signed answers.** Every answer has a link like `checkam.me/v/C-1a2b3c4d`, signed with CheckAm's Ed25519 key. A doctored "CheckAm says it's real" screenshot cannot produce a valid link, and anyone can paste the message to confirm it is the one that was checked. The message itself is never shown.
 - **Signed, hash-chained public alerts.** Analysts publish alerts only with a Scout-signed contract and an approval; each alert is signed and chained to the one before, so nobody can quietly edit or remove one.
 - **Scam radar.** The home page shows which scams are going round this week, counted from people's own anonymous checks.
-- **It answers like a person on Telegram.** It tells a question from a message to check, edits one message from "Checking…" to the answer with live progress, asks "who sent it?" when that would settle it, and in groups only speaks when called.
+- **It asks before it guesses.** When a message is too thin to judge, the answer says "need more details" and the agents ask the one or two questions that would settle it (who sent it, what it asks you to do, whether the money is really in your balance). The person answers in their own words, on the site or the bot, and the agents check again with the answer.
+- **A check you can do yourself, for every kind of scam.** Money received, account blocked, an agent who will call, a prize, a relative in trouble, a new number, a withdrawal to approve, a fine from the police or customs, threats, a SIM change, romance, a parcel held, a loan fee, an official communiqué, a job or scholarship: each claim comes with the one official check that settles it, such as dialing *126# yourself or calling the old number you know.
+- **It learns from analysts (Meterless H-MEM).** Under any answer, a person can say it looks wrong. That waits for an analyst; what the analyst confirms is remembered, and similar messages later recall it as evidence. A scammer cannot teach it that their own message is fine.
+- **It answers like a person on Telegram.** It tells a question from a message to check, edits one message from "Checking…" to the answer with live progress, asks its follow-up questions when they would settle it, and in groups only speaks when called.
 - **Advice that fits the scam.** A visa scam gets "check canada.ca yourself, never pay a processing fee"; a "sent by mistake" message gets "dial *126# yourself to see your real balance". Official numbers come from a fixed, validated list, never from the model.
 - **Instant for repeats.** The same scam reaches thousands of phones; a message checked in the last hours is answered in about a second and says so.
-- **Built for every phone.** Works from 320 px screens up, light or dark following the phone, installs as an app with a one-tap Paste button (Android can share a message straight to it; on iPhone, Apple keeps web apps out of the share sheet, so you forward the message to the Telegram bot in two taps), English or French following the phone.
+- **Built for every phone.** Works from 320 px screens up, light or dark following the phone, installs as an app, English or French following the phone. Four ways in: a one-tap Paste button, a screenshot (read by Nemotron VL, with Tesseract OCR on the server when the model is busy), Share → CheckAm from any app (Android directly; iPhone through a one-minute Apple Shortcut the site walks you through), or forwarding to the Telegram bot.
+- **Its French is checked word by word.** Anything the model writes is checked against full French and English dictionaries before a person sees it; text in the wrong language, with a lost accent ("telephone") or a garbled one ("reù") is replaced by our own sentence, written in both languages.
 
 ## How it works
 
@@ -50,9 +54,9 @@ CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pa
 
 | Agent | Job | Can block, retry or send back? |
 |---|---|---|
-| **Intake** | Reads text or a screenshot (Nemotron VL), strips hidden characters, turns phone numbers into the dataset's HMAC codes, finds links, asks and brands. Scout screens the message for instructions aimed at AI | Scout can block: a verdict-tampering attempt becomes evidence of a scam |
+| **Intake** | Reads text or a screenshot (Nemotron VL, Tesseract OCR as fallback), strips hidden characters, turns phone numbers into the dataset's HMAC codes, finds links, asks and brands. Scout screens the message for instructions aimed at AI | Scout can block: a verdict-tampering attempt becomes evidence of a scam |
 | **Planner** | Forms hypotheses and chooses tools (Nemotron Lightning), never fewer than the facts call for | Re-plans when the Critic objects |
-| **Investigator** | Runs the tools in parallel: number and link history, site vetting (claimed institution against the link, site age from the domain registry), similar scam wording (Nemotron embeddings), the genuine twin, the sender, a fraud analyst's reading (Nemotron Super), campaign membership (World Model), scale of the scam type. All data through Zetaris | One failing tool never stops the run |
+| **Investigator** | Runs the tools in parallel: number and link history, site vetting (claimed institution against the link, site age from the domain registry), similar scam wording (Nemotron embeddings), the genuine twin, the sender, a fraud analyst's reading (Nemotron Super, given the closest real labelled scams and genuine messages to compare with), campaign membership (World Model), what analysts already confirmed (H-MEM), scale of the scam type. All data through Zetaris | One failing tool never stops the run |
 | **Critic** | Re-counts every number claim in Zetaris itself, rejects claims without an evidence row, overrules look-alike findings when the message only routes to official channels or comes from a registered sender and asks for nothing that costs money, argues the message is genuine whenever the evidence changes, asks for missing evidence | **Yes:** rejects findings, sends work back to the Planner (max 3 rounds), gates the verdict |
 | **Reporter** | Writes the answer from accepted findings only, in plain English or French, about this message; picks next steps for the kind of scam from a fixed list of official channels, never from the model; Nemotron safety checks the reply; signs the answer | Falls back to templates if the safety check fails |
 
@@ -64,9 +68,12 @@ Every step of every run is a line in `logs/trace-<run_id>.jsonl` and in the app 
 |---|---|
 | **Zetaris** | The source of record. The Stop Arnaque 237 tables live in a Zetaris database (`STOP_ARNAQUE`, five tables registered from the customer-data volume) and every agent query goes through Zetaris over JDBC, with REST as a fallback. The Critic re-queries Zetaris to verify the Investigator. Without Zetaris the live system has no evidence |
 | **Meterless: World Model** | The campaign graph (`engines/world-model`). Reports, alerts and citizen checks are observations with content-derived ids; numbers and links are entities; clustering follows spec 4.3 (signature entities, then wording Jaccard ≥ 0.5 or Nemotron embedding cosine ≥ 0.85, with a 0.82 review band). Idempotent ingest, bitemporal edges, audit log, debounced writes. **Passes the official conformance suite 8/8** |
+| **Meterless: H-MEM** | Memory of what analysts confirm (`engines/h-mem`, the sponsor's reference implementation unchanged, our service around it). A citizen's "this looks wrong" waits in a review queue; an analyst's confirmation, correction or published alert becomes a memory with provenance; the Investigator recalls the closest ones on every check; a daily sleep cycle settles what keeps proving right and lets one-offs fade; every change is in the trust ledger. **Passes the official conformance suite 13/13** |
 | **Meterless: Scout Intent** | Intent, guard and contracts (`engines/scout-intent`). Screens every pasted message (injection, role confusion, verdict tampering, hidden bidi characters); a publish needs a Scout-signed contract, an operator-review approval and a verified signature. **Official eval harness: 1.00 on intent top-1, top-3, injection precision, injection recall and tool precision**; stage-1 scan 0.2 ms |
-| **NVIDIA Nemotron** | Nemotron 3.5 Super VL (screenshots, Critic), Nemotron 3.5 Lightning (extraction, planning, writing), Nemotron 3.5 Embed (scam wording similarity and campaign clustering), Nemotron 3.5 Content Safety (every reply) |
+| **NVIDIA Nemotron** | Nemotron 3.5 Super VL (screenshots, fraud analyst reading, Critic), Nemotron 3.5 Lightning (extraction, planning, writing), Nemotron 3.5 Embed (scam wording similarity and campaign clustering), Nemotron 3.5 Content Safety (every reply) |
 | **Cursor** | Used to set up the project at kickoff. The build itself was done with Claude Code after the organisers made Cursor optional |
+
+Details: [docs/ZETARIS.md](docs/ZETARIS.md) and [docs/METERLESS.md](docs/METERLESS.md).
 
 ## Run it
 
@@ -142,7 +149,9 @@ The sender shown on the phone is given, as a person would type it. Precision: of
 |---|---|
 | Zetaris JDBC down | REST, then the local parquet sample; the trace shows which backend answered |
 | Nemotron down or slow | Rule-based extraction, plan and templates; the verdict still rests on data |
-| World Model or Scout down | Skipped after a 1.5 s connect timeout for 30 s; the check still runs |
+| World Model, Scout or H-MEM down | Skipped after a 1.5 s connect timeout for 30 s; the check still runs |
+| Screenshot model busy or down | Tesseract OCR reads the screenshot on the server; if nothing can read it, the person is told so and asked to paste the text |
+| One NVIDIA key refused (rate limit) | That key sits out its cooldown and the call moves to the next key at once |
 | Model writes something unsafe | Content-safety check replaces it with a template |
 | Message tries to steer the AI | Scout flags it; the Reporter shows it as evidence of a scam |
 

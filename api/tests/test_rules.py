@@ -320,3 +320,30 @@ def test_garbled_french_accents_are_caught_but_real_words_pass():
     assert agents.garbled("Composez vous-mîme le *126#")
     for ok in ["Où est l'argent ?", "Une boîte de réception", "Le maître du jeu", "S'il vous plaît, vérifiez", "Ne renvoyez rien, même pas 500 F"]:
         assert not agents.garbled(ok), ok
+
+
+def test_every_kind_of_claim_from_an_unknown_sender_comes_with_a_check_not_a_shrug():
+    from checkam import claims
+    for m in ["Votre compte Mobile Money a été bloqué. Un agent va vous appeler.",
+              "Maman c'est moi, j'ai un nouveau numéro, mon téléphone est gâté",
+              "Votre colis est retenu à la douane, payez les frais de dédouanement",
+              "Confirmez le retrait de 50 000 FCFA en tapant votre code",
+              "Félicitations ! Vous avez été sélectionné au tirage au sort MTN"]:
+        assert claims.found(m), m
+        assert agents.run_check(m, persist=False)["verdict"] in ("suspicious", "scam"), m
+
+
+def test_too_little_to_judge_gets_questions_not_a_verdict():
+    card = agents.run_check("Le directeur général de la Cameroon Civil Aviation Authority (CCAA), Etablissement public", persist=False)
+    if card["verdict"] == "cant_tell":
+        assert card["questions"]
+
+
+def test_naming_an_operator_is_not_claiming_to_be_it():
+    f = {"text": "Hello, I mistakenly sent 25,000 FCFA to your MoMo number. Please send it back.", "brands": ["mtn"], "claimed_sender": None}
+    assert not agents.speaks_as(f, "mtn")
+    assert agents.speaks_as({**f, "text": "MTN: votre compte Mobile Money sera suspendu"}, "mtn")
+    assert agents.speaks_as({**f, "text": "Cher client, votre compte Orange Money est bloqué", "brands": ["orange"]}, "orange")
+    assert agents.speaks_as({**f, "text": "Vous avez reçu 30 000 FCFA. Nouveau solde : 31 250 FCFA"}, "mtn")
+    from checkam import claims
+    assert claims.found("Hello, I mistakenly sent 25,000 FCFA to your MoMo number, it is my child's hospital money")[0] == "sent_by_mistake"

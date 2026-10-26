@@ -31,7 +31,7 @@
   "verdict_scam": "Arnaque",
   "verdict_suspicious": "Prudence",
   "verdict_looks_genuine": "Semble authentique",
-  "verdict_cant_tell": "Incertain",
+  "verdict_cant_tell": "Plus de détails svp",
   "confidence": "de confiance",
   "why": "Pourquoi nous le disons",
   "do_now": "Que faire maintenant",
@@ -60,7 +60,7 @@
   "analyst_cta": "Connexion analyste",
   "install_title": "Gardez CheckAm à portée de main",
   "install_sub": "Installez-le comme une application. Sur Android, depuis n'importe quel SMS ou message WhatsApp, touchez Partager → CheckAm. Sur tout téléphone, copiez le message et touchez Coller, ou transférez-le à @checkam_bot sur Telegram.",
-  "install_ios": "Sur iPhone : dans Safari, touchez Partager, puis Sur l'écran d'accueil. Pour vérifier un message, copiez-le et touchez Coller, ou transférez-le à @checkam_bot.",
+  "install_ios": "Sur iPhone : dans Safari, touchez Partager, puis Sur l'écran d'accueil. Pour vérifier un message, copiez-le et touchez Coller, envoyez une capture, ou ajoutez CheckAm au menu Partager (étapes sous la zone de message).",
   "footer_data": "Construit sur Stop Arnaque 237, un jeu de données ouvert de vraies arnaques signalées au Cameroun.",
   "error": "Un problème est survenu. Vérifiez votre connexion et réessayez.",
   "lang": "English",
@@ -143,5 +143,23 @@
   "radar_sub": "{n} arnaques repérées ces {days} derniers jours, par type",
   "not_signed": "Non signée par CheckAm",
   "paste_btn": "Coller",
-  "ios_share": "Sur iPhone : appuyez longuement sur le message, touchez Transférer ou Partager, choisissez Telegram et envoyez-le à"
+  "followup_title": "Quelques questions pour que les agents puissent trancher",
+  "followup_placeholder": "Répondez avec vos mots, même brièvement",
+  "followup_prefix": "(Ce que je peux ajouter :",
+  "ios_share_title": "Ajoutez CheckAm au menu Partager de votre iPhone (une fois, 1 minute)",
+  "ios_share_steps": [
+    "Ouvrez l'application Raccourcis et touchez + pour créer un raccourci.",
+    "Touchez le bouton ⓘ et activez Afficher dans la feuille de partage. Sous Recevoir, gardez seulement Texte.",
+    "Ajoutez l'action Encoder en URL. Elle encode l'entrée du raccourci.",
+    "Ajoutez l'action Ouvrir les URL et tapez https://checkam.me/?text= puis insérez juste après Texte encodé en URL.",
+    "Nommez-le CheckAm. Ensuite dans Messages, WhatsApp ou Mail : appuyez longuement sur un message, touchez Partager, puis CheckAm."
+  ],
+  "ios_share_other": "Pas le temps ? Copiez le message et touchez Coller ci-dessus, envoyez une capture, ou transférez-le à",
+  "flag_open": "Cette réponse vous semble fausse ?",
+  "flag_ask": "Dites-nous ce que vous savez. Un analyste anti-fraude va l'examiner ; votre réponse reste la même en attendant.",
+  "flag_note": "Facultatif : pourquoi le pensez-vous",
+  "flag_is_scam": "C'est une arnaque",
+  "flag_is_genuine": "C'est authentique",
+  "flag_not_sure": "Pas sûr",
+  "flag_thanks": "Merci. Un analyste anti-fraude va l'examiner, et ce qu'il confirme aidera la prochaine personne."
 }
