@@ -4,16 +4,16 @@
     "short_codes": ["*126#"], 
     "whatsapp": ["650528787"], 
     "websites": ["mtn.cm"], 
-    "numbers": ["8787"],
+    "customer care": ["8787"],
     "sources": ["https://mtn.cm/help/contact-us/", "https://mtn.cm/fr/helppersonal/how-can-i-find-my-mtn-phone-number/"]
     }, 
 
   "orange": {
     "sender_names": ["Orange Money", "Orange"],
     "short_codes": ["#150#"], 
-    "whatsapp": [""], 
+    "whatsapp": ["698717171"], 
     "websites": ["orange.cm"], 
-    "numbers": ["8900"],
+    "customer care": ["8900"],
     "sources": [  "https://www.orange.cm/fr/assistance/nous-contacter.html", "https://www.orange.cm/fr/infos-et-numeros-utiles.html"]
     }, 
 
@@ -22,7 +22,7 @@
     "short_codes": ["*825#"], 
     "whatsapp": ["620105050"], 
     "websites": ["camtel.cm"], 
-    "numbers": ["828"],
+    "customer care": ["828"],
     "sources": [ "https://camtel.cm/support", "https://www.camtel.cm/support"]
     }
 }
