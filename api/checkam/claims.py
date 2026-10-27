@@ -9,6 +9,13 @@ import re
 # name: (pattern, check en, check fr, question en, question fr)
 CLAIMS = {
     # the most specific claims come first: the first one found decides the check the person is given
+    "code_by_mistake": (
+        r"\b(code|otp)\b[^.\n]{0,60}\b(by mistake|par erreur|forward|transf[ée]r|renvo|send (?:it|me|the)|envoie[sz]?[- ]moi|lis[- ]moi|read (?:it|me))"
+        r"|\b(forward|transf[ée]r\w*|renvo\w*|send)\b[^.\n]{0,30}\b(the code|le code|ce code|that code)\b",
+        "A code you receive by SMS is the key to your own account (WhatsApp, MoMo, your bank). Never forward it or read it out to anyone, even a friend: whoever asks is trying to take over your account",
+        "Un code reçu par SMS est la clé de votre propre compte (WhatsApp, MoMo, votre banque). Ne le transférez et ne le lisez jamais à personne, même à un ami : celui qui le demande veut prendre votre compte",
+        "Did someone ask you to forward or read out a code you received?",
+        "Quelqu'un vous a-t-il demandé de transférer ou de lire un code que vous avez reçu ?"),
     "sent_by_mistake": (
         r"\b(by mistake|mistakenly|wrongly sent|sent (?:it )?(?:to you )?wrong|wrong number|par erreur|erron[ée]ment|je me suis tromp[ée]|trompé de num)",
         "Dial your operator's balance code yourself (*126# for MTN, #150# for Orange). If the money is not there, it never came. If it is, a real mistake is reversed by the operator: never send it back yourself",
@@ -119,9 +126,15 @@ CLAIMS = {
 _COMPILED = {k: re.compile("(?i)" + v[0]) for k, v in CLAIMS.items()}
 
 
+# "do not forward this code", "votre compte n'est pas bloqué": a denied claim is advice, not a claim
+_DENIED = re.compile(r"(?i)\b(do not|don'?t|never|not|jamais|ne|pas)\b|\bn['’]")
+
+
 def found(text: str) -> list[str]:
     """Every claim the message makes, in the order of the table."""
-    return [k for k, rx in _COMPILED.items() if rx.search(text or "")]
+    text = text or ""
+    return [k for k, rx in _COMPILED.items()
+            if any(not _DENIED.search(text[max(0, m.start() - 25):m.end()]) for m in rx.finditer(text))]
 
 
 def check(name: str, lang: str) -> str:

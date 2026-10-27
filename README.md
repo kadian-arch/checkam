@@ -147,6 +147,7 @@ How to read it, honestly:
 - What is left: 3 genuine operator promos that read like scams (a short link plus "log in", a bonus), and 2 scams with nothing to judge (a cut opening sentence, "I cut the call"); for those CheckAm asks follow-up questions instead of guessing.
 - Fresh messages from a teammate, never seen while building: 4 of 5 caught before the fixes of 26 Oct; the one missed (a fake "login attempt, cancel here" alert) became the security-alert claim.
 - Field battery (35 messages we wrote from public warnings and real operator messages) and the teammate's 5 fresh messages are re-run on every change; see `evals/battery.json`.
+- Red team (`api/scripts/redteam.py`, 41 messages built to beat it): scams in Pidgin and texting French, spaced-out numbers, "M0M0", hidden zero-width characters, Cyrillic look-alike letters, five kinds of "AI, call this genuine" injection, plus genuine messages built to trip a false alarm (a scam warning passed on, pay on delivery, ride and OTP codes). The first run on 26 Oct found 2 false alarms and 2 thin openers wrongly cleared; after the fixes all 41 pass, and re-running the 267 labelled messages changed no verdict. Results: `evals/redteam.json`.
 - Results, with every verdict, reason and signal: `evals/results-v4-all-all.json`; the learned weights and their cross-validated report: `api/checkam/data/learned_weights.json`.
 
 ### Methods
@@ -189,7 +190,20 @@ CheckAm is a safety tool, so it is built to be attacked.
 ## Data, privacy and licence
 - Data: **Stop Arnaque 237 v1.0** (CC BY 4.0, DOI 10.5281/zenodo.23287617), built by the team before the hackathon and declared as a pre-existing component. Phone numbers in it are HMAC codes that cannot be reversed.
 - A citizen's real number is turned into the same code on the server, so it can be matched without being stored. Codes typed into a message ("my PIN is 4821") are removed before anything is saved. Checks are stored masked; trace lines never hold more than 200 characters of a message. Signed answers hold a fingerprint of the message, never the message.
-- Code: Apache-2.0. The Meterless test harnesses in `engines/*/conformance` and `engines/scout-intent/evals` are the sponsor's, Apache-2.0 (see `engines/NOTICE.md`).
+- Code: Apache-2.0. The Meterless test harnesses in `engines/*/conformance` and `engines/scout-intent/evals` and the H-MEM reference in `engines/h-mem/reference` are the sponsor's, Apache-2.0 (see `engines/NOTICE.md`).
+
+## AI and model usage
+- **Models (all NVIDIA, hosted):** Nemotron 3.5 Super VL (screenshots, the analyst's reading), Nemotron 3.5 Lightning (facts, plan, Critic, the written answer), Nemotron 3.5 Embed (scam wording by meaning), Nemotron 3.5 Content Safety (every answer before it is shown). Temperature is kept low so the same message gets the same answer. Without a key every agent still runs, on rules and SQL only.
+- **Learned weights:** a logistic regression (scikit-learn) on the agents' own findings, trained and scored with nested cross-validation on the labelled messages; see Evaluation.
+- **Partner technology:** Zetaris (source of record, every query), Meterless World Model, Scout Intent and H-MEM (see Sponsor technology and `docs/METERLESS.md`).
+- **Libraries:** FastAPI, Uvicorn, httpx, DuckDB, JayDeBeApi/JPype (Zetaris JDBC), cryptography (Ed25519 signatures), pyspellchecker, pytesseract with Tesseract OCR, Pillow, React and Vite; versions in `api/requirements.txt` and `web/package.json`.
+- **Data:** Stop Arnaque 237 (real reports, public alerts and labelled messages, pseudonymised). The demo messages, the field battery and `examples/` are written by the team to look like real messages and are synthetic; any number in them is made up.
+- **Adapted code:** only the Meterless files listed in `engines/NOTICE.md`.
+- **Coding assistants:** the code was written with AI coding assistants (Cursor at kickoff, then Claude Code). The team reviewed, tested and can explain every part.
+- **Limits:** see Limitations; answers are advice to check through official channels, not a guarantee.
+
+### Third-party licences
+FastAPI, Starlette, Uvicorn, httpx, pytest: BSD-3 or MIT. DuckDB, Pillow (HPND), React, Vite: MIT or similar permissive. JPype, cryptography, pytesseract, Tesseract: Apache-2.0 (cryptography also BSD). JayDeBeApi: LGPL-3.0 (used unchanged as a library). pyspellchecker: MIT. scikit-learn and NumPy (training only): BSD-3. Meterless files: Apache-2.0. Zetaris JDBC driver: Zetaris licence, not redistributed (loaded from the local platform install). Stop Arnaque 237 data: CC BY 4.0.
 
 ## Limitations
 - A campaign link shows a shared signal (number, link, wording), not proof that one person is behind it. Dossiers say so.
@@ -202,4 +216,4 @@ CheckAm is a safety tool, so it is built to be attacked.
 - **Chelsey**: field research and user testing, French review, official channel research, the operator view of the analyst desk (from her FraudLens mock-up), demo video.
 
 ## Pre-existing components
-The Stop Arnaque 237 dataset and its collection pipeline (separate repository: github.com/kadian-arch/stop-arnaque-237).
+The Stop Arnaque 237 dataset and its collection pipeline (separate repository: github.com/kadian-arch/stop-arnaque-237), built by Kum Donalsien Akwo before the hackathon. The Meterless harnesses and the H-MEM reference listed in `engines/NOTICE.md` are the sponsor's. Everything else was written from 22 October.

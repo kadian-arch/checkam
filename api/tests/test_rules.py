@@ -360,3 +360,34 @@ def test_a_fake_security_alert_with_a_cancel_link_is_phishing():
 def test_a_short_link_from_a_registered_sender_is_not_a_red_flag_by_itself():
     m = "YaMo Pitch registrations have been extended! Students, be among the 500 selected projects, apply before June 30 here: https://bit.ly/4vsdBlR"
     assert agents.run_check(m, sender="YaMo Class", persist=False)["verdict"] == "looks_genuine"
+
+
+def test_a_scam_warning_passed_on_is_not_the_scam_it_warns_about():
+    warning = ("Attention: scammers are sending messages saying they sent money by mistake. Never send money back, "
+               "check your balance with *126# first. Share this with your family.")
+    assert agents.run_check(warning, persist=False)["verdict"] in ("looks_genuine", "cant_tell")
+    # the same trick with somebody to pay is still the trick
+    assert agents.run_check("Beware! I sent 20 000 by mistake to your MoMo, send it back to 677 21 43 65", persist=False)["verdict"] in ("suspicious", "scam")
+
+
+def test_pay_on_delivery_from_a_registered_shop_is_not_a_payment_demand():
+    m = "Jumia: your order 3381229 is out for delivery today. Pay on delivery: 18 500 FCFA. Your delivery code is 7744."
+    assert agents.run_check(m, sender="Jumia", persist=False)["verdict"] == "looks_genuine"
+    f = {"asks": ["send_money"], "sender_kind": "registered", "numbers": [], "body_numbers": 1, "links": [], "text": m + " Pay to 677 11 22 33"}
+    assert "send_money" in agents.risky_asks(f)
+
+
+def test_an_urgent_or_check_your_momo_opener_is_never_cleared_and_always_explained():
+    for m in ["Call me back please, it's urgent.", "Please check your MoMo.", "Vérifie ton compte OM stp"]:
+        card = agents.run_check(m, persist=False)
+        assert card["verdict"] != "looks_genuine", m
+        assert card["why"] or card["questions"], m
+
+
+def test_asking_for_a_code_sent_by_mistake_is_account_takeover():
+    from checkam import advice, claims
+    m = "I sent you a 6-digit code by mistake on WhatsApp, please forward it to me quickly"
+    assert claims.found(m)[0] == "code_by_mistake"
+    assert advice.scheme_of(m, []) == "credential"
+    assert "code_by_mistake" not in claims.found("Your MTN verification code is 482913, do not forward it to anyone")
+    assert "account_blocked" not in claims.found("Votre compte n'est pas bloqué")

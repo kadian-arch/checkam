@@ -61,6 +61,14 @@ GAIN_VERB = re.compile(r"(?i)\b(get|earn|receive|win|gain|withdraw|profit|return
 AMOUNT = re.compile(r"(?i)(\d{1,3}(?:[ .,]\d{3})+|\d+)\s*(?:k\b|f\b|frs?\b|fcfa|f ?cfa|xaf|francs?)")
 # a dial code that carries a phone number moves money to that person
 USSD_TO_PERSON = re.compile(r"\*\d{2,4}(?:\*[^#\s]{0,12}){0,4}\*(?:\[PHONE:[^\]]+\]|(?:\+?237)?[26]\d{8})")
+# paid to the courier in hand, after you see the item: no number or link to send money to
+PAY_ON_DELIVERY = re.compile(r"(?i)\b(pay(?:ment)? on delivery|cash on delivery|paiement [àa] la livraison|payez [àa] la livraison|pay the (?:rider|courier|driver))\b")
+# a warning passed on to others: it names the trick to refuse it, it does not make the claim
+WARNING = re.compile(r"(?i)\b(scammers?|fraudsters?|arnaqueurs?|escrocs?|brouteurs?|beware|m[ée]fiez[- ]vous|attention aux|watch out for|be careful of|"
+                     r"never send|n'envoyez jamais|ne renvoyez jamais|never give|ne donnez jamais|share this with|partagez ce message|faites passer)\b")
+# the opener of a scam that comes in the next message: "it's urgent, call me", "check your MoMo"
+PRIMER = re.compile(r"(?i)\b(urgent|urgence|urgently|vite|quickly|asap|imm[ée]diatement|right away|tout de suite)\b"
+                    r"|\b(check|v[ée]rifie[rz]?|regarde[rz]?|look at)\b\W+(?:\w+\W+){0,3}(momo|om|mobile money|orange money|balance|solde|account|compte|phone|t[ée]l[ée]phone)\b")
 OFFICIAL_SENDERS = re.compile(r"(?i)^\s*(mobile ?money|mtn ?momo|mtn|orange ?money|orange|camtel|blue|8787|8000|express union|ecobank|uba|afriland|nexttel)\s*$")
 
 
@@ -857,8 +865,9 @@ def risky_asks(f: dict) -> set[str]:
     the official app, MoMo Pay) from a sender a phone cannot fake, with no personal number or outside link to
     send it to, is how real payments are made, so it is not on this list."""
     asks = set(f["asks"]) & {"pin", "send_money", "call_back", "personal_info"}
-    if ("send_money" in asks and f.get("sender_kind") in ("official", "registered") and OFFICIAL_ROUTE.search(f["text"])
-            and not f.get("body_numbers", len(f["numbers"])) and not f["links"]):
+    nowhere_to_send = not f.get("body_numbers", len(f["numbers"])) and not f["links"]
+    if "send_money" in asks and nowhere_to_send and f.get("sender_kind") in ("official", "registered") and (
+            OFFICIAL_ROUTE.search(f["text"]) or PAY_ON_DELIVERY.search(f["text"])):
         asks.discard("send_money")
     return asks
 
@@ -903,7 +912,10 @@ def arbitrate(case: Case, trace: Trace) -> None:
     # anyone can type a dial code into a text: it vouches for a message that asks nothing and promises
     # nothing; free money "for dialing a code" needs a sender a personal phone cannot fake
     trusted = case.facts.get("sender_kind") in ("official", "registered")
-    credit = unverified_credit(case.facts)
+    # an awareness message names the trick ("never send money back") and gives nobody to pay or call
+    warns = bool(WARNING.search(case.facts["text"])) and not risky_asks(case.facts) and not case.facts["links"] \
+        and not case.facts.get("body_numbers", len(case.facts["numbers"]))
+    credit = unverified_credit(case.facts) and not warns
     if credit and not any(f.tool == "unverified_credit" for f in case.findings):
         op = next((b for b in case.facts["brands"] if b in ("mtn", "orange")), "mtn")
         code = "#150#" if op == "orange" else "*126#"
@@ -917,7 +929,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
             "Les vrais messages « vous avez reçu de l'argent » viennent du système de l'opérateur sous son propre nom, jamais d'un numéro personnel. Celui-ci a été tapé par une personne"),
             "scam", "strong", [{"table": "message", "id": "sender", "detail": privacy.mask(case.facts.get("sender") or "")}], status="accepted"))
         credit = True
-    opportunity = advice.scheme_of(case.facts["text"], [], "") in ("job", "visa_scholarship") and not trusted
+    opportunity = advice.scheme_of(case.facts["text"], [], "") in ("job", "visa_scholarship") and not trusted and not warns
     if opportunity and not any(f.tool == "opportunity" for f in case.findings):
         claim = linkcheck.claimed(case.facts["text"], case.language)
         if not (claim and any(linkcheck.belongs(urlparse(u if "://" in u else "http://" + u).hostname or "", claim[1]) for u in case.facts["links"])):
@@ -926,7 +938,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
                 "Les annonces d'emploi, de formation et de bourse sont l'appât le plus courant au Cameroun. Les vraies sont publiées sur le site de l'employeur ou du ministère et ne demandent jamais de frais. Vérifiez là-bas avant de postuler ou de payer quoi que ce soit"),
                 "scam", "medium", [{"table": "message", "id": "scheme", "detail": "job or scholarship announcement"}], status="accepted"))
     # any other claim the person cannot see behind, from a sender anyone can type: never cleared on wording alone
-    said = [c for c in claims.found(case.facts["text"]) if c not in ("money_received", "opportunity")]
+    said = [] if warns else [c for c in claims.found(case.facts["text"]) if c not in ("money_received", "opportunity")]
     if said and not trusted and not any(f.tool == "claim" for f in case.findings):
         case.findings.append(Finding(_fid(), "claim", L(case,
             f"It makes a claim you cannot see behind, the kind scams are built on. Check it yourself: {claims.check(said[0], 'en')}",
@@ -950,7 +962,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
     # the "sent by mistake" opener cannot cost the reader money (a relative's news, a meeting time)
     quiet = (not f_["asks"] and not f_.get("promise") and not f_["links"] and not f_.get("body_numbers", len(f_["numbers"]))
              and not (f_["brands"] and THREAT.search(f_["text"]))
-             and not claimed_any and not f_.get("retold")
+             and not claimed_any and not f_.get("retold") and not PRIMER.search(f_["text"])
              and not re.search(r"(?i)erreur|mistake|wrong number|mauvais num", f_["text"]))
     harmless = harmless or quiet
     if not (strong_twin or official_only or harmless):
@@ -1162,6 +1174,12 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     if "pin" in case.facts["asks"]:
         why.insert(0, {"text": L(case, "It asks for a PIN or a secret code. No operator ever does that.", "Il demande un code secret. Aucun opérateur ne fait jamais ça."),
                        "weight": "strong", "evidence": []})
+    p = case.facts.get("learned_probability")
+    if verdict == "suspicious" and not why and p is not None:
+        # the learned weights raised it: say so, with their number, and that nothing in it proves it yet
+        why.append({"text": L(case, f"Nothing in it proves a scam yet, but messages built like this one were mostly scams in our labelled data: the weights learned from 267 checked messages put it at {round(p * 100)}%. Answer the questions below before you do anything.",
+                              f"Rien dedans ne prouve encore une arnaque, mais les messages construits comme celui-ci étaient surtout des arnaques dans nos données : les poids appris sur 267 messages vérifiés le placent à {round(p * 100)} %. Répondez aux questions ci-dessous avant de faire quoi que ce soit."),
+                    "weight": "weak", "evidence": [{"table": "learned_weights", "id": "probability", "detail": f"{p:.2f}"}]})
     headline = TEXT[verdict][lang]
     scheme = advice.scheme_of(case.facts["text"], case.facts.get("scam_types", []), case.facts.get("scheme", "")) if verdict in ("scam", "suspicious") else None
     if scheme:

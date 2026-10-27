@@ -22,7 +22,8 @@ SCHEMES = {
     "reversal": (r"par erreur|by mistake|mistaken|wrong number|wrong_number_reversal|renvoy|send (?:it )?back|rembours|refund|accidental (?:transfer|deposit|payment)|"
                  r"fake (?:credit|receipt|deposit)|faux re[çc]u|vous avez re[çc]u [\d .,]+ ?(?:xaf|fcfa|f) de|you have received [\d .,]+ ?(?:xaf|fcfa|f) from",
                  "money 'sent by mistake'", "l'argent « envoyé par erreur »"),
-    "credential": (r"\bpin\b|code secret|otp|mot de passe|password|credential_request|account_blocked|bloqu|suspend|fake_agent|agent|service client|customer care|sim_swap",
+    "credential": (r"\bpin\b|code secret|otp|mot de passe|password|credential_request|account_blocked|bloqu|suspend|fake_agent|agent|service client|customer care|sim_swap|"
+                   r"\d[- ]digit code|code (?:[àa] \d chiffres|de v[ée]rification)|verification code|forward (?:it|the code|me the code)|transf[ée]re[rz]?[- ]le",
                    "someone after your PIN or account", "quelqu'un qui veut votre code ou votre compte"),
     "prize": (r"gagn|won|winner|prize|lot |cadeau|gift|promo|f[ée]licitations|congratulations|anniversaire|tirage|fake_prize_promo",
               "a fake prize", "un faux gain"),

@@ -4,7 +4,7 @@
 #   docker run -p 8000:8000 --env-file .env checkam
 # Inside Docker on your laptop, Zetaris is reached at host.docker.internal (WITH_JAVA=1 for JDBC).
 
-FROM node:20-slim AS node
+FROM node:24.22.1-slim AS node
 WORKDIR /build
 COPY web/package*.json web/
 RUN cd web && npm ci
@@ -19,7 +19,7 @@ FROM python:3.12-slim
 ARG WITH_JAVA=0
 RUN if [ "$WITH_JAVA" = "1" ]; then apt-get update && apt-get install -y --no-install-recommends default-jre-headless && rm -rf /var/lib/apt/lists/*; fi
 # OCR for screenshots when the vision model cannot read them (English and French)
-RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra && rm -rf /var/lib/apt/lists/*
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 WORKDIR /app
 COPY api/requirements.txt api/requirements.txt
