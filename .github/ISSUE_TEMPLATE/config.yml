@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/kadian-arch/checkam/security/advisories/new
+    about: Report it privately, never in a public issue
+  - name: Report a scam to Stop Arnaque 237
+    url: https://github.com/kadian-arch/stop-arnaque-237
+    about: New scams go into the open dataset the agents search

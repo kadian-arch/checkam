@@ -2,6 +2,20 @@
 
 **Before you send, CheckAm.**
 
+[![CI](https://github.com/kadian-arch/checkam/actions/workflows/ci.yml/badge.svg)](https://github.com/kadian-arch/checkam/actions/workflows/ci.yml)
+[![Live](https://img.shields.io/website?url=https%3A%2F%2Fcheckam.me%2Fhealth&label=checkam.me&up_message=live&down_message=down)](https://checkam.me)
+[![Telegram](https://img.shields.io/badge/Telegram-%40checkam__bot-26A5E4?logo=telegram&logoColor=white)](https://t.me/checkam_bot)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](api/requirements.txt)
+[![Node](https://img.shields.io/badge/node-24-339933?logo=nodedotjs&logoColor=white)](Dockerfile)
+[![React](https://img.shields.io/badge/react-PWA-61DAFB?logo=react&logoColor=black)](web)
+[![Tests](https://img.shields.io/badge/tests-127%20passing-brightgreen)](api/tests)
+[![Red team](https://img.shields.io/badge/red%20team-41%2F41-brightgreen)](evals/redteam.json)
+[![Dataset DOI](https://img.shields.io/badge/data-10.5281%2Fzenodo.23287617-1682D4)](https://doi.org/10.5281/zenodo.23287617)
+[![Zetaris](https://img.shields.io/badge/data%20layer-Zetaris-6E3FF3)](docs/ZETARIS.md)
+[![Meterless](https://img.shields.io/badge/Meterless-World%20Model%20%C2%B7%20H--MEM%20%C2%B7%20Scout-111111)](docs/METERLESS.md)
+[![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203.5-76B900?logo=nvidia&logoColor=white)](#ai-and-model-usage)
+
 CheckAm is a multi-agent system for mobile money scams in Cameroon. A citizen pastes a suspicious SMS, WhatsApp message or screenshot and gets a verdict with the evidence behind every claim, in English or French. The agents also read messages written in Pidgin, the way many scams arrive. Every check is stored without the person's number and feeds an analyst desk, where the agents link reports, public alerts and citizen checks into campaigns, write a dossier and draft a public alert that a signed-in analyst approves and publishes.
 
 **Open Agent Hackathon 2026 · Track 02: The Agent That Can Explain Why · Team Ground Truth**
@@ -215,6 +229,9 @@ FastAPI, Starlette, Uvicorn, httpx, pytest: BSD-3 or MIT. DuckDB, Pillow (HPND),
 ## Team
 - **Kum Donalsien Akwo** (KAD): agents, Zetaris and Meterless integration, data, security, deployment.
 - **Chelsey**: field research and user testing, French review, official channel research, the operator view of the analyst desk (from her FraudLens mock-up), demo video.
+
+## Contributing and security
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before a pull request; it explains the one rule that matters most here: a wrong official number sends people to a scammer. A verdict that looks wrong goes in a "Wrong verdict" issue. A vulnerability goes to us privately, never in an issue: see [SECURITY.md](SECURITY.md). Everyone here follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Pre-existing components
 The Stop Arnaque 237 dataset and its collection pipeline (separate repository: github.com/kadian-arch/stop-arnaque-237), built by Kum Donalsien Akwo before the hackathon. The Meterless harnesses and the H-MEM reference listed in `engines/NOTICE.md` are the sponsor's. Everything else was written from 22 October.

@@ -1,0 +1,33 @@
+name: Bug report
+description: Something in the app, the Telegram bot or the analyst desk does not work
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options: [Web app (checkam.me), Telegram bot, Analyst desk, Local install, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open checkam.me\n2. Paste ...\n3. Tap Check it"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected and what happened
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Phone or browser
+      placeholder: Android 13, Chrome
+  - type: markdown
+    attributes:
+      value: A security problem? Do not post it here. See SECURITY.md.

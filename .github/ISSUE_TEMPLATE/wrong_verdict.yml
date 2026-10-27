@@ -1,0 +1,44 @@
+name: Wrong verdict
+description: CheckAm called a scam genuine, or a real message a scam
+title: "Wrong verdict: "
+labels: ["wrong-verdict"]
+body:
+  - type: markdown
+    attributes:
+      value: Replace every phone number with XXX before you paste. Never paste a PIN or a code you received.
+  - type: textarea
+    id: message
+    attributes:
+      label: The message
+      description: Exactly as you received it, with numbers replaced by XXX
+    validations:
+      required: true
+  - type: input
+    id: sender
+    attributes:
+      label: Who sent it
+      description: The sender shown on your phone (MTN, Orange, a number shown as XXX, a WhatsApp contact)
+  - type: dropdown
+    id: got
+    attributes:
+      label: What CheckAm said
+      options: [Scam, Suspicious, Be careful, Looks genuine]
+    validations:
+      required: true
+  - type: dropdown
+    id: truth
+    attributes:
+      label: What it really was
+      options: [A scam, A real message, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Signed answer link (optional)
+      description: The checkam.me/v/... link from "Signed answer"
+  - type: textarea
+    id: why
+    attributes:
+      label: How you know
+      description: For example, you checked *126# and the money was not there
