@@ -55,6 +55,8 @@ class Pacer:
 # several keys (comma-separated) share the load, each at its own pace
 _pacers = [Pacer(k.strip(), float(config.env("NVIDIA_RPM", "35"))) for k in config.MODEL_API_KEY.split(",") if k.strip()]
 _turn_lock = threading.Lock()
+# Meterless Nightshift's hotspot speaks the same API; it asks every app to name itself on each request
+_app_headers = {} if "api.nvidia.com" in config.MODEL_BASE_URL else {"meterless-app": "checkam", "meterless-scope": "user"}
 
 
 def _pacer(deadline: float) -> "Pacer | None":
@@ -79,7 +81,7 @@ def _post(path: str, body: dict, timeout: float) -> dict:
         try:
             with _slots:
                 r = _client.post(f"{config.MODEL_BASE_URL.rstrip('/')}{path}", json=body, timeout=left,
-                                 headers={"Authorization": f"Bearer {pacer.key}"})
+                                 headers={"Authorization": f"Bearer {pacer.key}", **_app_headers})
             if r.status_code == 429:
                 wait = r.headers.get("retry-after", "")
                 pacer.refused(float(wait) if wait.replace(".", "", 1).isdigit() else None)
