@@ -3,7 +3,7 @@
 **Before you send, CheckAm.**
 
 [![CI](https://github.com/kadian-arch/checkam/actions/workflows/ci.yml/badge.svg)](https://github.com/kadian-arch/checkam/actions/workflows/ci.yml)
-[![Live](https://img.shields.io/website?url=https%3A%2F%2Fcheckam.me%2Fhealth&label=checkam.me&up_message=live&down_message=down)](https://checkam.me)
+[![Live demo](https://img.shields.io/badge/live%20demo-checkam.me-F5A623)](https://checkam.me)
 [![Telegram](https://img.shields.io/badge/Telegram-%40checkam__bot-26A5E4?logo=telegram&logoColor=white)](https://t.me/checkam_bot)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)](api/requirements.txt)
