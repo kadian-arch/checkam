@@ -300,11 +300,26 @@ def _q(v: str) -> str:
 
 
 # ======================= Intake =======================
-def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "") -> dict:
-    channel = "text"
-    if image:
+MAX_SHOTS = 6
+
+
+def read_screenshots(images: list[tuple[str, str]], trace: Trace) -> str:
+    """Several screenshots are one conversation: each is read, and the order they were sent in is kept."""
+    def one(img: tuple[str, str]) -> str:
         # the vision model reads layout best; OCR on the server reads when the model cannot
-        read = nvidia.read_image(image[0], image[1], trace) or ocr.read(image[0], trace)
+        return nvidia.read_image(img[0], img[1], trace) or ocr.read(img[0], trace) or ""
+    if len(images) == 1:
+        return one(images[0])
+    with ThreadPoolExecutor(max_workers=min(4, len(images))) as pool:
+        return "\n\n".join(r for r in pool.map(one, images) if r)
+
+
+def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "",
+           images: list[tuple[str, str]] | None = None) -> dict:
+    channel = "text"
+    images = (list(images or []) or ([image] if image else []))[:MAX_SHOTS]
+    if images:
+        read = read_screenshots(images, trace)
         if read:
             text = (read + "\n" + (text or "")).strip()
             channel = "screenshot"
@@ -1246,7 +1261,10 @@ def _receipt(check_id: str, card: dict, text: str) -> dict:
 
 # ======================= the loop =======================
 def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: str = "", language: str = "", run_id: str | None = None,
-              holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None) -> dict:
+              holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None,
+              images: list[tuple[str, str]] | None = None) -> dict:
+    images = (list(images or []) or ([image] if image else []))[:MAX_SHOTS]
+    image = images[0] if images else None
     trace = Trace(run_id, echo=echo, on_line=on_line)
     check_id = "C-" + uuid.uuid4().hex[:8]
     # the same scam reaches thousands of phones: a message checked in the last hours is answered at once
@@ -1261,7 +1279,7 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "run_id": trace.run_id, "channel": "text", "operator": hit.get("operator", "other"), "amount_fcfa": hit.get("amount_fcfa"),
                           "scheme": hit.get("scheme")})
         return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", []), "receipt": _receipt(check_id, hit, text)}
-    facts = intake(text, trace, image=image, sender=sender, lang_hint=language)
+    facts = intake(text, trace, images=images, sender=sender, lang_hint=language)
     if not facts["text"].strip():
         trace.log("Reporter", "card", output="empty input", status="error")
         fr = language == "fr"

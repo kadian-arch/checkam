@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, streamCheck, type Card, type TraceLine, type PublicStats } from "./api";
+import { api, streamCheck, MAX_SHOTS, type Card, type TraceLine, type PublicStats } from "./api";
 
 // which of the six visible stages a live agent step belongs to
 function phase(l: TraceLine): number {
@@ -123,7 +123,7 @@ export default function Site() {
 function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [text, setText] = useState(shared);
   const [sender, setSender] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [live, setLive] = useState<TraceLine[]>([]);
   const [card, setCard] = useState<Card | null>(null);
@@ -136,12 +136,12 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const early = gate ? (() => { try { return JSON.parse(gate.output_summary || "{}").verdict as string; } catch { return ""; } })() : "";
 
   async function go(who = sender, body = text) {
-    if (!body.trim() && !file) return;
+    if (!body.trim() && !files.length) return;
     setBusy(true);
     setErr("");
     setLive([]);
     try {
-      const c = await streamCheck({ text: body, sender: who, language: lang, file }, (l) => setLive((x) => [...x, l]));
+      const c = await streamCheck({ text: body, sender: who, language: lang, files }, (l) => setLive((x) => [...x, l]));
       if (c.error) setErr(c.error);
       else setCard(c);
       top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -155,7 +155,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   if (card) {
     return (
       <section className="hero report-wrap" ref={top} id="check">
-        <VerdictReport card={card} t={t} onAgain={() => { setCard(null); setText(""); setSender(""); setFile(null); }}
+        <VerdictReport card={card} t={t} onAgain={() => { setCard(null); setText(""); setSender(""); setFiles([]); }}
           askSender={card.ask_sender && !sender.trim() ? (who) => { setSender(who); setCard(null); go(who); } : undefined}
           // the person's answer goes back to the agents with the message, so they judge both together
           followUp={(a) => { const more = `${text}
@@ -188,12 +188,21 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
             <input value={sender} onChange={(e) => setSender(e.target.value)} placeholder={t.sender_placeholder} disabled={busy} />
           </label>
           <label className="file">
-            <input type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            {/* each pick adds to the list: a long chat is several screenshots, read in the order they were added */}
+            <input type="file" accept="image/*" multiple hidden disabled={busy}
+              onChange={(e) => { const picked = Array.from(e.target.files ?? []); e.target.value = ""; setFiles((had) => [...had, ...picked].slice(0, MAX_SHOTS)); }} />
             <svg viewBox="0 0 24 24" aria-hidden><path d="M4 7h3l2-2h6l2 2h3v12H4z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
-            {file ? file.name.slice(0, 18) : t.screenshot}
+            {files.length ? fill(t.screenshots_n, { n: files.length }) : t.screenshot}
           </label>
         </div>
-        {file && <button className="link" onClick={() => setFile(null)}>{t.remove}</button>}
+        {files.length > 0 && (
+          <ul className="shots">
+            {files.map((f, i) => (
+              <li key={`${f.name}-${f.lastModified}-${i}`}><b>{i + 1}</b><span>{f.name.slice(0, 22)}</span>
+                <button type="button" className="link" disabled={busy} aria-label={`${t.remove} ${i + 1}`} onClick={() => setFiles((had) => had.filter((_, j) => j !== i))}>{t.remove}</button></li>
+            ))}
+          </ul>
+        )}
 
         {busy ? (
           <div className="live">
@@ -212,7 +221,7 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
             )}
           </div>
         ) : (
-          <button className="primary" disabled={!text.trim() && !file} onClick={() => go()}>{t.check}<span aria-hidden>→</span></button>
+          <button className="primary" disabled={!text.trim() && !files.length} onClick={() => go()}>{t.check}<span aria-hidden>→</span></button>
         )}
         {err && <p className="error" role="alert">{err}</p>}
         <p className="privacy"><svg viewBox="0 0 24 24" aria-hidden><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>{t.privacy}</p>
