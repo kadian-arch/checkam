@@ -944,7 +944,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
             "Les vrais messages « vous avez reçu de l'argent » viennent du système de l'opérateur sous son propre nom, jamais d'un numéro personnel. Celui-ci a été tapé par une personne"),
             "scam", "strong", [{"table": "message", "id": "sender", "detail": privacy.mask(case.facts.get("sender") or "")}], status="accepted"))
         credit = True
-    opportunity = advice.scheme_of(case.facts["text"], [], "") in ("job", "visa_scholarship") and not trusted and not warns
+    opportunity = advice.announcement(case.facts["text"]) and not trusted and not warns
     if opportunity and not any(f.tool == "opportunity" for f in case.findings):
         claim = linkcheck.claimed(case.facts["text"], case.language)
         if not (claim and any(linkcheck.belongs(urlparse(u if "://" in u else "http://" + u).hostname or "", claim[1]) for u in case.facts["links"])):

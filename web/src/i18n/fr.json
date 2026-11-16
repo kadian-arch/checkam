@@ -138,7 +138,14 @@
     "credential": "quelqu'un qui veut votre code ou votre compte",
     "prize": "un faux gain",
     "seller": "un faux vendeur ou une fausse livraison",
-    "family": "une fausse urgence d'un proche"
+    "family": "une fausse urgence d'un proche",
+    "exam": "une fausse offre de concours ou d'admission",
+    "romance": "une arnaque sentimentale",
+    "extortion": "un chantage ou une menace",
+    "official": "quelqu'un qui se fait passer pour une autorité",
+    "advance_fee": "des frais exigés avant un versement",
+    "phishing": "un lien fait pour voler vos identifiants",
+    "fake_page": "une fausse page ou un faux document au nom d'une personne ou d'une marque connue"
   },
   "radar_title": "Radar des arnaques",
   "radar_sub": "{n} arnaques repérées ces {days} derniers jours, par type",

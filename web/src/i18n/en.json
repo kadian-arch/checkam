@@ -138,7 +138,14 @@
     "credential": "someone after your PIN or account",
     "prize": "a fake prize",
     "seller": "a fake seller or delivery",
-    "family": "a fake emergency from someone you know"
+    "family": "a fake emergency from someone you know",
+    "exam": "a fake concours or admission offer",
+    "romance": "a romance scam",
+    "extortion": "blackmail or a threat",
+    "official": "someone posing as an official",
+    "advance_fee": "a fee demanded before a payout",
+    "phishing": "a link made to steal your login",
+    "fake_page": "a fake page or document using a known name"
   },
   "radar_title": "Scam radar",
   "radar_sub": "{n} scams caught in the last {days} days, by kind",
