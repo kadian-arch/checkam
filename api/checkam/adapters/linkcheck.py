@@ -25,7 +25,7 @@ INSTITUTIONS = [
      "the Cameroon government", "le gouvernement camerounais", ("gov.cm", "minesup.gov.cm", "minfopra.gov.cm", "prc.cm", "spm.gov.cm")),
     (r"\bmtn\b|momo|mobile ?money", "MTN", "MTN", ("mtn.cm", "mtnonline.com", "mtn.com")),
     (r"\borange\b", "Orange", "Orange", ("orange.cm", "orange.com")),
-    (r"\b(unicef|unesco|united nations|nations unies|\bun\b|who|oms|world bank|banque mondiale|daad|erasmus|mastercard foundation)\b",
+    (r"\b(unicef|unesco|united nations|nations unies|world bank|banque mondiale|daad|erasmus|mastercard foundation)\b|(?-i:\b(?:UN|WHO|OMS)\b)",
      "an international organisation", "une organisation internationale", ("un.org", "unicef.org", "unesco.org", "who.int", "worldbank.org", "daad.de", "erasmus-plus.ec.europa.eu", "europa.eu", "mastercardfdn.org")),
 ]
 

@@ -123,6 +123,9 @@ LINES = {
         "dont": [("Do not pay or send documents to a page you cannot confirm", "Ne payez pas et n'envoyez pas de documents à une page que vous ne pouvez pas confirmer")]},
 }
 
+JOB_SAFETY = ("Before you go anywhere: ask for the employer's name and address, meet first in a public place, and tell someone you trust where you are going and who you are meeting",
+              "Avant d'aller quelque part : demandez le nom et l'adresse de l'employeur, rencontrez-le d'abord dans un lieu public, et dites à une personne de confiance où vous allez et qui vous rencontrez")
+
 ASK_LINES = {
     "click_link": ("Do not open the link, and never type a code or password on that site", "N'ouvrez pas le lien, et ne tapez jamais de code ou de mot de passe sur ce site"),
     "call_back": ("Do not call or reply to the number in the message", "N'appelez pas et ne répondez pas au numéro du message"),
@@ -209,6 +212,8 @@ def steps(verdict: str, scheme: str | None, facts: dict, lang: str, route: str =
     money_scheme = scheme in ("reversal", "credential", None) or brand is not None
     if brand and money_scheme:
         do.append(OPERATOR[brand][lang if lang in ("en", "fr") else "en"])
+    if scheme == "job" and facts.get("body_numbers"):
+        do.append(JOB_SAFETY[i])  # an employer who is only a phone number: how to check it before you go
     do.append(WARN_OTHERS[i])
     dont += [d[i] for d in plan.get("dont", [])]
     for a in ("pin", "click_link", "call_back", "personal_info", "send_money"):

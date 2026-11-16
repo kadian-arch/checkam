@@ -18,7 +18,8 @@ CM_PHONE = re.compile(
 )
 TOKEN = re.compile(r"\[PHONE:([0-9a-z]{3}-[a-z]{6}|intl-[a-z]{6})\]")
 URL = re.compile(r"(?i)\b((?:https?://|www\.)[^\s<>\"']+|(?:[a-z0-9-]+(?:\[\.\]|\.))+(?:com|cm|net|org|click|xyz|top|info|online|site|link|me|io|app|ly|gl|co|gd|cc|tk|ml|ga|cf|gq|ws|biz|live|shop|store|vip|fr|ng|ca|us|uk)\b(?:/[^\s]*)?)")
-INVISIBLE = re.compile(r"[\U000E0000-\U000E007F\U000E0100-\U000E01EF︀-︎​-‏⁠-⁤﻿­]|(?<=\w)️")
+INVISIBLE = re.compile(r"[\U000E0000-\U000E007F\U000E0100-\U000E01EF\uFE00-\uFE0E\u200B\u200C\u200E\u200F\u2060-\u2064\uFEFF\u00AD]"
+                       r"|(?<=\w)\u200D|(?<=\w)\uFE0F(?!\u20E3)")  # not the joiner and selector of an emoji (1\uFE0F\u20E3, family emoji)
 PIN_ASK = re.compile(r"(?i)\b(pin|code secret|mot de passe|password|otp|code de (?:confirmation|v[ée]rification)|\*126\*|#150)\b")
 
 # public operator lines printed in their own messages (kept as they are)

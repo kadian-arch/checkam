@@ -39,9 +39,10 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
     <article className={`report ${TONE[card.verdict]}`}>
       <header className="report-head">
         <div className="stamp" aria-label={label}><span>{label}</span></div>
-        <div className="meter" aria-label={`${Math.round(card.confidence * 100)}% ${t.confidence}`}>
-          <i style={{ width: `${Math.round(card.confidence * 100)}%` }} />
-          <small>{Math.round(card.confidence * 100)}% {t.confidence}</small>
+        {/* how much evidence stands behind the answer, in words: a percentage would claim a precision we have not measured */}
+        <div className="meter" aria-label={t[`evidence_${card.evidence_level ?? "limited"}` as keyof Dict] as string}>
+          <i style={{ width: `${{ strong: 90, positive: 75, limited: 45, none: 20 }[card.evidence_level ?? "limited"]}%` }} />
+          <small>{t[`evidence_${card.evidence_level ?? "limited"}` as keyof Dict] as string}</small>
         </div>
       </header>
 
