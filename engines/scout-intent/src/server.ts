@@ -6,6 +6,8 @@ import { Scout } from "./index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.SCOUT_PORT ?? 8791);
+// internal service: only the API on this machine talks to it, so it is never bound to the public interface
+const HOST = process.env.ENGINE_HOST ?? "127.0.0.1";
 const scout = new Scout({
   intentRegistry: process.env.SCOUT_REGISTRY ?? join(here, "..", "registry", "checkam.json"),
   policyPack: ["default", "adversarial-tight"],
@@ -41,4 +43,4 @@ createServer(async (req, res) => {
   } catch (err) {
     send(res, 400, { error: (err as Error).message });
   }
-}).listen(PORT, "0.0.0.0", () => console.log(`scout on :${PORT}, ${scout.registry.intents.length} intents, stage-1 ${scout.selfTestMs.toFixed(2)} ms`));
+}).listen(PORT, HOST, () => console.log(`scout on :${PORT}, ${scout.registry.intents.length} intents, stage-1 ${scout.selfTestMs.toFixed(2)} ms`));

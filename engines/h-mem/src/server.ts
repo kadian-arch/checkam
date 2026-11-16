@@ -6,6 +6,8 @@ import fs from "node:fs";
 import { HMEM, type FeedbackKind } from "../reference/index.ts";
 
 const PORT = Number(process.env.HMEM_PORT ?? 8792);
+// internal service: only the API on this machine talks to it, so it is never bound to the public interface
+const HOST = process.env.ENGINE_HOST ?? "127.0.0.1";
 const DIR = process.env.HMEM_DIR ?? "data/hmem";
 fs.mkdirSync(DIR, { recursive: true });
 const mem = new HMEM({ persistDir: DIR, actor: "checkam" });
@@ -87,7 +89,7 @@ createServer(async (req, res) => {
   } catch (err) {
     send(res, 400, { error: (err as Error).message });
   }
-}).listen(PORT, "0.0.0.0", () => console.log(`h-mem on :${PORT}, dir ${DIR}`));
+}).listen(PORT, HOST, () => console.log(`h-mem on :${PORT}, dir ${DIR}`));
 
 // the sleep cycle runs once a day: repeated corrections settle into long-term memory, one-offs fade
 setInterval(() => { try { sleepNow(); } catch (e) { console.error("sleep failed", e); } }, DAY).unref();
