@@ -114,15 +114,24 @@ async def _image(upload: UploadFile) -> tuple[str, str]:
     return base64.b64encode(raw).decode(), mime
 
 
+async def _images(uploads: list[UploadFile]) -> list[tuple[str, str]]:
+    """One screenshot or several of the same conversation, in the order they were attached."""
+    if len(uploads) > agents.MAX_SHOTS:
+        raise HTTPException(413, f"Too many screenshots ({agents.MAX_SHOTS} max)")
+    return [await _image(u) for u in uploads]
+
+
 @app.post("/check/image/stream")
-async def check_image_stream(image: UploadFile = File(...), text: str = Form("", max_length=4000), language: str = Form("", max_length=5)):
-    img = await _image(image)
-    return _stream(lambda on_line: agents.run_check(text, image=img, language=language, on_line=on_line))
+async def check_image_stream(image: list[UploadFile] = File(...), text: str = Form("", max_length=4000), sender: str = Form("", max_length=80),
+                             language: str = Form("", max_length=5)):
+    imgs = await _images(image)
+    return _stream(lambda on_line: agents.run_check(text, images=imgs, sender=sender, language=language, on_line=on_line))
 
 
 @app.post("/check/image")
-async def check_image(image: UploadFile = File(...), text: str = Form("", max_length=4000), language: str = Form("", max_length=5)):
-    return agents.run_check(text, image=await _image(image), language=language)
+async def check_image(image: list[UploadFile] = File(...), text: str = Form("", max_length=4000), sender: str = Form("", max_length=80),
+                      language: str = Form("", max_length=5)):
+    return agents.run_check(text, images=await _images(image), sender=sender, language=language)
 
 
 @app.post("/run")

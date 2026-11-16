@@ -25,14 +25,17 @@ async function call<T>(path: string, init: RequestInit = {}, token?: string): Pr
 }
 
 // Runs a check and reports every agent step the moment it happens (server-sent events over POST).
-export async function streamCheck(input: { text: string; sender: string; language: string; file?: File | null },
+export const MAX_SHOTS = 6;
+
+export async function streamCheck(input: { text: string; sender: string; language: string; files?: File[] },
                                   onStep: (l: TraceLine) => void): Promise<Card> {
   let init: RequestInit;
   let path = "/check/stream";
-  if (input.file) {
+  if (input.files?.length) {
     const f = new FormData();
-    f.append("image", input.file);
+    for (const shot of input.files) f.append("image", shot);  // same field, kept in order: one conversation
     f.append("text", input.text);
+    f.append("sender", input.sender);
     f.append("language", input.language);
     init = { method: "POST", body: f };
     path = "/check/image/stream";
@@ -67,9 +70,9 @@ export async function streamCheck(input: { text: string; sender: string; languag
 export const api = {
   check: (text: string, sender: string, language: string) =>
     call<Card>("/check", { method: "POST", body: JSON.stringify({ text, sender, language }) }),
-  checkImage: (file: File, text: string, language: string) => {
+  checkImage: (files: File | File[], text: string, language: string) => {
     const f = new FormData();
-    f.append("image", file);
+    for (const shot of [files].flat()) f.append("image", shot);
     f.append("text", text);
     f.append("language", language);
     return call<Card>("/check/image", { method: "POST", body: f });

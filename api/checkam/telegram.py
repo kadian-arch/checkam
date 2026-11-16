@@ -22,7 +22,7 @@ LABEL = {
     "fr": {"scam": "🔴 ARNAQUE", "suspicious": "🟠 PRUDENCE", "looks_genuine": "🟢 SEMBLE AUTHENTIQUE", "cant_tell": "⚪ IL FAUT PLUS DE DÉTAILS"},
 }
 TEXT = {
-    "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me any message about money that feels off (SMS, WhatsApp, a job, a scholarship, a prize), or send a screenshot. "
+    "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me anything that feels off (a message, a job or scholarship offer, a prize, a seller, a romance, a threat), or send screenshots. "
                     "Five agents check it against real scam reports and official messages, then tell you what it is, why, and what to do.\n\nTry it: forward the last suspicious message you got.",
            "wait": "🔎 Checking…", "busy": "Too many checks from this chat. Try again in {s} s.",
            "why": "Why", "do": "What to do", "dont": "Don't", "error": "The check failed. Please try again in a minute.",
@@ -32,7 +32,7 @@ TEXT = {
            "seconds": "checked in {s} s", "more": "(What I can add:", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
            "stage": {"Intake": "📖 Reading the message", "Planner": "🧭 Planning the checks", "Investigator": "🔍 Searching scam reports and real operator messages",
                      "Critic": "⚖️ The critic is arguing the other side", "Reporter": "✍️ Writing your answer"}},
-    "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi un message d'argent qui vous paraît louche (SMS, WhatsApp, emploi, bourse, gain), ou une capture d'écran. "
+    "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi tout ce qui vous paraît louche (message, offre d'emploi ou de bourse, gain, vendeur, relation, menace), ou des captures d'écran. "
                     "Cinq agents le vérifient avec de vrais signalements et de vrais messages officiels, puis vous disent ce que c'est, pourquoi, et quoi faire.\n\nEssayez : transférez le dernier message suspect que vous avez reçu.",
            "wait": "🔎 Vérification…", "busy": "Trop de vérifications depuis ce chat. Réessayez dans {s} s.",
            "why": "Pourquoi", "do": "Que faire", "dont": "À ne pas faire", "error": "La vérification a échoué. Réessayez dans une minute.",
@@ -158,14 +158,15 @@ def _progress(chat_id: int, message_id: int | None, lang: str):
     return on_line
 
 
-def _check(chat_id: int, ui: str, text: str, photo_id: str, sender: str = "") -> None:
+def _check(chat_id: int, ui: str, text: str, photo_id: str | list[str], sender: str = "") -> None:
     lang = ui if not text else ("fr" if agents._guess_lang(text) == "fr" else ui)
     mid = _send(chat_id, TEXT[lang]["wait"])
     _call("sendChatAction", chat_id=chat_id, action="typing")
     started = time.monotonic()
     try:
-        image = _photo(photo_id) if photo_id else None
-        card = agents.run_check(text, image=image, sender=sender, echo=False, on_line=_progress(chat_id, mid, lang))
+        ids = [photo_id] if isinstance(photo_id, str) else list(photo_id)
+        images = [p for p in (_photo(i) for i in ids[:agents.MAX_SHOTS] if i) if p]
+        card = agents.run_check(text, images=images, sender=sender, echo=False, on_line=_progress(chat_id, mid, lang))
         if "verdict" not in card:
             _edit(chat_id, mid, html.escape(card.get("error", TEXT[lang]["error"]), quote=False))
             return
@@ -185,6 +186,36 @@ def _chat(chat_id: int, ui: str, text: str) -> None:
     _call("sendChatAction", chat_id=chat_id, action="typing")
     lang = "fr" if agents._guess_lang(text) == "fr" else ui
     _send(chat_id, html.escape(assistant.reply(text, lang) or TEXT[lang]["start"], quote=False))
+
+
+ALBUM_WAIT = 1.5  # seconds: Telegram delivers an album as one update per photo, a moment apart
+_albums: dict[tuple[int, str], dict] = {}
+_albums_lock = threading.Lock()
+
+
+def _album_add(chat_id: int, ui: str, msg: dict, text: str) -> None:
+    """Screenshots sent together are one conversation: gather them, then check them once, in order."""
+    key = (chat_id, str(msg["media_group_id"]))
+    with _albums_lock:
+        first = key not in _albums
+        album = _albums.setdefault(key, {"shots": [], "text": ""})
+        album["shots"].append((msg.get("message_id", 0), msg["photo"][-1]["file_id"]))
+        album["text"] = album["text"] or text
+    if first:
+        threading.Timer(ALBUM_WAIT, _album_done, args=(key, ui)).start()
+
+
+def _album_done(key: tuple[int, str], ui: str) -> None:
+    with _albums_lock:
+        album = _albums.pop(key, None)
+    if not album:
+        return
+    chat_id = key[0]
+    ok, wait = security.allowed(f"tg:{chat_id}", "check")  # an album is one check, not one per photo
+    if not ok:
+        _send(chat_id, TEXT[ui]["busy"].format(s=wait))
+        return
+    _check(chat_id, ui, album["text"], [fid for _, fid in sorted(album["shots"])])
 
 
 def handle(update: dict) -> None:
@@ -216,6 +247,9 @@ def handle(update: dict) -> None:
     if not text and not msg.get("photo") and not msg.get("text"):
         # stickers, voice notes, files, locations: say what works instead of guessing
         _send(chat_id, TEXT[ui]["unsupported"])
+        return
+    if msg.get("media_group_id") and msg.get("photo"):
+        _album_add(chat_id, ui, msg, text)
         return
     photo_id = msg["photo"][-1]["file_id"] if msg.get("photo") else ""
     if text.startswith("/start") or text.startswith("/help") or (not text and not photo_id):

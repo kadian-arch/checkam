@@ -35,8 +35,14 @@ ASKS = {
     "send_money": r"(?i)\b(send|return|refund|transfer|pay|deposit)\s+(it|the money|me|back|us|them|my|\d)|\bsend\s+(?:\w+\s+){0,3}back\b|\b(renvoy|rembours|retourn)\w*"
                   r"|\b(envoyez|transf[ée]rez|versez|d[ée]posez|payez)\b|\b(envoie|transf[èe]re|verse|d[ée]pose|paie|pr[êe]te)s?[- ](moi|nous|lui)\b"
                   r"|\b(fais|faites)[- ]moi (un |le )?(transfert|d[ée]p[ôo]t|retrait|envoi)\b|\b(lend|loan) me\b|\bkeep the rest|gardez le reste|\b(pay|payer|payez|r[ée]gler|send|envoye[rz])\b(?:\W+\w+){0,3}\W+(fee|fees|frais|charges|registration|inscription|dossier|commission|transport|delivery|livraison|shipping|customs|douane|exp[ée]dition)\b"
-                  r"|\bfrais (de|d')\s*(dossier|inscription|commission|m[ée]dica|enregistrement)",
-    "click_link": r"(?i)\b(click|tap|open|visit|cliquez|ouvrez|visitez|appuyez)\b" + _W + r"(link|lien|here|ici|site)\b",
+                  r"|\bfrais (de|d')\s*(dossier|inscription|commission|m[ée]dica|enregistrement)"
+                  # said to one person ("tu"): how a lover, a friend or a threat asks, where an operator says "vous"
+                  r"|\b(envoie|paie|paye|verse|d[ée]pose|transf[èe]re)s?\s+(?:moi\s+|nous\s+)?(?:les?\s+|la\s+|mes\s+)?\d"
+                  r"|\btu\s+(?:\w+\s+){0,2}(paies|payes|envoies|verses|d[ée]poses|transf[èe]res)\b",
+    "click_link": r"(?i)\b(click|tap|open|visit|cliquez|ouvrez|visitez|appuyez)\b" + _W + r"(link|lien|here|ici|site)\b"
+                  # "sign in here", "verify your account: http://...": a login page handed to you is the whole trick
+                  r"|\b(sign in|log ?in|verify|confirm|update|connectez-vous|v[ée]rifie[rz]|confirme[rz]|mettez [àa] jour)\b(?:\W+\w+){0,5}\W+(here|ici|link|lien|below|ci-dessous)\b"
+                  r"|\b(sign in|log ?in|verify|confirm|connectez-vous|v[ée]rifie[rz]|confirme[rz])\b[^.\n]{0,60}(?:https?://|www\.)",
     # only a personal number counts: official lines and short codes (8787, *126#) are removed first
     "call_back": r"(?i)\b(call|appel(?:ez|le)?|whatsapp|contact(?:ez)?|joindre|text|sms)\b(?:\W+\w+){0,5}\W+(\[PHONE:[^\]]+\]|(?:\+?237[ .-]?)?[26](?:[ .-]?\d){8})",
     "personal_info": r"(?i)\b(send|envoy\w*|share|upload)\b(?:\W+\w+){0,4}\W+(cni|id card|carte d'identit|passport|passeport|dipl[oô]me|diploma|cv|photo)\b",
@@ -166,15 +172,21 @@ def _fcfa(s: str) -> int:
     return n * 1000 if s.strip().lower().endswith("k") else n
 
 
+# an amount with its currency, or a bare one of 4 to 7 digits (not a phone number, not a small count)
+STAKE = re.compile(AMOUNT.pattern + r"|(?<![\d+*#])(?P<bare>\d{1,3}(?:[ .,]\d{3})+|\d{4,7})(?![\d*#])")
+
+
 def stake_and_return(text: str) -> bool:
     """You pay an amount, then get back a larger one: the shape of every Ponzi and advance-fee offer."""
     paid = None
-    for m in AMOUNT.finditer(text):
-        before = text[max(0, m.start() - 50):m.start()]
+    for m in STAKE.finditer(text):
+        bare = m.group("bare")
+        # a number with no currency counts only right after the verb ("invest 20000 and get 60000")
+        before = text[max(0, m.start() - (14 if bare else 50)):m.start()]
         verb = max([(v.start(), "pay") for v in PAY_VERB.finditer(before)] + [(v.start(), "gain") for v in GAIN_VERB.finditer(before)], default=None)
         if not verb:
             continue
-        n = _fcfa(m.group(0))
+        n = int(re.sub(r"\D", "", bare)) if bare else _fcfa(m.group(0))
         if verb[1] == "pay":
             paid = n if paid is None else paid
         elif paid is not None and n > paid:
@@ -300,11 +312,26 @@ def _q(v: str) -> str:
 
 
 # ======================= Intake =======================
-def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "") -> dict:
-    channel = "text"
-    if image:
+MAX_SHOTS = 6
+
+
+def read_screenshots(images: list[tuple[str, str]], trace: Trace) -> str:
+    """Several screenshots are one conversation: each is read, and the order they were sent in is kept."""
+    def one(img: tuple[str, str]) -> str:
         # the vision model reads layout best; OCR on the server reads when the model cannot
-        read = nvidia.read_image(image[0], image[1], trace) or ocr.read(image[0], trace)
+        return nvidia.read_image(img[0], img[1], trace) or ocr.read(img[0], trace) or ""
+    if len(images) == 1:
+        return one(images[0])
+    with ThreadPoolExecutor(max_workers=min(4, len(images))) as pool:
+        return "\n\n".join(r for r in pool.map(one, images) if r)
+
+
+def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "",
+           images: list[tuple[str, str]] | None = None) -> dict:
+    channel = "text"
+    images = (list(images or []) or ([image] if image else []))[:MAX_SHOTS]
+    if images:
+        read = read_screenshots(images, trace)
         if read:
             text = (read + "\n" + (text or "")).strip()
             channel = "screenshot"
@@ -929,7 +956,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
             "Les vrais messages « vous avez reçu de l'argent » viennent du système de l'opérateur sous son propre nom, jamais d'un numéro personnel. Celui-ci a été tapé par une personne"),
             "scam", "strong", [{"table": "message", "id": "sender", "detail": privacy.mask(case.facts.get("sender") or "")}], status="accepted"))
         credit = True
-    opportunity = advice.scheme_of(case.facts["text"], [], "") in ("job", "visa_scholarship") and not trusted and not warns
+    opportunity = advice.announcement(case.facts["text"]) and not trusted and not warns
     if opportunity and not any(f.tool == "opportunity" for f in case.findings):
         claim = linkcheck.claimed(case.facts["text"], case.language)
         if not (claim and any(linkcheck.belongs(urlparse(u if "://" in u else "http://" + u).hostname or "", claim[1]) for u in case.facts["links"])):
@@ -1246,7 +1273,10 @@ def _receipt(check_id: str, card: dict, text: str) -> dict:
 
 # ======================= the loop =======================
 def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: str = "", language: str = "", run_id: str | None = None,
-              holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None) -> dict:
+              holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None,
+              images: list[tuple[str, str]] | None = None) -> dict:
+    images = (list(images or []) or ([image] if image else []))[:MAX_SHOTS]
+    image = images[0] if images else None
     trace = Trace(run_id, echo=echo, on_line=on_line)
     check_id = "C-" + uuid.uuid4().hex[:8]
     # the same scam reaches thousands of phones: a message checked in the last hours is answered at once
@@ -1261,7 +1291,7 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "run_id": trace.run_id, "channel": "text", "operator": hit.get("operator", "other"), "amount_fcfa": hit.get("amount_fcfa"),
                           "scheme": hit.get("scheme")})
         return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", []), "receipt": _receipt(check_id, hit, text)}
-    facts = intake(text, trace, image=image, sender=sender, lang_hint=language)
+    facts = intake(text, trace, images=images, sender=sender, lang_hint=language)
     if not facts["text"].strip():
         trace.log("Reporter", "card", output="empty input", status="error")
         fr = language == "fr"
