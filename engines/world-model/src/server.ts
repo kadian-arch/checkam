@@ -3,6 +3,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { WorldModel, campaigns, contextFor, type Observation, type Campaign } from "./index.js";
 
 const PORT = Number(process.env.WORLD_MODEL_PORT ?? 8790);
+// internal service: only the API on this machine talks to it, so it is never bound to the public interface
+const HOST = process.env.ENGINE_HOST ?? "127.0.0.1";
 const FILE = process.env.WORLD_MODEL_FILE ?? "data/world.json";
 const world = new WorldModel({ storage: "file", path: FILE, namespace: "checkam" });
 
@@ -58,6 +60,6 @@ createServer(async (req, res) => {
   } catch (err) {
     send(res, 400, { error: (err as Error).message });
   }
-}).listen(PORT, "0.0.0.0", () => console.log(`world-model on :${PORT}, file ${FILE}`));
+}).listen(PORT, HOST, () => console.log(`world-model on :${PORT}, file ${FILE}`));
 
 for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => { world.flush(); process.exit(0); });

@@ -1,0 +1,21 @@
+name: uptime
+# Every 30 minutes: is the live site answering, and is it the app itself (not an internal engine)?
+# A failed run emails the repository owner, so an outage is known within the half hour.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - name: health endpoint
+        run: |
+          body=$(curl -sS -m 60 --retry 3 --retry-delay 20 --retry-all-errors https://checkam.me/health)
+          echo "$body"
+          echo "$body" | grep -q '"ok":true'
+      - name: home page is the app
+        run: |
+          page=$(curl -sS -m 60 --retry 3 --retry-delay 20 --retry-all-errors https://checkam.me/)
+          echo "$page" | grep -qi "<title>CheckAm"
