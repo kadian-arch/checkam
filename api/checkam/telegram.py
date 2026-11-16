@@ -22,7 +22,7 @@ LABEL = {
     "fr": {"scam": "🔴 ARNAQUE", "suspicious": "🟠 PRUDENCE", "looks_genuine": "🟢 SEMBLE AUTHENTIQUE", "cant_tell": "⚪ IL FAUT PLUS DE DÉTAILS"},
 }
 TEXT = {
-    "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me any message about money that feels off (SMS, WhatsApp, a job, a scholarship, a prize), or send a screenshot. "
+    "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me anything that feels off (a message, a job or scholarship offer, a prize, a seller, a romance, a threat), or send screenshots. "
                     "Five agents check it against real scam reports and official messages, then tell you what it is, why, and what to do.\n\nTry it: forward the last suspicious message you got.",
            "wait": "🔎 Checking…", "busy": "Too many checks from this chat. Try again in {s} s.",
            "why": "Why", "do": "What to do", "dont": "Don't", "error": "The check failed. Please try again in a minute.",
@@ -32,7 +32,7 @@ TEXT = {
            "seconds": "checked in {s} s", "more": "(What I can add:", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
            "stage": {"Intake": "📖 Reading the message", "Planner": "🧭 Planning the checks", "Investigator": "🔍 Searching scam reports and real operator messages",
                      "Critic": "⚖️ The critic is arguing the other side", "Reporter": "✍️ Writing your answer"}},
-    "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi un message d'argent qui vous paraît louche (SMS, WhatsApp, emploi, bourse, gain), ou une capture d'écran. "
+    "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi tout ce qui vous paraît louche (message, offre d'emploi ou de bourse, gain, vendeur, relation, menace), ou des captures d'écran. "
                     "Cinq agents le vérifient avec de vrais signalements et de vrais messages officiels, puis vous disent ce que c'est, pourquoi, et quoi faire.\n\nEssayez : transférez le dernier message suspect que vous avez reçu.",
            "wait": "🔎 Vérification…", "busy": "Trop de vérifications depuis ce chat. Réessayez dans {s} s.",
            "why": "Pourquoi", "do": "Que faire", "dont": "À ne pas faire", "error": "La vérification a échoué. Réessayez dans une minute.",

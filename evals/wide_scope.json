@@ -1,0 +1,23 @@
+[
+ {"kind": "romance", "label": "scam", "sender": "+44 7700 900123", "text": "My love, I have been thinking about you all day. I want to come to Cameroon and marry you but my card is blocked at the airport. Please send 80000 FCFA by MoMo and I will pay you back when I land."},
+ {"kind": "romance_fr", "label": "scam", "sender": "", "text": "Mon amour, je suis médecin militaire en mission en Syrie. Je veux t'épouser. J'ai besoin que tu paies 150000 pour le colis que je t'envoie avec mon or."},
+ {"kind": "extortion", "label": "scam", "sender": "677123456", "text": "We have your intimate photos and videos. Pay 100000 FCFA to this number before tomorrow or we will publish them to all your Facebook contacts."},
+ {"kind": "extortion_threat", "label": "scam", "sender": "", "text": "Nous savons où tes enfants vont à l'école. Envoie 200000 aujourd'hui sinon nous allons enlever ton fils. Ne parle pas à la police."},
+ {"kind": "official", "label": "scam", "sender": "655443322", "text": "Ici le commissariat central de Douala. Une plainte est déposée contre vous. Payez l'amende de 25000 par Orange Money à ce numéro pour éviter une convocation."},
+ {"kind": "official_customs", "label": "scam", "sender": "", "text": "This is customs officer Paul at the Douala port. Your parcel from Dubai is held. Send 45000 to my number 678112233 for clearance today."},
+ {"kind": "advance_fee", "label": "scam", "sender": "", "text": "Your inheritance of 4 500 000 FCFA from a late relative is ready. Pay the clearance fee of 35000 to release the funds. Reply with your full name and ID card."},
+ {"kind": "phishing", "label": "scam", "sender": "Facebook", "text": "Your Facebook account will be closed in 24 hours. Verify your account and sign in here: http://fb-secure-login.xyz/verify"},
+ {"kind": "whatsapp_code", "label": "scam", "sender": "", "text": "Hello, I sent a 6-digit code to your number by mistake. Please forward it to me, it is for my WhatsApp."},
+ {"kind": "exam", "label": "scam", "sender": "", "text": "Concours ENAM 2026: j'ai un contact au ministère qui peut pousser votre dossier. Envoyez 300000 et votre nom sera sur la liste d'admission."},
+ {"kind": "exam_leak", "label": "scam", "sender": "", "text": "GCE 2027 leaked exam papers available now. All subjects. Pay 10000 by MoMo to 670998877 and receive the questions on WhatsApp tonight."},
+ {"kind": "fake_page", "label": "scam", "sender": "", "text": "The First Lady's foundation is giving 250000 FCFA to every young Cameroonian. Send your name, ID card photo and 5000 registration fee to this page admin to receive yours."},
+ {"kind": "rental", "label": "scam", "sender": "", "text": "The studio in Molyko is still available, 35000 per month. Many people want it so send 2 months advance by MoMo now to reserve, then I will show you the house tomorrow."},
+ {"kind": "seller", "label": "scam", "sender": "", "text": "iPhone 13 neuf à 90000 seulement. Payez 30000 d'avance pour la livraison depuis Douala, le reste à la réception."},
+ {"kind": "crypto", "label": "scam", "sender": "", "text": "Join our Telegram trading group. Invest 20000 and get 60000 in 3 days guaranteed. Withdraw anytime. Use my invitation code KD77."},
+ {"kind": "genuine_school", "label": "genuine", "sender": "", "text": "Reminder: the CEF473 test holds on Friday at 10am in Amphi 250. Come with your student ID card."},
+ {"kind": "genuine_friend", "label": "genuine", "sender": "", "text": "Bro I don reach house. Thanks for today, we go see for church on Sunday."},
+ {"kind": "genuine_police", "label": "genuine", "sender": "", "text": "Communiqué: la police rappelle aux usagers que le port du casque est obligatoire pour les conducteurs de moto."},
+ {"kind": "genuine_love", "label": "genuine", "sender": "", "text": "Good morning my love, did you sleep well? I will call you after class."},
+ {"kind": "genuine_shop", "label": "genuine", "sender": "", "text": "Your order is ready. You can come and collect it at our shop in Great Soppo and pay when you see it."},
+ {"kind": "genuine_bank", "label": "genuine", "sender": "", "text": "Never share your password or OTP with anyone. Our staff will never ask you to verify your account by phone."}
+]
