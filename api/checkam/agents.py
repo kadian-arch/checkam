@@ -399,6 +399,7 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     # "X is hiring" promises nothing by itself: a job notice counts as a lure only when it carries what real
     # notices do not (hundreds of posts, a free mailbox, a fee, a private number, a link to follow)
     windfall = staked or bool(FREE_CASH.search(facts["text"])) or bool(PROMISE.search(RECRUITING.sub(" ", facts["text"])))
+    out["windfall"] = bool(windfall)  # a prize, gift, grant or free money: not a job notice
     if out["promise"] and not windfall and advice.announcement(facts["text"]) and not announcement_bait(out):
         out["promise"] = False
     trace.log("Intake", "facts", input=f"{len(facts['text'])} chars via {channel}",
@@ -1251,6 +1252,20 @@ def decide(case: Case) -> tuple[str, float, int]:
     return verdict, confidence, score
 
 
+def hard_evidence(case: Case) -> bool:
+    """What a message does or what our records show, as opposed to what it looks like. Only this earns the word
+    'scam'. The kind of message, a private number to contact, a free mailbox and the AI model's opinion are soft:
+    they earn a warning. A strong finding counts, except the model's own."""
+    f = case.facts
+    if any(fd.status == "accepted" and fd.direction == "scam" and fd.weight == "strong" and fd.tool != "model_judgement" for fd in case.findings):
+        return True
+    if "pin" in f["asks"] or f.get("stake_return") or f.get("impossible_date") or f.get("injection") or USSD_TO_PERSON.search(f["text"]):
+        return True
+    if f.get("windfall") and f.get("sender_kind") not in ("official", "registered"):
+        return True  # a prize, gift or grant promised to a stranger by a sender anyone can type: the template of every prize scam
+    return bool(risky_asks(f) & {"send_money", "pin"})  # an explicit demand to hand over money or a code
+
+
 def rule_verdict(case: Case) -> tuple[str, float, int]:
     acc = [f for f in case.findings if f.status == "accepted"]
     score = sum(WEIGHT[f.weight] for f in acc if f.direction == "scam")
@@ -1272,6 +1287,9 @@ def rule_verdict(case: Case) -> tuple[str, float, int]:
         if case.facts.get("promise"):
             score += 2  # an unearned windfall: prize, gift, grant, mass recruitment, easy returns
     if score >= 4:
+        if not hard_evidence(case):
+            # only soft signs: worth a warning and a check at the source, not an accusation
+            return "suspicious", 0.65, score
         return "scam", min(0.97, 0.7 + 0.04 * score), score
     if score >= 2:
         return "suspicious", 0.6, score
@@ -1312,6 +1330,33 @@ TEXT = {
     "cant_tell": {"en": "Not enough to go on yet. Answer a question below and the agents will look again.",
                   "fr": "Pas encore assez d'éléments. Répondez à une question ci-dessous et les agents regarderont à nouveau."},
 }
+
+
+ANNOUNCEMENT_HEADLINE = {
+    "suspicious": {"en": "We cannot confirm this offer. Check it before you reply, go anywhere or pay anything.",
+                   "fr": "Nous ne pouvons pas confirmer cette offre. Vérifiez-la avant de répondre, de vous déplacer ou de payer quoi que ce soit."},
+    "looks_genuine": {"en": "This looks like a real notice. Still confirm it on the organisation's own website before you apply.",
+                      "fr": "Cela ressemble à une vraie annonce. Confirmez-la quand même sur le site de l'organisme avant de postuler."},
+}
+SAYS_SCAM = re.compile(r"(?i)\b(scams?|scammers?|fake|fraud\w*|arnaques?|arnaqueurs?|faux|fausses?|frauduleu\w+|phishing|hoax)\b")
+SAYS_SAFE = re.compile(r"(?i)\b(genuine|legit\w*|authentic\w*|authentiques?|safe|trustworthy|fiable|s[û]re?)\b")
+
+
+def _says(rx: re.Pattern, text: str) -> bool:
+    for m in rx.finditer(text or ""):
+        before = text[max(0, m.start() - 26):m.start()].lower()
+        if not re.search(r"\b(not|no|never|nothing|n't|pas|aucun\w*|ni|sans|jamais|rien|non)\W+(?:\w+\W+){0,3}$", before):
+            return True
+    return False
+
+
+def contradicts(text: str, verdict: str) -> bool:
+    """Words that say the opposite of the verdict ('likely fake' on a message that looks genuine)."""
+    if verdict == "looks_genuine":
+        return _says(SAYS_SCAM, text)
+    if verdict in ("scam", "suspicious"):
+        return _says(SAYS_SAFE, text)
+    return False
 
 
 def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
@@ -1371,7 +1416,8 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     llm = None if not why else nvidia.chat_json([
         {"role": "system", "content": "You write the verdict card for a person in Cameroon who just received a message. Use ONLY the findings given. "
          "The headline is about THIS message (what it is), never about other people, victims or past reports. Plain words, short sentences. "
-         "Never name a model, tool, database or AI: say what was found, not who found it. Reply with JSON only."},
+         "Never name a model, tool, database or AI: say what was found, not who found it. The verdict is already decided and final: "
+         "never call a looks_genuine message a scam or fake, never call a scam or suspicious message safe or genuine. Reply with JSON only."},
         {"role": "user", "content": json.dumps({"verdict": verdict, "language": lang, "kind_of_message": advice.label(scheme, lang) or None,
                                                 "message_start": privacy.mask(case.facts["text"])[:300], "findings": [w["text"] for w in why]}, ensure_ascii=False) +
          f"\nWrite in {'correct French with every accent (é, è, à, ç, ê)' if lang == 'fr' else 'English'}, for someone who has never used a computer. Return {{\"headline\": str (max 14 words), "
@@ -1396,10 +1442,25 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
             w["text"] = p
         headline, explain = scheme_headline or TEXT[verdict][lang], " ".join(w["text"].rstrip(".") + "." for w in why[:2])
         trace.log("Reporter", "safety_fallback", output="model text replaced by template", status="rejected")
+    soft_announcement = verdict == "suspicious" and scheme in advice.ANNOUNCEMENTS and not hard_evidence(case)
+    if soft_announcement:
+        # nothing here is proof: say what is true (we cannot confirm it), never that it is a fake one
+        headline = ANNOUNCEMENT_HEADLINE["suspicious"][lang]
+        explain = " ".join(w["text"].rstrip(".") + "." for w in why[:2])
+    elif verdict == "looks_genuine" and case.facts.get("announcement"):
+        headline = ANNOUNCEMENT_HEADLINE["looks_genuine"][lang]
+    # the verdict is decided by the evidence; words that say the opposite are replaced by the template, never shown
+    if contradicts(headline, verdict):
+        headline = scheme_headline or TEXT[verdict][lang]
+        trace.log("Reporter", "contradiction_fallback", input=headline, output="model headline said the opposite of the verdict", status="rejected")
+    if contradicts(explain, verdict):
+        explain = " ".join(w["text"].rstrip(".") + "." for w in why[:2])
+    level = ("strong" if verdict == "scam" else "limited" if verdict == "suspicious" else "none" if verdict == "cant_tell"
+             else "positive" if any(f.status == "accepted" and f.direction == "genuine" and f.weight in ("strong", "medium") for f in case.findings) else "limited")
     route = OFFICIAL_ROUTE.search(case.facts["text"])
     do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))
     card = {
-        "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2),
+        "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2), "evidence_level": level,
         "headline": headline, "explain": explain, "why": why, "language": lang,
         "do_now": do_now, "dont": dont, "scheme": scheme,
         # when the agents cannot decide yet, the questions that would let them

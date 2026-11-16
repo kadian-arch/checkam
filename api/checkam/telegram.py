@@ -21,6 +21,10 @@ LABEL = {
     "en": {"scam": "🔴 SCAM", "suspicious": "🟠 BE CAREFUL", "looks_genuine": "🟢 LOOKS GENUINE", "cant_tell": "⚪ NEED MORE DETAILS"},
     "fr": {"scam": "🔴 ARNAQUE", "suspicious": "🟠 PRUDENCE", "looks_genuine": "🟢 SEMBLE AUTHENTIQUE", "cant_tell": "⚪ IL FAUT PLUS DE DÉTAILS"},
 }
+EVIDENCE = {
+    "en": {"strong": "strong evidence", "positive": "positive signs", "limited": "limited evidence, confirm at the source", "none": "not enough to judge"},
+    "fr": {"strong": "preuves solides", "positive": "signes positifs", "limited": "preuves limitées, confirmez à la source", "none": "pas assez d'éléments"},
+}
 TEXT = {
     "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me anything that feels off (a message, a job or scholarship offer, a prize, a seller, a romance, a threat), or send screenshots. "
                     "Five agents check it against real scam reports and official messages, then tell you what it is, why, and what to do.\n\nTry it: forward the last suspicious message you got.",
@@ -85,7 +89,7 @@ def _edit(chat_id: int, message_id: int | None, text: str, buttons: list | None 
 def render(card: dict, ui: str, seconds: float | None = None) -> str:
     lang = card.get("language") if card.get("language") in TEXT else ui
     t, e = TEXT[lang], (lambda s: html.escape(s, quote=False))  # Telegram needs only & < > escaped
-    out = [f"<b>{LABEL[lang].get(card['verdict'], card['verdict'])}</b>  · {round(card.get('confidence', 0) * 100)}%", f"<b>{e(card.get('headline', ''))}</b>"]
+    out = [f"<b>{LABEL[lang].get(card['verdict'], card['verdict'])}</b>  · {EVIDENCE[lang].get(card.get('evidence_level', 'limited'), '')}", f"<b>{e(card.get('headline', ''))}</b>"]
     if card.get("explain"):
         out.append(e(card["explain"]))
     if card.get("why"):
