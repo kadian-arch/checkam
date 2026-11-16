@@ -7,10 +7,13 @@ import pytest
 
 from checkam import agents
 
-CASES = json.loads((Path(__file__).resolve().parents[2] / "evals" / "wide_scope.json").read_text(encoding="utf-8"))
+EVALS = Path(__file__).resolve().parents[2] / "evals"
+# wide_scope: scams that are not money messages. everyday: ordinary genuine messages (job notices from an
+# organisation's own address, class links, appointments, shop and church notices) beside the fakes built like them
+CASES = [c for name in ("wide_scope", "everyday") for c in json.loads((EVALS / f"{name}.json").read_text(encoding="utf-8"))]
 
 
-@pytest.mark.parametrize("case", CASES, ids=[c["kind"] for c in CASES])
+@pytest.mark.parametrize("case", CASES, ids=[f"{i}-{c['kind']}" for i, c in enumerate(CASES)])
 def test_wide_scope(case):
     card = agents.run_check(case["text"], sender=case.get("sender", ""), persist=False, echo=False)
     if case["label"] == "scam":

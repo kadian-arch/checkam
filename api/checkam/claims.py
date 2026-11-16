@@ -55,7 +55,12 @@ CLAIMS = {
         "To receive the prize, does it ask you to pay, give a code or open a link?",
         "Pour recevoir le gain, vous demande-t-on de payer, de donner un code ou d'ouvrir un lien ?"),
     "relative_trouble": (
-        r"\b(accident|h[ôo]pital|hospital|urgence|emergency|arr[êe]t[ée]e?|arrested|gard[ée] [àa] vue|bloqu[ée]e? [àa] la fronti|stuck at the border|kidnapp|enlev[ée])",
+        # a hospital or an emergency is a claim about someone in trouble only when a person is said to be there, or
+        # money is tied to it: an appointment reminder or a hospital notice is not
+        r"\b(accident|arr[êe]t[ée]e?|arrested|gard[ée] [àa] vue|bloqu[ée]e? [àa] la fronti|stuck at the border|kidnapp|enlev[ée])"
+        r"|\b(i am|i'm|je suis|il est|elle est|he is|she is|we are|nous sommes|is|est)\W+(?:\w+\W+){0,3}(at|in|[àa]|en)\W+(?:the |l'|la |le )?(h[ôo]pital|hospital|urgences?|emergency)"
+        r"|\b(h[ôo]pital|hospital|urgences?|emergency)\b\W+(?:\w+\W+){0,6}(bill|facture|op[ée]ration|surgery|argent|money|send|envoie[zs]?|pay|paie|payez|urgent)"
+        r"|\b(send|envoie[zs]?|pay|paie|payez|argent|money|urgent)\b\W+(?:\w+\W+){0,6}(h[ôo]pital|hospital|urgences?|emergency)",
         "Call your relative on the number you already know, or someone who is with them, before you send anything",
         "Appelez votre proche sur le numéro que vous connaissez déjà, ou quelqu'un qui est avec lui, avant d'envoyer quoi que ce soit",
         "Have you reached the person on the number you already know?",

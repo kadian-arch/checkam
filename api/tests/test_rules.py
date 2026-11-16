@@ -261,7 +261,12 @@ def test_a_victim_retelling_what_happened_is_judged_on_what_they_were_asked():
 def test_a_job_or_scholarship_announcement_is_never_called_harmless():
     for ad in ["En rejoignant Nestlé, vous rejoignez la plus grande société alimentaire au monde. Type de contrat: Temps plein",
                "Volontaires ONU (VNU) 2024/2025. La candidature est en cours"]:
-        assert agents.run_check(ad, persist=False)["verdict"] in ("suspicious", "scam"), ad
+        card = agents.run_check(ad, persist=False)
+        # never cleared on its wording, and never accused on its kind alone: with no fee, number, link or
+        # mass hiring in it, the answer is to confirm it at the source
+        assert card["verdict"] != "looks_genuine", ad
+        if card["verdict"] == "cant_tell":
+            assert card["do_now"] and card["dont"], ad
 
 
 def test_a_fee_for_the_application_is_a_payment_demand_without_a_pay_verb():

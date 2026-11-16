@@ -121,6 +121,9 @@ def strip_invisible(text: str) -> tuple[str, int]:
     return INVISIBLE.sub("", text or ""), found
 
 
+EMAIL = re.compile(r"(?i)[a-z0-9][\w.+-]*@((?:[a-z0-9-]+\.)+[a-z]{2,})")
+
+
 def extract(text: str) -> dict:
     """Numbers (as dataset codes), links and evasion signals found in a message."""
     clean, hidden = strip_invisible(text)
@@ -135,9 +138,14 @@ def extract(text: str) -> dict:
         code = pseudonym(d)
         numbers.append({"code": code, "prefix": d[:3]})
     numbers += [{"code": c, "prefix": c[:3]} for c in TOKEN.findall(clean)]
+    # an email address is a way to write to someone, not a site the message sends you to
+    emails = []
+    for m in EMAIL.finditer(clean):
+        if m.group(1).lower() not in emails:
+            emails.append(m.group(1).lower())
     links = []
-    for m in URL.findall(clean):
-        host = re.sub(r"(?i)^https?://", "", m).replace("[.]", ".").split("/")[0].lower().removeprefix("www.")
+    for m in URL.findall(EMAIL.sub(" ", clean)):
+        host = re.sub(r"(?i)^https?://", "", m).replace("[.]", ".").split("/")[0].lower().removeprefix("www.").rstrip(".,;:!?)")
         if host and host not in links:
             links.append(host)
     return {
@@ -146,6 +154,7 @@ def extract(text: str) -> dict:
         "official_numbers": official,
         "links": [h for h in links if not OFFICIAL_DOMAINS.search(h)],
         "official_links": [h for h in links if OFFICIAL_DOMAINS.search(h)],
+        "email_domains": emails,
         "hidden_characters": hidden,
         "asks_for_secret": bool(PIN_ASK.search(clean)),
     }

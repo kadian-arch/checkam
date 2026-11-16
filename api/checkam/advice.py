@@ -14,7 +14,8 @@ SCHEMES = {
     # name: (pattern over text + scam types + the model's scheme name, label en, label fr)
     "visa_scholarship": (r"visa|lottery|loterie|scholarship|bourse|immigra|study abroad|[ée]tudier [àa] l'[ée]tranger|work permit|permis de travail|green card|dv ?lottery|fake_scholarship_visa",
                          "a fake visa or scholarship offer", "une fausse offre de visa ou de bourse"),
-    "job": (r"recrut|recruit|job|emploi|hiring|embauche|stage|internship|salaire|salary|fake_job|candidat|volontaire|volunteer|rejoign\w* (?:notre|nos|l'|la|le)|join our|type de contrat|temps plein|full[- ]time|former \d+ jeunes",
+    "job": (r"recrut|recruit|job|emploi|hiring|embauche|stage|internship|salaire|salary|fake_job|candidat|volontaire|volunteer|rejoign\w* (?:notre|nos|l'|la|le)|join our|type de contrat|temps plein|full[- ]time|former \d+ jeunes|vacanc|postule[rz]|"
+            r"terms of reference|termes de r[ée]f[ée]rence|apply (?:before|through)|is looking for an?\b",
             "a fake job offer", "une fausse offre d'emploi"),
     "exam": (r"concours|admission|[ée]preuves|leaked (?:exam|paper|question)|exam (?:results?|papers?|questions?)|fuite d(?:es|'[ée]preuves)|fake_concours_admission|enam\b|emia\b",
              "a fake concours or admission offer", "une fausse offre de concours ou d'admission"),
@@ -173,6 +174,17 @@ def steps(verdict: str, scheme: str | None, facts: dict, lang: str, route: str =
     brand = next((b for b in facts.get("brands", []) if b in OPERATOR), None)
     asks = set(facts.get("asks", []))
     do, dont = [], []
+    if verdict == "looks_genuine" and facts.get("announcement"):
+        do.append(("Apply only through the organisation's own address or website", "Postulez seulement par l'adresse ou le site de l'organisme")[i])
+        do.append(("If anyone later asks you to pay to apply, or to send money for a file, a test or a uniform, stop: that part would be a scam",
+                   "Si quelqu'un vous demande ensuite de payer pour postuler, ou d'envoyer de l'argent pour un dossier, un test ou une tenue, arrêtez : ce serait une arnaque")[i])
+        return do, dont
+    if verdict == "cant_tell" and facts.get("announcement"):
+        do.append(("Find this offer yourself on the organisation's official website or at its office before you apply",
+                   "Retrouvez vous-même cette offre sur le site officiel de l'organisme ou à son bureau avant de postuler")[i])
+        dont.append(("Never pay to apply, and do not send your ID or diplomas until you have confirmed the offer",
+                     "Ne payez jamais pour postuler, et n'envoyez ni pièce d'identité ni diplômes avant d'avoir confirmé l'offre")[i])
+        return do, dont
     if verdict == "looks_genuine":
         if route:
             do.append((f"You can use it through the official route it gives ({route}), typed by you", f"Vous pouvez l'utiliser par la voie officielle indiquée ({route}), en la tapant vous-même")[i])
