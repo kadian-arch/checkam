@@ -660,7 +660,14 @@ def _vet_site(case: Case, host: str, age: int | None, established: bool) -> list
     # one a personal phone cannot fake; a registered sender's login or terms address that asks nothing is context
     pushed = ("click_link" in f["asks"] or bool(f.get("promise")) or f.get("sender_kind") not in ("official", "registered")) and not established
     claim = linkcheck.claimed(f["text"])
-    if claim and not linkcheck.belongs(host, claim[1]):
+    if claim and not linkcheck.belongs(host, claim[1]) and f.get("sender_kind") in ("official", "registered") \
+            and linkcheck.registrable(host) in SHORTENERS:
+        # a shortened link hides where it goes: from a sender a personal phone cannot use it is how real promos link
+        # their terms. The destination is unknown, which is not the same as wrong
+        out.append(Finding(_fid(), "link_check", L(case, f"The link {host} is shortened, so it hides where it goes. That does not prove it is theirs, and it does not prove it is not",
+                             f"Le lien {host} est raccourci, il cache sa destination. Cela ne prouve ni qu'il est à eux, ni qu'il ne l'est pas"),
+                           "context", "weak", [{"table": "message", "id": host, "detail": "shortened link"}]))
+    elif claim and not linkcheck.belongs(host, claim[1]):
         if pushed:
             f.setdefault("wrong_site", []).append(host)
         out.append(Finding(_fid(), "link_check", L(case, f"It claims to come from {claim[0]}, but the link goes to {host}, which is not one of their sites (theirs end in {claim[1][0]})",
