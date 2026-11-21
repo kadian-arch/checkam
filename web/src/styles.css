@@ -487,3 +487,5 @@ a.primary, a.ghost { text-decoration: none; }
 .flag-box .row { justify-content: center; flex-wrap: wrap; gap: 8px; }
 .tbl .actions { white-space: nowrap; display: flex; gap: 6px; }
 .tbl input.mini { width: 100%; min-width: 120px; }
+
+.note { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 10px; color: var(--paper); font-size: 15px; line-height: 1.5; }

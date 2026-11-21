@@ -38,6 +38,8 @@
   "evidence_positive": "Positive signs",
   "evidence_limited": "Limited evidence: confirm at the source",
   "evidence_none": "Not enough to judge",
+  "verdict_quiet": "Nothing to check yet",
+  "evidence_quiet": "Nothing risky in it",
   "why": "Why we say this",
   "do_now": "What to do now",
   "dont": "Do not",

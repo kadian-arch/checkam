@@ -38,6 +38,8 @@
   "evidence_positive": "Signes positifs",
   "evidence_limited": "Preuves limitées : confirmez à la source",
   "evidence_none": "Pas assez d'éléments",
+  "verdict_quiet": "Rien à vérifier pour l'instant",
+  "evidence_quiet": "Rien de risqué dedans",
   "why": "Pourquoi nous le disons",
   "do_now": "Que faire maintenant",
   "dont": "À ne pas faire",

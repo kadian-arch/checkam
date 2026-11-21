@@ -128,6 +128,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [live, setLive] = useState<TraceLine[]>([]);
   const [card, setCard] = useState<Card | null>(null);
   const [err, setErr] = useState("");
+  const [note, setNote] = useState("");
   const top = useRef<HTMLElement>(null);
   const step = live.reduce((s, l) => Math.max(s, phase(l)), 0);
   const last = live[live.length - 1];
@@ -142,8 +143,9 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     setLive([]);
     try {
       const c = await streamCheck({ text: body, sender: who, language: lang, files }, (l) => setLive((x) => [...x, l]));
-      if (c.error) setErr(c.error);
-      else setCard(c);
+      if (c.nothing) { setErr(""); setNote(c.error ?? ""); }  // a greeting is not a failure
+      else if (c.error) setErr(c.error);
+      else { setNote(""); setCard(c); }
       top.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
       setErr(t.error);
@@ -224,6 +226,7 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
           <button className="primary" disabled={!text.trim() && !files.length} onClick={() => go()}>{t.check}<span aria-hidden>→</span></button>
         )}
         {err && <p className="error" role="alert">{err}</p>}
+        {note && <p className="note" role="status">{note}</p>}
         <p className="privacy"><svg viewBox="0 0 24 24" aria-hidden><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>{t.privacy}</p>
         {isIOS && (
           // Apple keeps web apps out of the share menu; a one-time Shortcut puts CheckAm there for every app
