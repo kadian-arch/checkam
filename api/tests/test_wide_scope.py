@@ -12,7 +12,7 @@ import pytest
 from checkam import agents
 
 EVALS = Path(__file__).resolve().parents[2] / "evals"
-CASES = [c for name in ("wide_scope", "everyday") for c in json.loads((EVALS / f"{name}.json").read_text(encoding="utf-8"))]
+CASES = [c for name in ("wide_scope", "everyday", "real_messages") for c in json.loads((EVALS / f"{name}.json").read_text(encoding="utf-8"))]
 FLAGGED = ("scam", "suspicious")
 
 

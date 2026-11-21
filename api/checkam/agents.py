@@ -179,6 +179,16 @@ def _fcfa(s: str) -> int:
 STAKE = re.compile(AMOUNT.pattern + r"|(?<![\d+*#])(?P<bare>\d{1,3}(?:[ .,]\d{3})+|\d{4,7})(?![\d*#])")
 
 
+PLATFORM_DEPOSIT = re.compile(r"(?i)\b(d[ée]p[ôo]t|deposit)\b[^\n]{0,25}\b(min|minimum)|\b(min|minimum)\b[^\n]{0,25}\b(d[ée]p[ôo]t|deposit)")
+PLATFORM_WITHDRAW = re.compile(r"(?i)\b(retrait|withdrawal)\b[^\n]{0,25}\b(min|minimum)|\b(min|minimum)\b[^\n]{0,25}\b(retrait|withdrawal)")
+PLATFORM_LEVELS = re.compile(r"(?i)(niveau|level|tier)\s*\d\s*[:=-]?\s*\d+\s*%")
+
+
+def platform_scheme(text: str) -> bool:
+    """A 'platform' that shows a minimum deposit and withdrawal, or commission levels per referral: the layout of an investment or referral pyramid."""
+    return bool((PLATFORM_DEPOSIT.search(text) and PLATFORM_WITHDRAW.search(text)) or len(PLATFORM_LEVELS.findall(text)) >= 2)
+
+
 def stake_and_return(text: str) -> bool:
     """You pay an amount, then get back a larger one: the shape of every Ponzi and advance-fee offer."""
     paid = None
@@ -345,7 +355,7 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     asks = operator_demands(facts["text"], kind)
     ignored: list[str] = []
     seen = QUOTED_FIELD.sub(" ", facts["text"]) if payer_note_is_label(facts["text"], kind) else facts["text"]
-    staked = stake_and_return(facts["text"]) and not OFFICIAL_ROUTE.search(facts["text"])
+    staked = (stake_and_return(facts["text"]) or platform_scheme(facts["text"])) and not OFFICIAL_ROUTE.search(facts["text"])
     if staked and "send_money" not in asks:
         asks.append("send_money")
     brands = [k for k, rx in BRANDS.items() if re.search(rx, facts["text"])]
