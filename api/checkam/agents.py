@@ -179,14 +179,25 @@ def _fcfa(s: str) -> int:
 STAKE = re.compile(AMOUNT.pattern + r"|(?<![\d+*#])(?P<bare>\d{1,3}(?:[ .,]\d{3})+|\d{4,7})(?![\d*#])")
 
 
-PLATFORM_DEPOSIT = re.compile(r"(?i)\b(d[ée]p[ôo]t|deposit)\b[^\n]{0,25}\b(min|minimum)|\b(min|minimum)\b[^\n]{0,25}\b(d[ée]p[ôo]t|deposit)")
-PLATFORM_WITHDRAW = re.compile(r"(?i)\b(retrait|withdrawal)\b[^\n]{0,25}\b(min|minimum)|\b(min|minimum)\b[^\n]{0,25}\b(retrait|withdrawal)")
-PLATFORM_LEVELS = re.compile(r"(?i)(niveau|level|tier)\s*\d\s*[:=-]?\s*\d+\s*%")
+# a "platform" that moves your money is recognised by what it describes, not by one wording: any two of these signs
+PLATFORM_SIGNS = {
+    "min_deposit": re.compile(r"(?i)\b(d[ée]p[ôo]ts?|deposits?|recharge|mise|stake|invest\w*)\b[^\n]{0,25}\b(min|minimum|minimal|from|d[èe]s)\b|\b(min|minimum|minimal)\b[^\n]{0,25}\b(d[ée]p[ôo]ts?|deposits?|recharge|mise|stake|invest\w*)"),
+    "min_withdraw": re.compile(r"(?i)\b(retraits?|withdraw\w*|payouts?|cash ?out)\b[^\n]{0,25}\b(min|minimum|minimal|from|d[èe]s)\b|\b(min|minimum|minimal)\b[^\n]{0,25}\b(retraits?|withdraw\w*|payouts?|cash ?out)"),
+    "levels": re.compile(r"(?i)(?:\b(?:niveau|level|tier|generation|g[ée]n[ée]ration|lvl)\s*\d\s*[:=-]?\s*\d+(?:[.,]\d+)?\s*%[^\n]*\n?){2,}"),
+    "signup_bonus": re.compile(r"(?i)\b(bonus|cadeau|gift|reward)\s+(d[' ]?)?(inscription|enregistrement|sign[- ]?up|registration|welcome|bienvenue)|\b(inscription|sign[- ]?up|registration|welcome)\s+(bonus|gift|reward)"),
+    "daily_return": re.compile(r"(?i)\b(\d+(?:[.,]\d+)?\s*%\s*(?:par jour|per day|daily|/ ?day|/ ?jour|quotidien\w*|chaque jour|every day)|(?:gain|profit|revenu|income|return)s?\s+(?:quotidiens?|daily|par jour|per day))"),
+    "fee_on_withdraw": re.compile(r"(?i)\b(frais|fees?|charges?)\s*:?\s*\d+(?:[.,]\d+)?\s*%"),
+}
+
+
+def platform_signs(text: str) -> list[str]:
+    return [k for k, rx in PLATFORM_SIGNS.items() if rx.search(text)]
 
 
 def platform_scheme(text: str) -> bool:
-    """A 'platform' that shows a minimum deposit and withdrawal, or commission levels per referral: the layout of an investment or referral pyramid."""
-    return bool((PLATFORM_DEPOSIT.search(text) and PLATFORM_WITHDRAW.search(text)) or len(PLATFORM_LEVELS.findall(text)) >= 2)
+    """A 'platform' that shows deposit and withdrawal minimums, referral levels, a sign-up bonus or daily returns:
+    the layout of an investment or referral pyramid. Two signs together are enough; one alone is not."""
+    return len(platform_signs(text)) >= 2
 
 
 def stake_and_return(text: str) -> bool:

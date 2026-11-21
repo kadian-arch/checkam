@@ -86,6 +86,8 @@ export const api = {
   dossier: (t: string, id: string) => call<any>(`/analyst/campaigns/${id}`, {}, t),
   checks: (t: string) => call<{ checks: any[]; stats: any }>("/analyst/checks", {}, t),
   publish: (t: string, body: any) => call<any>("/analyst/alerts", { method: "POST", body: JSON.stringify(body) }, t),
+  afterAction: (b: { acted: string; verdict: string; scheme: string; brands: string[]; why: string[]; language: string }) =>
+    call<{ steps: string[] }>("/advice/after", { method: "POST", body: JSON.stringify(b) }),
   flag: (checkId: string, suggested: string, note: string) =>
     call<{ ok: boolean }>(`/checks/${checkId}/flag`, { method: "POST", body: JSON.stringify({ suggested, note }) }),
   flags: (t: string) => call<{ flags: any[] }>("/analyst/flags", {}, t),

@@ -176,5 +176,12 @@
   "flag_is_genuine": "It is genuine",
   "flag_not_sure": "Not sure",
   "flag_thanks": "Thank you. A fraud analyst will review it, and what they confirm helps the next person.",
-  "signed_answer": "Signed answer"
+  "signed_answer": "Signed answer",
+  "acted_q": "Have you already done something?",
+  "acted_nothing": "Nothing yet",
+  "acted_clicked": "I opened the link",
+  "acted_code": "I gave a code or PIN",
+  "acted_money": "I sent money",
+  "acted_documents": "I sent my ID or documents",
+  "acted_installed": "I installed an app"
 }

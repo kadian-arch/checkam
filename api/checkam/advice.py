@@ -224,3 +224,79 @@ def steps(verdict: str, scheme: str | None, facts: dict, lang: str, route: str =
     if not dont:
         dont.append(ASK_LINES["send_money"][i])
     return do[:3], dont[:3]
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# What to do depends on what the person has already done. The reader says it ("I paid", "I gave my code"), the
+# fixed lines below name only official channels, and a model may add at most two lines that pass the same checks.
+ACTED = ("nothing", "clicked", "code", "money", "documents", "installed")
+
+AFTER = {
+    "money": [
+        ("Act within the hour: tell your operator or bank that the transfer was fraud, using its official line, and ask them to block the receiving number and the transaction",
+         "Agissez dans l'heure : dites à votre opérateur ou à votre banque que le transfert est une fraude, par sa ligne officielle, et demandez de bloquer le numéro receveur et la transaction"),
+        ("Keep the transaction ID, the receiving number and a screenshot of the conversation. Do not delete anything",
+         "Gardez l'identifiant de la transaction, le numéro receveur et une capture de la conversation. Ne supprimez rien"),
+        ("Report it to the police or gendarmerie with those proofs. Anyone who offers to recover your money for a fee is a second scam",
+         "Déclarez-le à la police ou à la gendarmerie avec ces preuves. Toute personne qui propose de récupérer votre argent contre des frais est une deuxième arnaque"),
+    ],
+    "code": [
+        ("Change your Mobile Money PIN now, from your phone's own menu, then check your last transactions",
+         "Changez votre code secret Mobile Money maintenant, depuis le menu de votre téléphone, puis vérifiez vos dernières transactions"),
+        ("If the code was for an app or account, change that password and sign out of all other devices",
+         "Si le code était celui d'une application ou d'un compte, changez ce mot de passe et déconnectez tous les autres appareils"),
+        ("Tell your operator or bank that someone has your code, through its official line",
+         "Dites à votre opérateur ou à votre banque que quelqu'un a votre code, par sa ligne officielle"),
+    ],
+    "clicked": [
+        ("Close the page without typing anything. If you already typed a password or code, change it now from the real app or site you type yourself",
+         "Fermez la page sans rien taper. Si vous avez déjà tapé un mot de passe ou un code, changez-le maintenant depuis la vraie application ou le vrai site que vous tapez vous-même"),
+        ("Check your balance and recent activity for anything you did not do",
+         "Vérifiez votre solde et votre activité récente pour toute opération que vous n'avez pas faite"),
+    ],
+    "documents": [
+        ("Keep a copy of what you sent and to whom. Your ID can be used to open accounts or SIM cards in your name",
+         "Gardez une copie de ce que vous avez envoyé et à qui. Votre pièce d'identité peut servir à ouvrir des comptes ou des lignes à votre nom"),
+        ("Tell your operator and bank that your ID may be misused, and be wary of calls that quote your own details back to you",
+         "Dites à votre opérateur et à votre banque que votre pièce d'identité peut être utilisée à mauvais escient, et méfiez-vous des appels qui vous citent vos propres informations"),
+    ],
+    "installed": [
+        ("Uninstall the app now and switch off any permission it asked for. Do not open it again",
+         "Désinstallez l'application maintenant et coupez toutes les autorisations demandées. Ne la rouvrez pas"),
+        ("From another device, change the passwords of your email, Mobile Money and social accounts",
+         "Depuis un autre appareil, changez les mots de passe de votre courriel, de votre Mobile Money et de vos réseaux sociaux"),
+    ],
+}
+
+
+def after_action(acted: str, brands: list[str], lang: str) -> list[str]:
+    """Fixed, official-only steps for what the person already did, first. The operator's own line goes in when known."""
+    if acted not in AFTER:
+        return []
+    i = 1 if lang == "fr" else 0
+    out = [s[i] for s in AFTER[acted]]
+    brand = next((b for b in brands if b in OPERATOR), None)
+    if brand and acted in ("money", "code"):
+        out.insert(1, OPERATOR[brand][lang if lang in ("en", "fr") else "en"])
+    return out
+
+
+_NUM = re.compile(r"\d[\d ]{2,}\d|\*\d[\d*]*#|#\d[\d*]*#|https?://\S+|www\.\S+|\b[\w-]+\.(?:com|cm|net|org|app|me|top)\b", re.I)
+
+
+def allowed_tokens() -> set[str]:
+    """Every number, code and site a card may name: the operators' own lines and the official list, nothing else."""
+    ok = set()
+    for line in OPERATOR.values():
+        for t in line.values():
+            ok |= {re.sub(r"\s", "", m) for m in _NUM.findall(t)}
+    return ok
+
+
+def vetted(line: str) -> bool:
+    """A model-written step is kept only if it invents no phone number, code or site, is short, and promises nothing."""
+    if not line or len(line) > 220:
+        return False
+    if any(re.sub(r"\s", "", m) not in allowed_tokens() for m in _NUM.findall(line)):
+        return False
+    return not re.search(r"(?i)\b(guarantee|garanti\w*|you will (?:get|recover)|vous (?:r[ée]cup[ée]rerez|serez rembours))", line)

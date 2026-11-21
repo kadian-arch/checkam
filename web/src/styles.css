@@ -489,3 +489,6 @@ a.primary, a.ghost { text-decoration: none; }
 .tbl input.mini { width: 100%; min-width: 120px; }
 
 .note { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 10px; color: var(--paper); font-size: 15px; line-height: 1.5; }
+.acted .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+.acted .chip { border: 1px solid var(--line, #3a3a3a); background: transparent; color: inherit; padding: 8px 12px; border-radius: 999px; font: inherit; cursor: pointer; }
+.acted .chip.on { background: var(--amber, #f5a623); color: #111; border-color: transparent; }

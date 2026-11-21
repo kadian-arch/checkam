@@ -176,5 +176,12 @@
   "flag_is_genuine": "C'est authentique",
   "flag_not_sure": "Pas sûr",
   "flag_thanks": "Merci. Un analyste anti-fraude va l'examiner, et ce qu'il confirme aidera la prochaine personne.",
-  "signed_answer": "Réponse signée"
+  "signed_answer": "Réponse signée",
+  "acted_q": "Avez-vous déjà fait quelque chose ?",
+  "acted_nothing": "Rien pour l'instant",
+  "acted_clicked": "J'ai ouvert le lien",
+  "acted_code": "J'ai donné un code ou mon code secret",
+  "acted_money": "J'ai envoyé de l'argent",
+  "acted_documents": "J'ai envoyé ma pièce d'identité ou des documents",
+  "acted_installed": "J'ai installé une application"
 }

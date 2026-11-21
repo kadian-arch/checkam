@@ -134,6 +134,31 @@ async def check_image(image: list[UploadFile] = File(...), text: str = Form("", 
     return agents.run_check(text, images=await _images(image), sender=sender, language=language)
 
 
+class AfterIn(BaseModel):
+    acted: str = Field("", max_length=20)
+    verdict: str = Field("", max_length=20)
+    scheme: str = Field("", max_length=40)
+    brands: list[str] = Field(default_factory=list, max_length=6)
+    why: list[str] = Field(default_factory=list, max_length=4)
+    language: str = Field("en", max_length=5)
+
+
+@app.post("/advice/after")
+def advice_after(body: AfterIn):
+    """What to do now, given what the person has already done. Fixed official-only steps first; the model may add
+    up to two more, kept only if they pass the same checks (no invented number, code or site)."""
+    from . import advice
+    lang = "fr" if body.language == "fr" else "en"
+    if body.acted not in advice.ACTED or body.acted == "nothing":
+        return {"steps": []}
+    steps = advice.after_action(body.acted, [b for b in body.brands if isinstance(b, str)], lang)
+    msgs = [{"role": "system", "content": "You advise a Cameroonian who may have been scammed. Reply with JSON only: {\"steps\": [up to 2 short imperative sentences]}. Never write a phone number, USSD code, website or promise of getting money back. Answer in " + ("French" if lang == "fr" else "English") + "."},
+            {"role": "user", "content": json.dumps({"verdict": body.verdict, "kind": body.scheme, "reasons": body.why[:3], "already_done": body.acted, "fixed_steps": steps}, ensure_ascii=False)}]
+    extra = (nvidia.chat_json(msgs, max_tokens=200, agent="Reporter", action="tailor") or {}).get("steps", []) if config.MODEL_API_KEY else []
+    steps += [x for x in extra if isinstance(x, str) and advice.vetted(x) and x not in steps][:2]
+    return {"steps": steps}
+
+
 @app.post("/run")
 def run(body: RunIn):
     """Programmatic entry point for judges: {"mode": "check"|"investigate", ...}."""
