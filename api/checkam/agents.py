@@ -59,7 +59,7 @@ OFFICIAL_ROUTE = re.compile(r"(?i)[*#]\d{2,4}(?:\*\d+)*\*?#|\b(?:dial|composez|t
 # unearned windfalls: prizes, gifts, grants, mass recruitment, easy returns
 PROMISE = re.compile(r"(?i)\b(congratulations|f[ée]licitations|you (?:have )?won|vous avez gagn|winner|gagnant|s[ée]lectionn[ée]|selected|free (?:data|money|gift)|gratuit|cadeau|gift|"
                      r"subvention|grant|subsidy|aide financi|financement|recrutement|recruitment|recrute|recruiting|stages? r[ée]mun[ée]r|paid internship|offres? d'emploi|"
-                     r"double your money|doublez|daily income|revenu journalier|investissez|invest today|gagnez \d|earn \d|win \d|re[çc]evoir jusqu|receive up to|"
+                     r"ont droit (?:[àa]|de|aux?)|avez droit|droit de retirer|are entitled to|eligible to (?:receive|withdraw)|double your money|doublez|daily income|revenu journalier|investissez|invest today|gagnez \d|earn \d|win \d|re[çc]evoir jusqu|receive up to|"
                      # grant money and testimonial bait: "proof" that a payout is real, to pull the next victim in
                      r"foundation funds?|development funds?|fondation|empowerment (?:fund|grant|program)|"
                      r"(?:true|real|legit) (?:promotion|programme?|offer)|i (?:apply|applied)\W+(?:\w+\W+){0,3}i (?:receive|received|got)|"
@@ -407,12 +407,18 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     return out
 
 
+# one short greeting or pleasantry and nothing else: there is nothing to judge, and a verdict on it would be a guess
+GREETING = re.compile(r"(?i)^\W*(?:hi|hello|hey|hallo|salut|coucou|bonjour|bonsoir|bonne (?:journ[ée]e|soir[ée]e)|good (?:morning|afternoon|evening|night)|"
+                      r"how are you|how r u|how is it going|what'?s up|wassup|[cç]a va|comment (?:vas|allez)[- ]tu|merci|thanks?|thank you|ok(?:ay)?|test(?:ing)?|"
+                      r"yes|no|oui|non|please|s'il (?:te|vous) pla[iî]t)\b[^.?!\n]{0,60}[.?!]?\W*$")
+
+
 def nothing_to_check(facts: dict) -> bool:
     """Emoji, a greeting, a few letters: no number, link, amount, request, brand or real sentence. Giving a
     verdict on that would be guessing, so the person is asked for the actual message instead."""
     words_ = re.findall(r"[^\W\d_]{2,}", facts["text"])
     signals = facts["numbers"] or facts["links"] or facts.get("official_numbers") or facts["asks"] or facts.get("promise") or facts["brands"]         or re.search(r"\d{3,}|[*#]\d{2,4}", facts["text"]) or facts.get("injection") or facts.get("hidden_characters")
-    return not signals and len(words_) < 4
+    return not signals and (len(words_) < 4 or bool(GREETING.match(facts["text"])))
 
 
 def _guess_lang(t: str) -> str:
@@ -660,7 +666,14 @@ def _vet_site(case: Case, host: str, age: int | None, established: bool) -> list
     # one a personal phone cannot fake; a registered sender's login or terms address that asks nothing is context
     pushed = ("click_link" in f["asks"] or bool(f.get("promise")) or f.get("sender_kind") not in ("official", "registered")) and not established
     claim = linkcheck.claimed(f["text"])
-    if claim and not linkcheck.belongs(host, claim[1]):
+    if claim and not linkcheck.belongs(host, claim[1]) and f.get("sender_kind") in ("official", "registered") \
+            and linkcheck.registrable(host) in SHORTENERS:
+        # a shortened link hides where it goes: from a sender a personal phone cannot use it is how real promos link
+        # their terms. The destination is unknown, which is not the same as wrong
+        out.append(Finding(_fid(), "link_check", L(case, f"The link {host} is shortened, so it hides where it goes. That does not prove it is theirs, and it does not prove it is not",
+                             f"Le lien {host} est raccourci, il cache sa destination. Cela ne prouve ni qu'il est à eux, ni qu'il ne l'est pas"),
+                           "context", "weak", [{"table": "message", "id": host, "detail": "shortened link"}]))
+    elif claim and not linkcheck.belongs(host, claim[1]):
         if pushed:
             f.setdefault("wrong_site", []).append(host)
         out.append(Finding(_fid(), "link_check", L(case, f"It claims to come from {claim[0]}, but the link goes to {host}, which is not one of their sites (theirs end in {claim[1][0]})",
@@ -702,6 +715,15 @@ def _tool_similar_scams(case: Case, trace: Trace) -> list[Finding]:
     ev = [{"table": "messages", "id": r["id"], "detail": r['text'][:140], "score": round(score, 2), "wording": round(lex, 2), "meaning": round(sem, 2),
            "scam_types": r["scam_types"]} for score, lex, sem, r in top]
     case.facts["scam_types"] = sorted({t for _, _, _, r in top for t in (r["scam_types"] or [])})
+    # worded as a near copy of a message already reported as a scam: that is the same message going round again,
+    # whether or not it asks for anything (forged communiqués and fake recruitment notices ask for nothing).
+    # Too few words can sit inside any long text, so a short message never counts as a copy
+    # a message that comes from an operator's own sender name is not a scammer's copy going round
+    if best[1] >= 0.8 and len(words(case.facts["text"])) >= 8 and case.facts.get("sender_kind") not in ("official", "registered"):
+        case.facts["known_copy"] = True
+        return [Finding(_fid(), "similar_scams", L(case, "It is a copy of a message that people have already reported as a scam",
+                                                  "C'est la copie d'un message que des personnes ont déjà signalé comme une arnaque"),
+                        "scam", "strong", ev, verify={"kind": "similar", "id": best[3]["id"], "score": round(best[0], 3)})]
     # scammers copy real operator formats on purpose, so resemblance alone proves nothing:
     # it is scam evidence only when the message also demands something or promises a windfall
     if not (case.facts["asks"] or case.facts.get("promise")):
@@ -958,6 +980,25 @@ MASS_HIRING = re.compile(r"(?i)(?<![\d.,])(\d{1,3}(?:[ .]\d{3})+|\d{2,6})\s+(?:\
                          r"youths?|positions|posts|workers|interns|vacancies|talents|dipl[ôo]m[ée]s|auditeurs)\b")
 
 
+# names that fake recruitment notices borrow. A notice that speaks for one of them but gives no address, link or
+# contact on that organisation's own site cannot be confirmed from the message: real ones are published on the
+# organisation's own pages. Acronyms are matched in capitals only (ADC, PAD, ONU), words in any case
+KNOWN_ISSUERS = re.compile(r"(?i)\b(port autonome|a[ée]roports? du cameroun|camair|minfopra|fonction publique|elecam|elections cameroon|perenco|carrefour|"
+                           r"santa lucia|chococam|boissons du cameroun|brasseries|nestl[ée]|total ?[ée]nergies|nations unies|united nations|programme alimentaire mondial|"
+                           r"world food programme|afriland|ecobank|bicec|soci[ée]t[ée] g[ée]n[ée]rale|union bank|minesup|minesec|minist[èe]re|ministry of|"
+                           r"orange cameroun|mtn cameroon|camtel|eneo|cnps)\b|(?-i:\b(?:PAD|ADC|ONU|VNU|PAM|WFP|UNICEF|UNHCR|PNUD|UNDP|UBA|CCAA)\b)")
+# a way to apply that can be checked in person is a channel too
+APPLY_IN_PERSON = re.compile(r"(?i)\b(d[ée]poser? (?:vos?|votre|les) dossiers? (?:au|[àa]|sur)|dossiers? [àa] d[ée]poser (?:au|[àa])|apply in person|"
+                       r"apply at (?:the|our) (?:office|branch|head ?office)|sur place|at the (?:head ?office|branch|office)|au si[èe]ge|[àa] la direction|affich[ée]e? (?:au|[àa]|sur|dans)|babillard|notice ?board|tableau d'affichage|secr[ée]tariat|dean'?s office|collect (?:yours|it) at)")
+MASS_WORDS = re.compile(r"(?i)\b(mille|milliers|centaines?|thousands?|hundreds?)\b\s+(?:\w+\s+){0,2}(jeunes|postes|stagiaires|agents|personnes|candidats|places|enseignants|"
+                        r"youths?|positions|posts|workers|interns|vacancies|talents|dipl[ôo]m[ée]s|auditeurs)\b")
+
+
+def verifiable_channel(f: dict) -> bool:
+    """An address, a link or a place on the organisation's own side that the reader can check."""
+    return bool([d for d in f.get("email_domains", []) if d not in FREE_MAIL] or f["links"] or f.get("official_links") or APPLY_IN_PERSON.search(f["text"]))
+
+
 def plain_old_link(f: dict) -> bool:
     """'Register on the official page: <link>' where the site has existed for years and the message neither
     promises, threatens nor asks for anything else: how people share pages. Short links hide where they go."""
@@ -976,7 +1017,7 @@ def announcement_bait(f: dict) -> list[str]:
         bait.append("gives a private number to contact")
     if any(d in FREE_MAIL for d in f.get("email_domains", [])):
         bait.append("uses a free mailbox")
-    if any(int(re.sub(r"\D", "", m.group(1))) >= 30 for m in MASS_HIRING.finditer(f["text"])):
+    if any(int(re.sub(r"\D", "", m.group(1))) >= 30 for m in MASS_HIRING.finditer(f["text"])) or MASS_WORDS.search(f["text"]):
         bait.append("announces posts by the dozen or the hundred")
     return bait
 
@@ -1073,6 +1114,12 @@ def arbitrate(case: Case, trace: Trace) -> None:
                     "Job, training and scholarship announcements are the most common bait in Cameroon. Real ones are published on the employer's or ministry's own website and never ask for a fee. Check there before you apply or pay anything",
                     "Les annonces d'emploi, de formation et de bourse sont l'appât le plus courant au Cameroun. Les vraies sont publiées sur le site de l'employeur ou du ministère et ne demandent jamais de frais. Vérifiez là-bas avant de postuler ou de payer quoi que ce soit"),
                     "scam", "medium", [{"table": "message", "id": "scheme", "detail": "job or scholarship announcement: " + "; ".join(bait)}], status="accepted"))
+            elif KNOWN_ISSUERS.search(case.facts["text"]) and not verifiable_channel(case.facts):
+                issuer = KNOWN_ISSUERS.search(case.facts["text"]).group(0).strip()
+                case.findings.append(Finding(_fid(), "unverified_issuer", L(case,
+                    f"It speaks for {issuer}, a name scams often borrow, but it gives no address, link or contact on that organisation's own site. Real notices are published there: confirm it before you apply",
+                    f"Il parle au nom de {issuer}, un nom que les arnaques empruntent souvent, mais il ne donne aucune adresse, aucun lien ni contact sur le site de cet organisme. Les vraies annonces y sont publiées : confirmez-la avant de postuler"),
+                    "scam", "medium", [{"table": "message", "id": "issuer", "detail": issuer}], status="accepted"))
             else:
                 # being an announcement is not evidence against it: nothing here is what the fakes do, and
                 # nothing here proves who wrote it either
@@ -1119,6 +1166,11 @@ def arbitrate(case: Case, trace: Trace) -> None:
             trace.log("Critic", "arbitrate", input=twin.claim, output=twin.critic_note, status="rejected", target="Reporter")
         return
     strong_twin = tw and tw["similarity"] >= 0.8
+    # a message that is a near copy of a reported scam AND of a real operator message is the format scammers
+    # copy on purpose (a transfer receipt, a promo): the real match wins, as it always did. Without a real match,
+    # a copy of a reported scam stays hard evidence
+    if case.facts.get("known_copy") and strong_twin:
+        case.facts["known_copy"] = False
     # from a sender name a personal phone cannot use, asking for nothing that can cost money: no harm path
     f_ = case.facts
     harmless = (f_.get("sender_kind") in ("official", "registered")
@@ -1129,7 +1181,7 @@ def arbitrate(case: Case, trace: Trace) -> None:
     # a link to a site that has existed for years, in a message that does nothing with it, changes none of this
     quiet = (not f_["asks"] and not f_.get("promise") and all(h in f_.get("old_sites", []) for h in f_["links"]) and not f_.get("body_numbers", len(f_["numbers"]))
              and not (f_["brands"] and THREAT.search(f_["text"]))
-             and not claimed_any and not f_.get("retold") and not PRIMER.search(f_["text"])
+             and not claimed_any and not f_.get("retold") and not PRIMER.search(f_["text"]) and not f_.get("known_copy")
              and not re.search(r"(?i)erreur|mistake|wrong number|mauvais num", f_["text"]))
     harmless = harmless or quiet
     if not (strong_twin or official_only or harmless):
@@ -1138,7 +1190,8 @@ def arbitrate(case: Case, trace: Trace) -> None:
               else "it only routes you to official channels (USSD, short codes, the official app) and carries no red flag" if official_only
               else "it comes from a registered sender and asks for nothing that can cost you money")
     for f in case.findings:
-        if f.status == "accepted" and f.direction == "scam" and f.tool in ("similar_scams", "model_judgement", "genuine_twin", "campaign"):
+        if f.status == "accepted" and f.direction == "scam" and f.tool in ("similar_scams", "model_judgement", "genuine_twin", "campaign") \
+                and not (f.tool == "similar_scams" and case.facts.get("known_copy")):
             f.direction, f.weight, f.critic_note = "context", "weak", f"overruled: {reason}"
             trace.log("Critic", "arbitrate", input=f.claim, output=f.critic_note, status="rejected", target="Reporter")
     if strong_twin and twin:
@@ -1273,6 +1326,8 @@ def rule_verdict(case: Case) -> tuple[str, float, int]:
         score += 3
     if case.facts["hidden_characters"]:
         score += 2
+    if case.facts.get("known_copy"):
+        score += 2  # the same message people have already reported as a scam
     if case.facts.get("injection"):
         score += 3  # a real operator never writes instructions for the AI that checks its message
     if case.facts.get("impossible_date") or USSD_TO_PERSON.search(case.facts["text"]):
@@ -1332,6 +1387,12 @@ TEXT = {
 }
 
 
+QUIET = {
+    "headline": {"en": "Nothing to check yet. This message asks you for nothing.",
+                 "fr": "Rien à vérifier pour l'instant. Ce message ne vous demande rien."},
+    "explain": {"en": "It asks for no money, no code and no document, promises nothing, and has no link or number. That does not prove who sent it. If this person later asks for money, a code or a favour, send me that message too.",
+                "fr": "Il ne demande ni argent, ni code, ni document, ne promet rien, et n'a ni lien ni numéro. Cela ne prouve pas qui l'a envoyé. Si cette personne demande ensuite de l'argent, un code ou un service, envoyez-moi aussi ce message."},
+}
 ANNOUNCEMENT_HEADLINE = {
     "suspicious": {"en": "We cannot confirm this offer. Check it before you reply, go anywhere or pay anything.",
                    "fr": "Nous ne pouvons pas confirmer cette offre. Vérifiez-la avant de répondre, de vous déplacer ou de payer quoi que ce soit."},
@@ -1457,10 +1518,17 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
         explain = " ".join(w["text"].rstrip(".") + "." for w in why[:2])
     level = ("strong" if verdict == "scam" else "limited" if verdict == "suspicious" else "none" if verdict == "cant_tell"
              else "positive" if any(f.status == "accepted" and f.direction == "genuine" and f.weight in ("strong", "medium") for f in case.findings) else "limited")
+    # harmless is not the same as genuine: with no positive evidence behind it (an operator template, a sender name
+    # a phone cannot fake, an official route), "looks genuine" would claim more than we know
+    positive = any(f.status == "accepted" and f.direction == "genuine" and (f.tool != "no_harm_path" or case.facts.get("sender_kind") in ("official", "registered"))
+                   for f in case.findings)
+    quiet = verdict == "looks_genuine" and not positive and not case.facts.get("announcement")
+    if quiet:
+        headline, explain, level = QUIET["headline"][lang], QUIET["explain"][lang], "quiet"
     route = OFFICIAL_ROUTE.search(case.facts["text"])
     do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))
     card = {
-        "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2), "evidence_level": level,
+        "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2), "evidence_level": level, "quiet": quiet,
         "headline": headline, "explain": explain, "why": why, "language": lang,
         "do_now": do_now, "dont": dont, "scheme": scheme,
         # when the agents cannot decide yet, the questions that would let them
@@ -1515,9 +1583,16 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
         return {"run_id": trace.run_id, "error": "Collez un message ou joignez une capture d'écran." if fr else "Paste a message or attach a screenshot."}
     if nothing_to_check(facts):
         trace.log("Intake", "nothing_to_check", output="no number, link, amount, request, brand or sentence to check", target="Reporter")
-        return {"run_id": trace.run_id, "nothing": True, "language": facts["language"],
-                "error": ("Il n'y a rien à vérifier ici. Collez ou transférez le message que vous avez reçu." if facts["language"] == "fr"
-                          else "There is nothing here to check. Paste or forward the message you received.")}
+        fr_ = facts["language"] == "fr"
+        if GREETING.match(facts["text"]):
+            note = ("C'est une salutation, pas un message à vérifier. Collez le message, l'offre ou l'appel que vous voulez me soumettre. "
+                    "Si un inconnu vous salue ainsi puis demande de l'argent, un code ou de passer sur une autre application, envoyez-moi la suite." if fr_
+                    else "That is a greeting, not something to check. Paste the message, offer or call you want me to look at. "
+                         "If a stranger greets you like this and then asks for money, a code or to move to another app, send me what comes next.")
+        else:
+            note = ("Il n'y a rien à vérifier ici. Collez ou transférez le message que vous avez reçu." if fr_
+                    else "There is nothing here to check. Paste or forward the message you received.")
+        return {"run_id": trace.run_id, "nothing": True, "language": facts["language"], "error": note}
     case = Case(trace.run_id, facts["text"], facts, facts["channel"], facts["language"], check_id,
                 holdout=frozenset(holdout), holdout_text=facts["text"] if holdout else "")
     while case.rounds < config.MAX_AGENT_ROUNDS:

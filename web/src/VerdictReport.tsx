@@ -27,7 +27,7 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
   const [flagNote, setFlagNote] = useState("");
   const sendFlag = (suggested: string) =>
     api.flag(card.check_id, suggested, flagNote).then(() => setFlagged(true)).catch(() => setFlagged(true));
-  const label = t[`verdict_${card.verdict}` as keyof Dict] as string;
+  const label = (card.quiet ? t.verdict_quiet : t[`verdict_${card.verdict}` as keyof Dict]) as string;
   const twin = card.genuine_twin;
   const share = () => {
     // the signed answer travels with the warning, so the person receiving it can check it is real
@@ -36,12 +36,12 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
     else window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
   };
   return (
-    <article className={`report ${TONE[card.verdict]}`}>
+    <article className={`report ${card.quiet ? "unsure" : TONE[card.verdict]}`}>
       <header className="report-head">
         <div className="stamp" aria-label={label}><span>{label}</span></div>
         {/* how much evidence stands behind the answer, in words: a percentage would claim a precision we have not measured */}
         <div className="meter" aria-label={t[`evidence_${card.evidence_level ?? "limited"}` as keyof Dict] as string}>
-          <i style={{ width: `${{ strong: 90, positive: 75, limited: 45, none: 20 }[card.evidence_level ?? "limited"]}%` }} />
+          <i style={{ width: `${{ strong: 90, positive: 75, limited: 45, none: 20, quiet: 30 }[card.evidence_level ?? "limited"]}%` }} />
           <small>{t[`evidence_${card.evidence_level ?? "limited"}` as keyof Dict] as string}</small>
         </div>
       </header>

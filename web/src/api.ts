@@ -8,7 +8,7 @@ export type Verdict = "scam" | "suspicious" | "looks_genuine" | "cant_tell";
 export type Radar = { days: number; checks: number; flagged: number; top: { scheme: string; n: number }[] };
 export type PublicStats = { checks: number; flagged: number; alerts: number; radar?: Radar };
 export type Card = {
-  check_id: string; run_id: string; verdict: Verdict; confidence: number; evidence_level?: "strong" | "positive" | "limited" | "none"; headline: string;
+  check_id: string; run_id: string; verdict: Verdict; confidence: number; evidence_level?: "strong" | "positive" | "limited" | "none" | "quiet"; quiet?: boolean; nothing?: boolean; headline: string;
   explain: string; why: Why[]; language: string; do_now: string[]; dont: string[]; questions?: string[]; ask_sender?: boolean; genuine_twin: Evidence | null;
   campaign: { id: string; size: number } | null; rounds: number; trace: TraceLine[]; error?: string;
   receipt?: { id: string; url: string }; cached?: number; scheme?: string | null;
