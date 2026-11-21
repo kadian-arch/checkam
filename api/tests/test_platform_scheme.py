@@ -17,6 +17,7 @@ HONEST = [
     "Good news! Instant referral payments are back. Earn 200F automatically for every successful referral. Reach 15 referrals and get an extra 5,000F bonus!",
     "Cash in of 500 XAF has been completed. Added commission: .",
     "Votre recharge est de 500.0 U. Solde: 550.0 U.",
+    "You have received an advance of 50XAF from MMC to repay with Access Fee:1XAF  Fee:0.5% daily,Max Fee:18.5% Transact ID:[TXN_ID]. Your transaction is pending",
 ]
 
 
@@ -34,3 +35,9 @@ def test_ordinary_receipts_and_referral_promos_are_not_platforms(text):
 def test_an_unknown_sender_platform_is_flagged(text):
     card = agents.run_check(text, sender="telegram account", persist=False, echo=False)
     assert card["verdict"] in ("scam", "suspicious")
+
+
+def test_an_operators_own_loan_notice_is_not_a_pyramid():
+    text = "You have received an advance of 1000XAF from MMC to repay with Access Fee:35XAF  Fee:0.5% daily,Max Fee:18.5% Transact ID:[TXN_ID]. Your transaction is pending, wait for final SMS"
+    card = agents.run_check(text, sender="Mobile Money", persist=False, echo=False)
+    assert card["verdict"] not in ("scam", "suspicious")
