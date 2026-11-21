@@ -202,8 +202,8 @@ PLATFORM_SIGNS = {
     "min_withdraw": re.compile(r"(?i)\b(retraits?|withdraw\w*|payouts?|cash ?out)\b[^\n]{0,25}\b(min|minimum|minimal|from|d[èe]s)\b|\b(min|minimum|minimal)\b[^\n]{0,25}\b(retraits?|withdraw\w*|payouts?|cash ?out)"),
     "levels": re.compile(r"(?i)(?:\b(?:niveau|level|tier|generation|g[ée]n[ée]ration|lvl)\s*\d\s*[:=-]?\s*\d+(?:[.,]\d+)?\s*%[^\n]*\n?){2,}"),
     "signup_bonus": re.compile(r"(?i)\b(bonus|cadeau|gift|reward)\s+(d[' ]?)?(inscription|enregistrement|sign[- ]?up|registration|welcome|bienvenue)|\b(inscription|sign[- ]?up|registration|welcome)\s+(bonus|gift|reward)"),
-    "daily_return": re.compile(r"(?i)\b(\d+(?:[.,]\d+)?\s*%\s*(?:par jour|per day|daily|/ ?day|/ ?jour|quotidien\w*|chaque jour|every day)|(?:gain|profit|revenu|income|return)s?\s+(?:quotidiens?|daily|par jour|per day))"),
-    "fee_on_withdraw": re.compile(r"(?i)\b(frais|fees?|charges?)\s*:?\s*\d+(?:[.,]\d+)?\s*%"),
+    "daily_return": re.compile(r"(?i)\b(?:gagn\w*|earn\w*|profit\w*|rapport\w*|re[çc]oi\w*|recev\w*|return\w*|gain\w*|revenus?|income)\b[^\n]{0,40}\b\d+(?:[.,]\d+)?\s*%\s*(?:par jour|per day|daily|/ ?day|/ ?jour|quotidien\w*|chaque jour|every day)"
+                              r"|\b\d+(?:[.,]\d+)?\s*%\s*(?:par jour|per day|daily|quotidien\w*)\b[^\n]{0,40}\b(?:gagn\w*|earn\w*|profit\w*|rapport\w*|return\w*|gains?|revenus?|income)\b"),
 }
 
 
@@ -414,7 +414,7 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
         asks.append("pin")
     ignored: list[str] = []
     seen = QUOTED_FIELD.sub(" ", facts["text"]) if payer_note_is_label(facts["text"], kind) else facts["text"]
-    staked = (stake_and_return(facts["text"]) or platform_scheme(facts["text"])) and not OFFICIAL_ROUTE.search(facts["text"])
+    staked = (stake_and_return(facts["text"]) or (platform_scheme(facts["text"]) and kind not in ("official", "registered"))) and not OFFICIAL_ROUTE.search(facts["text"])
     if staked and "send_money" not in asks:
         asks.append("send_money")
     brands = [k for k, rx in BRANDS.items() if re.search(rx, facts["text"])]
