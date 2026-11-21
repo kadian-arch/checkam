@@ -777,6 +777,7 @@ def _tool_similar_scams(case: Case, trace: Trace) -> list[Finding]:
         sem = cosine(vec, _cache["scam_vecs"][r["id"]]) if vec and r["id"] in _cache.get("scam_vecs", {}) else 0.0
         scored.append((max(lex, sem), lex, sem, r))
     scored.sort(key=lambda x: -x[0])
+    case.facts["nearest_scam"] = round(scored[0][0], 3) if scored else None
     top = [x for x in scored[:3] if x[0] >= 0.3]
     if not top:
         return [Finding(_fid(), "similar_scams", L(case, "It is not worded like any scam people have reported", "Il n'est formulé comme aucune arnaque signalée"), "context", "weak")]
@@ -1679,9 +1680,17 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     quiet = verdict == "looks_genuine" and not positive and not case.facts.get("announcement")
     if quiet:
         headline, explain, level = QUIET["headline"][lang], QUIET["explain"][lang], "quiet"
+    nearest = max([x for x in (case.facts.get("nearest_scam"), next((e.get("similarity") for fd in case.findings if fd.tool == "genuine_twin" for e in fd.evidence if e.get("similarity") is not None), None)) if x is not None], default=None)
+    novelty = None if nearest is None else round(1 - nearest, 2)
+    # wording alone cannot say "new to us"; this needs the meaning-embeddings, and a sender name no phone can use is not new
+    unfamiliar = (novelty is not None and novelty >= 0.7 and "scam_vecs" in _cache and case.facts.get("sender_kind") not in ("official", "registered")
+                  and verdict in ("looks_genuine", "cant_tell", "suspicious"))
     route = OFFICIAL_ROUTE.search(case.facts["text"])
     do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))
+    if unfamiliar and verdict != "suspicious":
+        do_now = (do_now + [("Nothing we know looks like this wording, so confirm it with the sender another way before acting", "Rien de ce que nous connaissons ne ressemble à cette formulation : confirmez-la avec l'expéditeur par un autre moyen avant d'agir")[1 if lang == "fr" else 0]])[:4]
     card = {
+        "novelty": novelty, "unfamiliar": unfamiliar,
         "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2), "evidence_level": level, "quiet": quiet,
         "headline": headline, "explain": explain, "why": why, "language": lang,
         "do_now": do_now, "dont": dont, "scheme": scheme,
@@ -1776,6 +1785,9 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "operator": next((b for b in facts["brands"] if b in ("mtn", "orange", "camtel")), "other"),
                           "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) and 0 < facts["amount_fcfa"] < 50_000_000 else None,
                           "scheme": card.get("scheme")})
+        if card.get("unfamiliar") and verdict != "scam":
+            # wording nothing we hold resembles: it waits on the analyst desk, the place the next learning comes from
+            store.add_flag(check_id, "", "auto: unfamiliar wording")
     card["findings"] = [f.public() for f in case.findings]
     # the message facts the verdict weighs directly, beside the findings: what a learned weighting can use
     card["profile"] = profile(case, score)
