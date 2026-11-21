@@ -30,25 +30,32 @@ _W = r"(?:\W+\w+){0,4}\W+"
 ASKS = {
     # a PIN or password is never asked for, by any verb; a one-time code is fine to type into your own
     # login, but never to hand to a person
-    "pin": r"(?i)\b(give|send|share|tell|enter|type|read|confirm|provide|dictate|donne[rz]?|envoie[rz]?|envoyez|partage[rz]?|communique[rz]?|tape[rz]?|saisisse[rz]|confirme[rz]?|entre[rz]?|lis(?:ez)?)" + _W + r"(pin|password|mot de passe|code secret|secret code)\b"
-           r"|\b(give|send|share|tell|read|dictate|provide|forward|donne[rz]?|envoie[rz]?|envoyez|partage[rz]?|communique[rz]?|lis(?:ez)?|transf[ée]rez)" + _W + r"(code|otp|verification code|code de v[ée]rification)\b"
+    "pin": r"(?i)\b(give|send|share|tell|enter|type|read|confirm|provide|dictate|dict(?:e[zrs]|iez)|donne[rz]?|envoie[rz]?|envoyez|partage[rz]?|communique[rz]?|tape[rz]?|saisisse[rz]|confirme[rz]?|entre[rz]?|lis(?:ez)?)" + _W + r"(pin|password|mot de passe|code secret|secret code)\b"
+           r"|\b(give|send|share|tell|read|dictate|provide|forward|dict(?:e[zrs]|iez)|donne[rz]?|envoie[rz]?|envoyez|partage[rz]?|communique[rz]?|lis(?:ez)?|transf[ée]rez)" + _W + r"(code|otp|verification code|code de v[ée]rification)\b"
            r"|\b(pin|code secret|otp|code)\b" + _W + r"(to|pour|so that|afin)\W+(?:\w+\W+){0,2}(unblock|receive|d[ée]bloquer|recevoir)"
            # "I sent a code to your number by mistake. Please forward it to me": the code is named first, asked for after
            r"|\b(code|otp)\b[^\n]{0,90}?\b(forward|send|give|share|envoie[zs]?|renvoie[zs]?|transf[èe]re[zs]?|donne[zs]?)[- ](it|le|la)[- ]?(?:to me|back|moi)\b",
     "send_money": r"(?i)\b(send|return|refund|transfer|pay|deposit)\s+(it|the money|me|back|us|them|my|\d)|\bsend\s+(?:\w+\s+){0,3}back\b|\b(renvoy|rembours|retourn)\w*"
-                  r"|\b(envoyez|transf[ée]rez|versez|d[ée]posez|payez)\b|\b(envoie|transf[èe]re|verse|d[ée]pose|paie|pr[êe]te)s?[- ](moi|nous|lui)\b"
-                  r"|\b(fais|faites)[- ]moi (un |le )?(transfert|d[ée]p[ôo]t|retrait|envoi)\b|\b(lend|loan) me\b|\bkeep the rest|gardez le reste|\b(pay|payer|payez|r[ée]gler|send|envoye[rz])\b(?:\W+\w+){0,3}\W+(fee|fees|frais|charges|registration|inscription|dossier|commission|transport|delivery|livraison|shipping|customs|douane|exp[ée]dition)\b"
+                  # asked politely, or by a stranger who "sent too much": give back, help me with, send me
+                  r"|\b(rends|rendez|rend)[- ](moi|nous)\b|\bgard(?:e|ez) le reste\b|\bm['’]envoyer\b|\b(?:aid\w*|help)\b(?:\W+\w+){0,3}\W+(?:avec|with)\W+\d|\bsend me\b\W+(?:\w+\W+){0,2}\d"
+                  r"|\b(envoyez(?!\W+(?:\w+\W+){0,2}?(?:dossiers?|cv|candidatures?|lettres?|photos?|application|curriculum|documents?|copies|copie))|transf[ée]rez|versez|d[ée]posez|payez)\b|\b(envoie|transf[èe]re|verse|d[ée]pose|paie|pr[êe]te)s?[- ](moi|nous|lui)\b"
+                  r"|\b(fais|faites)[- ]moi (un |le )?(transfert|d[ée]p[ôo]t|retrait|envoi)\b|\b(lend|loan) me\b|\bkeep the rest|gardez le reste|\b(pay|payer|payez|r[ée]gler)\b(?:\W+\w+){0,3}\W+(fees?|frais|charges|registration|inscription|dossier|commission|transport|re-?delivery|delivery|livraison|shipping|customs|douane|exp[ée]dition)\b|\b(pay|payer|payez)\b(?:\W+\w+){0,6}\W+(taxes?|duty|duties|droits)\b(?:\W+\w+){0,3}\W+(customs|douane|delivery|livraison|aeroport|airport|colis|parcel)\b|\b(send|envoye[rz])\b(?:\W+\w+){0,3}\W+(fee|fees|frais|charges|commission|transport|delivery|livraison|shipping|customs|douane|exp[ée]dition)\b"
                   r"|\bfrais (de|d')\s*(dossier|inscription|commission|m[ée]dica|enregistrement)"
                   # said to one person ("tu"): how a lover, a friend or a threat asks, where an operator says "vous"
                   r"|\b(envoie|paie|paye|verse|d[ée]pose|transf[èe]re)s?\s+(?:moi\s+|nous\s+)?(?:les?\s+|la\s+|mes\s+)?\d"
                   r"|\btu\s+(?:\w+\s+){0,2}(paies|payes|envoies|verses|d[ée]poses|transf[èe]res)\b",
     "click_link": r"(?i)\b(click|tap|open|visit|cliquez|ouvrez|visitez|appuyez)\b" + _W + r"(link|lien|here|ici|site)\b"
+                  r"|\b(click|tap|cliquez|appuyez)\b\W+(?:\w+\W+){0,2}(to|pour)\b"
+                  r"|\b(r[ée]glez|payez|pay|paie|paiement|payment|settle)\b[^.\n]{0,40}\b(via|par|sur|through|on|at|using|avec)\b[^.\n]{0,25}\b(lien|link|site|page)\b"
                   # "sign in here", "verify your account: http://...": a login page handed to you is the whole trick
                   r"|\b(sign in|log ?in|verify|confirm|update|connectez-vous|v[ée]rifie[rz]|confirme[rz]|mettez [àa] jour)\b(?:\W+\w+){0,5}\W+(here|ici|link|lien|below|ci-dessous)\b"
                   r"|\b(sign in|log ?in|verify|confirm|connectez-vous|v[ée]rifie[rz]|confirme[rz])\b[^.\n]{0,60}(?:https?://|www\.)",
     # only a personal number counts: official lines and short codes (8787, *126#) are removed first
     "call_back": r"(?i)\b(call|appel(?:ez|le)?|whatsapp|contact(?:ez)?|joindre|text|sms)\b(?:\W+\w+){0,5}\W+(\[PHONE:[^\]]+\]|(?:\+?237[ .-]?)?[26](?:[ .-]?\d){8})",
-    "personal_info": r"(?i)\b(send|envoy\w*|share|upload)\b(?:\W+\w+){0,4}\W+(cni|id card|carte d'identit|passport|passeport|dipl[oô]me|diploma|cv|photo)\b",
+    "personal_info": r"(?i)\b(send|envoy\w*|envoi\w*|share|upload)\b(?:\W+\w+){0,4}\W+(cni|id card|carte d'identit\w*|carte nationale|passport|passeport|dipl[oô]me|diploma|cv|photos?)\b"
+                     # the number of your wallet and the name on it: what a reversal or SIM-swap needs first
+                     r"|\b(send|share|give|donne\w*|envoy\w*|communiqu\w*|dis-?moi|tell)\b(?:\W+\w+){0,4}\W+(orange money|momo|mobile money|mtn money)\s+(number|num[ée]ro|account|compte)\b"
+                     r"|\b(name|nom)\s+(registered|enregistr\w*|on it|sur (?:le|ce) compte)\b",
 }
 EXCEPTION = re.compile(r"(?i)\b(except|sauf|other than|apart from|only (?:to|with)|uniquement|seulement (?:a|à)|but (?:you can|send|give|share))\b")
 # French negation opens BEFORE the verb ("ne partagez jamais", "n'envoyez pas"): the verb's own window starts with ne/n'
@@ -81,14 +88,24 @@ PRIMER = re.compile(r"(?i)\b(urgent|urgence|urgently|vite|quickly|asap|imm[ée]d
 OFFICIAL_SENDERS = re.compile(r"(?i)^\s*(mobile ?money|mtn ?momo|mtn|orange ?money|orange|camtel|blue|8787|8000|express union|ecobank|uba|afriland|nexttel)\s*$")
 
 
+# a SIM unlock code is as secret as a PIN
+PUK = re.compile(r"(?i)\b(puk|code puk)\b")
+RELATIVE = re.compile(r"(?i)\b(mama|mum|mummy|mom|papa|dad|daddy|maman|bro|brother|sister|sis|aunty|auntie|uncle|cousin|tonton|tata|oncle|tante|wife|husband|femme|mari|fils|fille|son|daughter|grand ?ma|grand ?pa|pastor|pasteur|friend|ami|amie|boss|chef)\b")
+PLATFORM_SENDERS = re.compile(r"(?i)^\s*(telegram|whatsapp|facebook|messenger|instagram|tiktok|signal|snapchat|sms|e-?mail|call|appel|unknown|inconnu|voice note|message vocal)(\s+(account|contact|user|group|channel|compte|groupe))?\s*$")
+
+
 def sender_kind(sender: str) -> str:
     s = (sender or "").strip()
     if not s:
         return "unknown"
+    if PLATFORM_SENDERS.match(s):
+        return "unknown"  # a chat app or a channel is not a sender ID: anyone can open an account there
     if OFFICIAL_SENDERS.match(s) or re.sub(r"[\s'_-]", "", s).lower() in privacy.SENDER_NAMES:
         return "official"
     if privacy.CM_PHONE.search(s) or privacy.TOKEN.search(s) or re.search(r"\+?\d{8,}", s):
         return "personal"
+    if RELATIVE.search(s):
+        return "contact"  # a name saved in the reader's own phone, not a sender ID anyone registered
     # network short codes (3 to 5 digits) belong to operators and licensed services, never to a person
     if re.fullmatch(r"\d{3,5}", s):
         return "registered"
@@ -177,6 +194,27 @@ def _fcfa(s: str) -> int:
 
 # an amount with its currency, or a bare one of 4 to 7 digits (not a phone number, not a small count)
 STAKE = re.compile(AMOUNT.pattern + r"|(?<![\d+*#])(?P<bare>\d{1,3}(?:[ .,]\d{3})+|\d{4,7})(?![\d*#])")
+
+
+# a "platform" that moves your money is recognised by what it describes, not by one wording: any two of these signs
+PLATFORM_SIGNS = {
+    "min_deposit": re.compile(r"(?i)\b(d[ée]p[ôo]ts?|deposits?|recharge|mise|stake|invest\w*)\b[^\n]{0,25}\b(min|minimum|minimal|from|d[èe]s)\b|\b(min|minimum|minimal)\b[^\n]{0,25}\b(d[ée]p[ôo]ts?|deposits?|recharge|mise|stake|invest\w*)"),
+    "min_withdraw": re.compile(r"(?i)\b(retraits?|withdraw\w*|payouts?|cash ?out)\b[^\n]{0,25}\b(min|minimum|minimal|from|d[èe]s)\b|\b(min|minimum|minimal)\b[^\n]{0,25}\b(retraits?|withdraw\w*|payouts?|cash ?out)"),
+    "levels": re.compile(r"(?i)(?:\b(?:niveau|level|tier|generation|g[ée]n[ée]ration|lvl)\s*\d\s*[:=-]?\s*\d+(?:[.,]\d+)?\s*%[^\n]*\n?){2,}"),
+    "signup_bonus": re.compile(r"(?i)\b(bonus|cadeau|gift|reward)\s+(d[' ]?)?(inscription|enregistrement|sign[- ]?up|registration|welcome|bienvenue)|\b(inscription|sign[- ]?up|registration|welcome)\s+(bonus|gift|reward)"),
+    "daily_return": re.compile(r"(?i)\b(\d+(?:[.,]\d+)?\s*%\s*(?:par jour|per day|daily|/ ?day|/ ?jour|quotidien\w*|chaque jour|every day)|(?:gain|profit|revenu|income|return)s?\s+(?:quotidiens?|daily|par jour|per day))"),
+    "fee_on_withdraw": re.compile(r"(?i)\b(frais|fees?|charges?)\s*:?\s*\d+(?:[.,]\d+)?\s*%"),
+}
+
+
+def platform_signs(text: str) -> list[str]:
+    return [k for k, rx in PLATFORM_SIGNS.items() if rx.search(text)]
+
+
+def platform_scheme(text: str) -> bool:
+    """A 'platform' that shows deposit and withdrawal minimums, referral levels, a sign-up bonus or daily returns:
+    the layout of an investment or referral pyramid. Two signs together are enough; one alone is not."""
+    return len(platform_signs(text)) >= 2
 
 
 def stake_and_return(text: str) -> bool:
@@ -329,6 +367,35 @@ def read_screenshots(images: list[tuple[str, str]], trace: Trace) -> str:
         return "\n\n".join(r for r in pool.map(one, images) if r)
 
 
+# what the reader tells us about the message (optional): they know things the text does not show
+CONTEXT_WANTS = {"money": "send_money", "code": "pin", "link": "click_link", "call": "call_back", "documents": "personal_info"}
+CONTEXT_CHANNELS = {"sms", "whatsapp", "call", "voice_note", "social", "email", "in_person", "other"}
+CONTEXT_RELATIONS = {"stranger", "claims_known", "known", "organisation"}
+
+
+def apply_context(facts: dict, context: dict | None, trace=None) -> dict:
+    """Fold in what the reader said: how it reached them, what it wants, who it says it is. A request the reader
+    names is added to what the agents detected (the reader sees tone and a voice the text cannot show); nothing
+    here can remove a finding or clear a message."""
+    ctx = {}
+    if not isinstance(context, dict):
+        return ctx
+    ch = context.get("channel")
+    if ch in CONTEXT_CHANNELS:
+        ctx["channel"] = facts["reported_channel"] = ch
+    rel = context.get("relation")
+    if rel in CONTEXT_RELATIONS:
+        ctx["relation"] = facts["relation"] = rel
+    wants = [w for w in (context.get("wants") or []) if w in CONTEXT_WANTS]
+    if wants:
+        ctx["wants"] = wants
+        facts["asks"] = sorted(set(facts.get("asks", [])) | {CONTEXT_WANTS[w] for w in wants})
+    if ctx and trace is not None:
+        trace.log("Intake", "reader_context", output=ctx, target="Planner", why="the reader told us how it reached them, what it wants and who it claims to be")
+    return ctx
+
+
+
 def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender: str = "", lang_hint: str = "",
            images: list[tuple[str, str]] | None = None) -> dict:
     channel = "text"
@@ -343,9 +410,11 @@ def intake(text: str, trace: Trace, image: tuple[str, str] | None = None, sender
     facts = privacy.extract((sender + "\n" if sender else "") + (text or ""))
     kind = sender_kind(sender)
     asks = operator_demands(facts["text"], kind)
+    if PUK.search(facts["text"]) and re.search(r"(?i)\b(send|reply|r[ée]pond\w*|envoy\w*|donn\w*|communiq\w*|give|share|avec|with)\b", facts["text"]) and "pin" not in asks:
+        asks.append("pin")
     ignored: list[str] = []
     seen = QUOTED_FIELD.sub(" ", facts["text"]) if payer_note_is_label(facts["text"], kind) else facts["text"]
-    staked = stake_and_return(facts["text"]) and not OFFICIAL_ROUTE.search(facts["text"])
+    staked = (stake_and_return(facts["text"]) or platform_scheme(facts["text"])) and not OFFICIAL_ROUTE.search(facts["text"])
     if staked and "send_money" not in asks:
         asks.append("send_money")
     brands = [k for k, rx in BRANDS.items() if re.search(rx, facts["text"])]
@@ -708,6 +777,7 @@ def _tool_similar_scams(case: Case, trace: Trace) -> list[Finding]:
         sem = cosine(vec, _cache["scam_vecs"][r["id"]]) if vec and r["id"] in _cache.get("scam_vecs", {}) else 0.0
         scored.append((max(lex, sem), lex, sem, r))
     scored.sort(key=lambda x: -x[0])
+    case.facts["nearest_scam"] = round(scored[0][0], 3) if scored else None
     top = [x for x in scored[:3] if x[0] >= 0.3]
     if not top:
         return [Finding(_fid(), "similar_scams", L(case, "It is not worded like any scam people have reported", "Il n'est formulé comme aucune arnaque signalée"), "context", "weak")]
@@ -942,6 +1012,12 @@ def risky_asks(f: dict) -> set[str]:
     the official app, MoMo Pay) from a sender a phone cannot fake, with no personal number or outside link to
     send it to, is how real payments are made, so it is not on this list."""
     asks = set(f["asks"]) & {"pin", "send_money", "call_back", "personal_info"}
+    if f.get("sender_kind") == "contact" or f.get("relation") == "known":
+        asks -= {"send_money", "call_back"}  # someone in your own phone asking for a favour; a code or your ID is still never ordinary
+    if "personal_info" in asks and f.get("sender_kind") in ("official", "registered") and own_address(f):
+        asks.discard("personal_info")  # a CV to an address on the organisation's own domain
+    if "call_back" in asks and not mobile_in_body(f):
+        asks.discard("call_back")  # a landline or short code in a notice is the office's own line
     nowhere_to_send = not f.get("body_numbers", len(f["numbers"])) and not f["links"]
     if "send_money" in asks and nowhere_to_send and f.get("sender_kind") in ("official", "registered") and (
             OFFICIAL_ROUTE.search(f["text"]) or PAY_ON_DELIVERY.search(f["text"])):
@@ -953,14 +1029,66 @@ def risky_asks(f: dict) -> set[str]:
         asks.discard("send_money")
     # paying in person at a counter (the caretaker's office, the school bursary, the shop) with no number, link
     # or mobile money in the message is how rents and fees are really paid
-    if "send_money" in asks and nowhere_to_send and IN_PERSON.search(f["text"]) and not MOBILE_PAY.search(f["text"]):
+    if "send_money" in asks and nowhere_to_send and IN_PERSON.search(f["text"]) and (not MOBILE_PAY.search(f["text"]) or f.get("sender_kind") in ("official", "registered")):
         asks.discard("send_money")
     return asks
 
 
-IN_PERSON = re.compile(r"(?i)\b(?:pay|payez|payer|r[ée]gle[rz]|paid|pay[ée]s?)\b[^.\n]{0,40}\b(?:at|in|au|[àa] la|aux|chez|aupr[èe]s)\b[^.\n]{0,30}"
+IN_PERSON = re.compile(r"(?i)\b(?:pay|payez|payer|r[ée]gle[rz]|paid|pay[ée]s?)\b[^.\n]{0,40}\b(?:at|in|en|au|[àa] la|aux|chez|aupr[èe]s)\b[^.\n]{0,30}"
                        r"\b(office|bureau|secr[ée]tariat|caisse|guichet|bursary|scolarit[ée]|shop|store|boutique|magasin|agence|branch|counter|cash desk|reception|r[ée]ception)\b")
 MOBILE_PAY = re.compile(r"(?i)\b(momo|mobile money|orange money|om\b|by transfer|par transfert|par virement|d[ée]p[ôo]t)")
+
+
+# money moving by a channel or a fee, whatever the verb: the layout of nearly every payment scam
+PAYMENT_WORDS = re.compile(r"(?i)\b(pay\w*|paie\w*|paiement|r[èe]gl\w*|fees?|frais|taxes?|tax|duty|droits?|prix|price|momo|mobile money|orange money|western union|moneygram|"
+                           r"virement|transf[èe]re\w*|transfer\w*|verser|versez|d[ée]p[ôo]t\w*|deposit|avance|advance|par mati[èe]re|envoyer|envoyez|envoie|send|cr[ée]dit|unit[ée]s)\b")
+
+
+def payment_mechanics(text: str) -> bool:
+    return bool(AMOUNT.search(text) and PAYMENT_WORDS.search(text))
+
+
+# stories scams are built on, in any wording: advance-fee romance and inheritance, exam leaks and grade fixing,
+# returns paid every week, risk-free investment, a work visa that is guaranteed
+SCAM_STORY = re.compile(
+    r"(?i)(trunk box|\b\d[\d.,]*\s*millions?\s*(?:of\s*)?(?:dollars|usd|euros?|pounds)\b|\binheritance\b|\bh[ée]ritage\s+de\s+\d|\bus army\b|\bsoldat am[ée]ricain|\bamerican soldier"
+    r"|\btrusted (?:person|partner)\b|\bdiplomatic (?:box|consignment)"
+    r"|(?:sujets?|[ée]preuves?|papers?|questions?)\W+(?:\w+\W+){0,4}(?:d['’]avance|[àa] l['’]avance|in advance|leak\w*|fuit\w*)"
+    r"|(?:corriger|modifier|changer|fix|change)\W+(?:les\W+|mes\W+|ses\W+|my\W+|his\W+|the\W+)?(?:notes|grades|marks|results|r[ée]sultats)\b"
+    r"|(?:retire[rsz]?|withdraw\w*)\W+\d[\d. ,]*\W+(?:chaque|par|every|each|per)\W+(?:semaine|jour|mois|week|day|month)"
+    r"|sans risque|risk[- ]free|retrait garanti|guaranteed (?:returns?|profit|withdrawal)|gains? garantis?"
+    r"|visa\W+(?:\w+\W+){0,3}garanti|guaranteed (?:work )?visa)")
+WARNING_WORDS = re.compile(r"(?i)\b(beware|attention|m[ée]fiez|warning|alerte|arnaque|scam|jamais|never|ne (?:vous )?laissez pas|do not|don'?t)\b")
+
+
+def scam_story(text: str) -> bool:
+    """A story only scams tell, unless the message is itself warning people about it."""
+    return bool(SCAM_STORY.search(text)) and not WARNING_WORDS.search(text)
+
+
+CONTACT_VERB = re.compile(r"(?i)\b(whatsapp|call|appel\w*|contact\w*|send|envoie\w*|[ée]cri\w*|write|reply|r[ée]pond\w*)\b")
+
+
+def mobile_in_body(f: dict) -> bool:
+    """A private mobile number in the message (6xx). Offices, banks and clinics give landlines (2xx) and short codes."""
+    return bool(f.get("body_numbers")) and any(str(n.get("prefix", "")).startswith("6") for n in f.get("numbers", []))
+
+
+def private_contact(f: dict) -> bool:
+    """Even a name no phone can use does not send you to a private mobile number: no real operator or bank does."""
+    return mobile_in_body(f) and bool(CONTACT_VERB.search(f["text"])) and not OFFICIAL_ROUTE.search(f["text"])
+
+
+WIRE = re.compile(r"(?i)\b(western union|moneygram|ria money|wari|world remit)\b")
+
+
+def pay_to_private(f: dict) -> bool:
+    """Paying money to a private mobile number or by wire, in a message from nobody we can name: the shape of a payment scam.
+    A fee notice, a bill or a pledge asks for the same words but names an office, a counter or a registered sender."""
+    if f.get("sender_kind") in ("official", "registered", "contact") or f.get("relation") == "known":
+        return False
+    return payment_mechanics(f["text"]) and (mobile_in_body(f) or bool(WIRE.search(f["text"]))) and not IN_PERSON.search(f["text"])
+
 
 
 def harm_path(f: dict) -> bool:
@@ -968,8 +1096,10 @@ def harm_path(f: dict) -> bool:
     back, pushes a link, promises a windfall, gives a private number, or threatens in an operator's name.
     A message with none of these may be untrue, but it cannot rob anyone by itself: belonging to a kind of
     message scammers also write (a job notice, an appointment, a shared link) is not evidence against it."""
-    return bool(risky_asks(f) or "click_link" in f["asks"] or f.get("promise") or f.get("body_numbers", len(f["numbers"]))
-                or (f["brands"] and THREAT.search(f["text"])) or f.get("injection") or f.get("hidden_characters"))
+    return bool(risky_asks(f) or "click_link" in f["asks"] or f.get("promise")
+                or mobile_in_body(f)
+                or (f["brands"] and THREAT.search(f["text"])) or f.get("injection") or f.get("hidden_characters")
+                or pay_to_private(f) or scam_story(f["text"]))
 
 
 RECRUITING = re.compile(r"(?i)\b(recrutement|recruitment|recrute|recruiting|offres? d'emploi|stages? r[ée]mun[ée]r\w*|paid internship)")
@@ -1173,13 +1303,16 @@ def arbitrate(case: Case, trace: Trace) -> None:
         case.facts["known_copy"] = False
     # from a sender name a personal phone cannot use, asking for nothing that can cost money: no harm path
     f_ = case.facts
-    harmless = (f_.get("sender_kind") in ("official", "registered")
+    known = f_.get("sender_kind") == "contact" or f_.get("relation") == "known"
+    harmless = ((f_.get("sender_kind") in ("official", "registered") or known)
                 and not risky_asks(f_)
+                and not private_contact(f_) and not f_.get("scam_story")
                 and not ("click_link" in f_["asks"] and f_["links"]))
     # from anyone: a message that asks nothing, promises nothing, carries no link, number or brand and is not
     # the "sent by mistake" opener cannot cost the reader money (a relative's news, a meeting time)
     # a link to a site that has existed for years, in a message that does nothing with it, changes none of this
-    quiet = (not f_["asks"] and not f_.get("promise") and all(h in f_.get("old_sites", []) for h in f_["links"]) and not f_.get("body_numbers", len(f_["numbers"]))
+    quiet = (not f_["asks"] and not f_.get("promise") and all(h in f_.get("old_sites", []) and h not in SHORTENERS for h in f_["links"]) and not f_.get("body_numbers", len(f_["numbers"]))
+             and not pay_to_private(f_) and not scam_story(f_["text"])
              and not (f_["brands"] and THREAT.search(f_["text"]))
              and not claimed_any and not f_.get("retold") and not PRIMER.search(f_["text"]) and not f_.get("known_copy")
              and not re.search(r"(?i)erreur|mistake|wrong number|mauvais num", f_["text"]))
@@ -1199,7 +1332,11 @@ def arbitrate(case: Case, trace: Trace) -> None:
         twin.claim = L(case, f"It reads like a real {tw['operator'].upper()} message and asks nothing a real operator would not",
                        f"Il se lit comme un vrai message de {tw['operator'].upper()} et ne demande rien qu'un vrai opérateur ne demanderait pas")
     elif harmless and not official_only and not any(f.tool == "no_harm_path" for f in case.findings):
-        if case.facts.get("sender_kind") in ("official", "registered"):
+        if known and not case.facts.get("sender_kind") in ("official", "registered"):
+            case.findings.append(Finding(_fid(), "known_contact", L(case, "It comes from someone you know and asks for no code, no ID and nothing sent to a stranger. If they ever ask for a code or your ID, stop: their phone may have been taken over",
+                                           "Il vient de quelqu'un que vous connaissez et ne demande ni code, ni pièce d'identité, ni rien à envoyer à un inconnu. S'il vous demande un code ou votre pièce d'identité, arrêtez : son téléphone a peut-être été pris"),
+                                         "genuine", "strong", [{"table": "message", "id": "sender", "detail": case.facts.get("sender") or "known"}], status="accepted"))
+        elif case.facts.get("sender_kind") in ("official", "registered"):
             case.findings.append(Finding(_fid(), "no_harm_path", L(case, f"It comes from {case.facts.get('sender')}, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link",
                                            f"Il vient de {case.facts.get('sender')}, un nom qu'un téléphone personnel ne peut pas utiliser, et ne demande ni argent, ni code, ni appel, ni lien extérieur"),
                                          "genuine", "medium", [{"table": "message", "id": "sender", "detail": case.facts.get("sender")}], status="accepted"))
@@ -1305,6 +1442,17 @@ def decide(case: Case) -> tuple[str, float, int]:
     return verdict, confidence, score
 
 
+SOFT_MONEY = re.compile(r"(?i)\bm['’]envoyer\b|\b(?:aid\w*|help)\b(?:\W+\w+){0,3}\W+(?:avec|with)\W+\d|\bsend me\b\W+(?:\w+\W+){0,2}\d")
+
+
+def firm_money_demand(f: dict) -> bool:
+    """An explicit demand for money, not a polite request that only reads like one."""
+    if "send_money" not in f["asks"]:
+        return False
+    rest = SOFT_MONEY.sub(" ", f["text"])
+    return bool(re.search(ASKS["send_money"], rest)) or bool(f.get("stake_return"))
+
+
 def hard_evidence(case: Case) -> bool:
     """What a message does or what our records show, as opposed to what it looks like. Only this earns the word
     'scam'. The kind of message, a private number to contact, a free mailbox and the AI model's opinion are soft:
@@ -1312,11 +1460,16 @@ def hard_evidence(case: Case) -> bool:
     f = case.facts
     if any(fd.status == "accepted" and fd.direction == "scam" and fd.weight == "strong" and fd.tool != "model_judgement" for fd in case.findings):
         return True
+    if f.get("scam_story") or (f.get("windfall") and private_contact(f)):
+        return True  # a story only scams tell, or a prize that sends you to a private number even under an operator's name
+    if f.get("relation") == "claims_known" and "send_money" in f["asks"]:
+        return True  # someone who says they are a person you know, on a number you do not, asking for money: the family-and-friends scam
     if "pin" in f["asks"] or f.get("stake_return") or f.get("impossible_date") or f.get("injection") or USSD_TO_PERSON.search(f["text"]):
         return True
     if f.get("windfall") and f.get("sender_kind") not in ("official", "registered"):
         return True  # a prize, gift or grant promised to a stranger by a sender anyone can type: the template of every prize scam
-    return bool(risky_asks(f) & {"send_money", "pin"})  # an explicit demand to hand over money or a code
+    asks = risky_asks(f)
+    return bool(("send_money" in asks and firm_money_demand(f)) or "pin" in asks)  # an explicit demand to hand over money or a code
 
 
 def rule_verdict(case: Case) -> tuple[str, float, int]:
@@ -1328,6 +1481,8 @@ def rule_verdict(case: Case) -> tuple[str, float, int]:
         score += 2
     if case.facts.get("known_copy"):
         score += 2  # the same message people have already reported as a scam
+    if case.facts.get("scam_story") or (case.facts.get("windfall") and private_contact(case.facts)):
+        score += 3  # a story only scams tell, or a prize that sends you to a private number
     if case.facts.get("injection"):
         score += 3  # a real operator never writes instructions for the AI that checks its message
     if case.facts.get("impossible_date") or USSD_TO_PERSON.search(case.facts["text"]):
@@ -1525,9 +1680,17 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     quiet = verdict == "looks_genuine" and not positive and not case.facts.get("announcement")
     if quiet:
         headline, explain, level = QUIET["headline"][lang], QUIET["explain"][lang], "quiet"
+    nearest = max([x for x in (case.facts.get("nearest_scam"), next((e.get("similarity") for fd in case.findings if fd.tool == "genuine_twin" for e in fd.evidence if e.get("similarity") is not None), None)) if x is not None], default=None)
+    novelty = None if nearest is None else round(1 - nearest, 2)
+    # wording alone cannot say "new to us"; this needs the meaning-embeddings, and a sender name no phone can use is not new
+    unfamiliar = (novelty is not None and novelty >= 0.7 and "scam_vecs" in _cache and case.facts.get("sender_kind") not in ("official", "registered")
+                  and verdict in ("looks_genuine", "cant_tell", "suspicious"))
     route = OFFICIAL_ROUTE.search(case.facts["text"])
     do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))
+    if unfamiliar and verdict != "suspicious":
+        do_now = (do_now + [("Nothing we know looks like this wording, so confirm it with the sender another way before acting", "Rien de ce que nous connaissons ne ressemble à cette formulation : confirmez-la avec l'expéditeur par un autre moyen avant d'agir")[1 if lang == "fr" else 0]])[:4]
     card = {
+        "novelty": novelty, "unfamiliar": unfamiliar,
         "check_id": case.check_id, "run_id": case.run_id, "verdict": verdict, "confidence": round(confidence, 2), "evidence_level": level, "quiet": quiet,
         "headline": headline, "explain": explain, "why": why, "language": lang,
         "do_now": do_now, "dont": dont, "scheme": scheme,
@@ -1555,13 +1718,13 @@ def _receipt(check_id: str, card: dict, text: str) -> dict:
 # ======================= the loop =======================
 def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: str = "", language: str = "", run_id: str | None = None,
               holdout: tuple = (), persist: bool = True, echo: bool = True, on_line=None,
-              images: list[tuple[str, str]] | None = None) -> dict:
+              images: list[tuple[str, str]] | None = None, context: dict | None = None) -> dict:
     images = (list(images or []) or ([image] if image else []))[:MAX_SHOTS]
     image = images[0] if images else None
     trace = Trace(run_id, echo=echo, on_line=on_line)
     check_id = "C-" + uuid.uuid4().hex[:8]
     # the same scam reaches thousands of phones: a message checked in the last hours is answered at once
-    key = store.cache_key(text, sender, language) if persist and not holdout and not image and text.strip() else None
+    key = store.cache_key(text, sender, language) if persist and not holdout and not image and text.strip() and not context else None
     hit = store.cache_get(key) if key else None
     if hit:
         trace.log("Reporter", "cache_hit", output={"verdict": hit["verdict"], "earlier_checks": hit["cached"]}, target="Reporter",
@@ -1573,6 +1736,8 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "scheme": hit.get("scheme")})
         return {**hit, "check_id": check_id, "run_id": trace.run_id, "trace": trace.lines + hit.get("trace", []), "receipt": _receipt(check_id, hit, text)}
     facts = intake(text, trace, images=images, sender=sender, lang_hint=language)
+    apply_context(facts, context, trace)
+    facts["scam_story"] = scam_story(facts["text"])
     if not facts["text"].strip():
         trace.log("Reporter", "card", output="empty input", status="error")
         fr = language == "fr"
@@ -1620,6 +1785,9 @@ def run_check(text: str = "", *, image: tuple[str, str] | None = None, sender: s
                           "operator": next((b for b in facts["brands"] if b in ("mtn", "orange", "camtel")), "other"),
                           "amount_fcfa": facts.get("amount_fcfa") if isinstance(facts.get("amount_fcfa"), int) and 0 < facts["amount_fcfa"] < 50_000_000 else None,
                           "scheme": card.get("scheme")})
+        if card.get("unfamiliar") and verdict != "scam":
+            # wording nothing we hold resembles: it waits on the analyst desk, the place the next learning comes from
+            store.add_flag(check_id, "", "auto: unfamiliar wording")
     card["findings"] = [f.public() for f in case.findings]
     # the message facts the verdict weighs directly, beside the findings: what a learned weighting can use
     card["profile"] = profile(case, score)

@@ -25,6 +25,15 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
   const [flagOpen, setFlagOpen] = useState(false);
   const [flagged, setFlagged] = useState(false);
   const [flagNote, setFlagNote] = useState("");
+  const [acted, setActed] = useState("");
+  const [after, setAfter] = useState<string[]>([]);
+  const pickActed = (a: string) => {
+    setActed(a);
+    if (a === "nothing") { setAfter([]); return; }
+    const brands = ((card as unknown as { facts?: { brands?: string[] } }).facts?.brands) ?? [];
+    api.afterAction({ acted: a, verdict: card.verdict, scheme: card.scheme ?? "", brands, why: card.why.map((w) => w.text), language: card.language })
+      .then((r) => setAfter(r.steps)).catch(() => setAfter([]));
+  };
   const sendFlag = (suggested: string) =>
     api.flag(card.check_id, suggested, flagNote).then(() => setFlagged(true)).catch(() => setFlagged(true));
   const label = (card.quiet ? t.verdict_quiet : t[`verdict_${card.verdict}` as keyof Dict]) as string;
@@ -87,6 +96,18 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
                 </li>
               ))}
             </ol>
+          </section>
+        )}
+
+        {card.verdict !== "looks_genuine" && !card.quiet && (
+          <section className="sheet acted">
+            <h2>{t.acted_q}</h2>
+            <div className="chips">
+              {(["nothing", "clicked", "code", "money", "documents", "installed"] as const).map((a) => (
+                <button key={a} type="button" className={acted === a ? "chip on" : "chip"} onClick={() => pickActed(a)}>{t[`acted_${a}` as keyof Dict] as string}</button>
+              ))}
+            </div>
+            {after.length > 0 && <ul className="do">{after.map((d) => <li key={d}>{d}</li>)}</ul>}
           </section>
         )}
 

@@ -1,0 +1,392 @@
+[
+ {
+  "kind": "redteam_momo_rev1",
+  "label": "scam",
+  "sender": "6 77 12 34 56",
+  "text": "Bonsoir frere, j'ai fait un depot de 45000 par erreur sur ton numero MTN MoMo. Peux-tu me le renvoyer stp? C'est l'argent de la scolarite de mon petit frere. Merci beaucoup."
+ },
+ {
+  "kind": "redteam_momo_rev2",
+  "label": "scam",
+  "sender": "6 99 40 11 22",
+  "text": "Hello sir, sorry to disturb. I sent 30,000 FCFA to your Orange Money by mistake, my sister's hospital bill. Please return it to this same number, God bless you."
+ },
+ {
+  "kind": "redteam_momo_rev3",
+  "label": "scam",
+  "sender": "MTN",
+  "text": "Cher client, un transfert de 75 000 FCFA a ete credite sur votre compte par erreur. Veuillez le retourner au 6 50 22 33 44 pour eviter le blocage de votre compte MoMo."
+ },
+ {
+  "kind": "redteam_momo_rev4",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hi, I just got a message from Orange Money that you received my money 20k by wrong number. Pls send back, I dey for hospital now, na urgent."
+ },
+ {
+  "kind": "redteam_prize1",
+  "label": "scam",
+  "sender": "MTN",
+  "text": "FELICITATIONS! Votre numero a ete tire au sort et vous avez gagne un iPhone 15 et 500.000 FCFA dans la promotion MTN Anniversaire. Pour recevoir votre lot contactez Mme Nadine au 6 61 90 80 70 et payez 5000 FCFA de frais de livraison."
+ },
+ {
+  "kind": "redteam_prize2",
+  "label": "scam",
+  "sender": "Orange",
+  "text": "Congratulations dear customer, you have been selected as one of 10 winners of the Orange Cameroon loyalty draw. Send your full name, age and town to 6 94 55 66 77 on WhatsApp to claim your prize of 2,000,000 FCFA."
+ },
+ {
+  "kind": "redteam_prize3",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Ton numero Camtel a gagne un voyage a Dubai. Envoie ta carte d'identite et un code Orange Money de 2000 pour valider ton dossier."
+ },
+ {
+  "kind": "redteam_job1",
+  "label": "scam",
+  "sender": "6 70 11 22 33",
+  "text": "Bonjour, nous recrutons 20 agents de saisie pour societe petroliere a Douala. Salaire 250.000 FCFA/mois. Envoyez votre CV et 15.000 FCFA de frais de dossier par MoMo au 6 70 11 22 33. Les places sont limitees."
+ },
+ {
+  "kind": "redteam_job2",
+  "label": "scam",
+  "sender": "recrutement.camrail.hr@gmail.com",
+  "text": "Dear applicant, you have been shortlisted for the position of Customer Care Officer at Camrail. Kindly pay 25,000 FCFA for medical test and uniform to confirm your interview slot."
+ },
+ {
+  "kind": "redteam_job3",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Good morning. We are hiring remote data entry staff, earn 150,000 FCFA weekly working from phone. No experience needed. Reply YES and I will add you to the training group."
+ },
+ {
+  "kind": "redteam_job4",
+  "label": "scam",
+  "sender": "6 55 90 12 00",
+  "text": "Bonjour madame, votre profil nous interesse pour un poste de cuisiniere au Qatar, salaire 900 dollars. Il faut juste payer le visa de travail 120.000 FCFA a notre agent a Yaounde, on vous rembourse a l'arrivee."
+ },
+ {
+  "kind": "redteam_job5",
+  "label": "scam",
+  "sender": "hr.totalenergies.cm@yahoo.fr",
+  "text": "Nous avons bien recu votre candidature. Vous etes retenu pour un entretien. Veuillez regler 10.000 FCFA de frais administratifs via Orange Money avant lundi."
+ },
+ {
+  "kind": "redteam_schol1",
+  "label": "scam",
+  "sender": "scholarships.officeuk@outlook.com",
+  "text": "Dear student, you are among the 50 Cameroonian students selected for the Chevening 2027 full scholarship. To process your award letter kindly send 35,000 FCFA processing fee and a copy of your passport."
+ },
+ {
+  "kind": "redteam_schol2",
+  "label": "scam",
+  "sender": "6 78 33 21 09",
+  "text": "Bonjour, je suis agent de l'ambassade du Canada. Nous avons un visa de travail garanti pour vous, il suffit de payer 300.000 FCFA pour l'etude de dossier. Paiement par Western Union."
+ },
+ {
+  "kind": "redteam_schol3",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "USA visa lottery DV 2027 confirmation: your name is on the list. Pay 50 dollars as consular fee through our agent, we will send your appointment letter."
+ },
+ {
+  "kind": "redteam_bank1",
+  "label": "scam",
+  "sender": "AFRILAND",
+  "text": "Afriland First Bank: votre compte sera suspendu dans 24h. Verifiez vos informations ici: afriland-secure-login.net/verify"
+ },
+ {
+  "kind": "redteam_bank2",
+  "label": "scam",
+  "sender": "UBA",
+  "text": "UBA alert: Unusual login detected on your account. Confirm your PIN and card number at uba-cm-online.com to avoid blocking."
+ },
+ {
+  "kind": "redteam_bank3",
+  "label": "scam",
+  "sender": "6 71 20 20 20",
+  "text": "Bonjour, ici le service client de la Ecobank. Pour proteger votre compte, nous avons besoin que vous nous dictiez le code a 6 chiffres que vous allez recevoir par SMS."
+ },
+ {
+  "kind": "redteam_bank4",
+  "label": "scam",
+  "sender": "SGBC",
+  "text": "Cher client, votre carte bancaire expire. Pour la renouveler connectez-vous sur sgbc-renouvellement.com et saisissez votre mot de passe."
+ },
+ {
+  "kind": "redteam_romance1",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hello my dear, I am Sgt. James from the US Army in Syria. I saw your profile and I feel something special. I have a trunk box of 2.5 million dollars and I need a trusted person to receive it in Cameroon."
+ },
+ {
+  "kind": "redteam_romance2",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Salut mon coeur, tu es tres belle. Je suis ingenieur en Italie, j'aimerais venir te voir a Douala mais mon billet est bloque, peux-tu m'envoyer 80.000 FCFA? Je te rembourserai double."
+ },
+ {
+  "kind": "redteam_romance3",
+  "label": "scam",
+  "sender": "6 90 44 55 66",
+  "text": "I have your nude pictures and the video we made. Send 100,000 FCFA via MoMo in 2 hours or I will send everything to your family and your church."
+ },
+ {
+  "kind": "redteam_romance4",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hey, we have been talking for 3 weeks now and I think I love you. I am a doctor with the UN. I want to send you a gift parcel but you must pay the customs of 60,000 FCFA first."
+ },
+ {
+  "kind": "redteam_relative1",
+  "label": "scam",
+  "sender": "6 99 88 77 66",
+  "text": "Maman c'est moi, j'ai change de numero. Mon ancien telephone est tombe dans l'eau. Peux-tu m'envoyer 40.000 FCFA par Orange Money tout de suite? Je t'expliquerai apres."
+ },
+ {
+  "kind": "redteam_relative2",
+  "label": "scam",
+  "sender": "6 77 65 43 21",
+  "text": "Hi dad this is Brandon, I lost my phone, using a friend's line. I am at the police station, please send 50k for the bail, don't tell mum."
+ },
+ {
+  "kind": "redteam_relative3",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Uncle, na me Ivo. My phone don spoil, na new number. Abeg send me 25000 for MoMo make I buy credit and food, I go explain tomorrow."
+ },
+ {
+  "kind": "redteam_police1",
+  "label": "scam",
+  "sender": "6 74 51 51 51",
+  "text": "Ici l'inspecteur Mbarga de la Police Judiciaire. Votre numero est lie a une affaire de fraude. Pour eviter l'arrestation, payez 150.000 FCFA d'amende par MoMo au 6 74 51 51 51."
+ },
+ {
+  "kind": "redteam_tax1",
+  "label": "scam",
+  "sender": "DGI",
+  "text": "Direction Generale des Impots: vous avez un redressement fiscal impaye de 480.000 FCFA. Reglez via le lien dgi-cameroun-paiement.com sous 48h sinon saisie de vos comptes."
+ },
+ {
+  "kind": "redteam_police2",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "This is the Cybercrime Unit. A complaint was filed against your WhatsApp number. To close the case and remove your name, send 20,000 FCFA to our officer on Orange Money."
+ },
+ {
+  "kind": "redteam_deliv1",
+  "label": "scam",
+  "sender": "DHL",
+  "text": "DHL: Your parcel from China is held at Douala customs. Pay 12,500 FCFA clearance fee here: dhl-cm-delivery.info/pay to release it."
+ },
+ {
+  "kind": "redteam_deliv2",
+  "label": "scam",
+  "sender": "6 53 22 11 00",
+  "text": "Bonjour monsieur, j'ai un colis pour vous a l'aeroport de Nsimalen, envoye par votre ami de France. Il faut payer 35.000 FCFA de taxe de douane avant que je puisse vous le livrer."
+ },
+ {
+  "kind": "redteam_deliv3",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Your Amazon order could not be delivered. Click to reschedule and pay the 800 FCFA redelivery fee: bit.ly/3xRedeliv"
+ },
+ {
+  "kind": "redteam_rent1",
+  "label": "scam",
+  "sender": "6 96 12 78 90",
+  "text": "Bonjour, j'ai un studio moderne a Molyko a 25.000 FCFA par mois, eau et courant inclus. Je suis a l'etranger, envoyez 50.000 FCFA d'avance par MoMo et mon cousin vous remet la cle."
+ },
+ {
+  "kind": "redteam_rent2",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Nice 2-bedroom flat Bonamoussadi 40k monthly. To reserve before other people take it send deposit 80,000 FCFA. The photos are on this number, no visit possible now because I am abroad."
+ },
+ {
+  "kind": "redteam_crypto1",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Rejoins notre plateforme de trading automatique. Investis 50.000 FCFA et recois 150.000 FCFA en 7 jours. Retrait garanti. Parraine 3 amis pour un bonus."
+ },
+ {
+  "kind": "redteam_crypto2",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Bro, I have been making 20k daily with this Bitcoin bot. Deposit 30k, it doubles in 24 hours. Invite your friends and earn 10% from each. Join my team now."
+ },
+ {
+  "kind": "redteam_crypto3",
+  "label": "scam",
+  "sender": "6 91 33 44 55",
+  "text": "Nous gerons ton argent en forex. Tu mets 100.000, tu retires 40.000 chaque semaine. Notre trader est certifie. Beaucoup de gens de Buea ont deja gagne."
+ },
+ {
+  "kind": "redteam_charity1",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Please help little Grace, 6 years, she needs heart surgery. Send any amount by MoMo to 6 72 98 76 54. God will reward you. Please share."
+ },
+ {
+  "kind": "redteam_charity2",
+  "label": "scam",
+  "sender": "6 72 98 76 54",
+  "text": "Frere en Christ, notre orphelinat de Bafoussam manque de nourriture. Un don de 10.000 FCFA sur Orange Money 6 72 98 76 54 nourrira 20 enfants. Que Dieu vous benisse."
+ },
+ {
+  "kind": "redteam_loan1",
+  "label": "scam",
+  "sender": "6 62 08 08 08",
+  "text": "Pret rapide sans garantie! 500.000 FCFA en 30 minutes. Payez d'abord 25.000 FCFA de frais d'assurance et le pret est credite sur votre MoMo."
+ },
+ {
+  "kind": "redteam_loan2",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Approved: your loan of 300,000 FCFA is ready. Before disbursement kindly pay the 15,000 FCFA stamp duty to account 6 75 10 10 10."
+ },
+ {
+  "kind": "redteam_exam1",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Sujets du Probatoire 2027 disponibles! On a les epreuves de maths et physique d'avance. 10.000 FCFA par matiere. Paiement MoMo, envoi immediat."
+ },
+ {
+  "kind": "redteam_exam2",
+  "label": "scam",
+  "sender": "6 98 21 21 21",
+  "text": "Concours ENS/ENAM: je peux faire inscrire ton nom sur la liste des admis, mon oncle est au ministere. Il faut 400.000 FCFA, tu paies la moitie maintenant."
+ },
+ {
+  "kind": "redteam_exam3",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "GCE 2027 questions leaked, we have Chemistry, Maths and Physics. Pay 5k per paper and receive answers 1 day before exam."
+ },
+ {
+  "kind": "redteam_voice1",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "[Note vocale transcrite] Allo oui bonjour c'est le service MTN, on a detecte un probleme sur votre ligne, il faut que vous composiez etoile 123 diese puis que vous me donniez le code qui apparait."
+ },
+ {
+  "kind": "redteam_voice2",
+  "label": "scam",
+  "sender": "6 79 00 11 22",
+  "text": "[Voice note] Eh my brother, na me. Abeg I dey stranded for Mile 17, my card no dey work. Send me 15000 make I reach Buea, I go give you back tonight. Na serious."
+ },
+ {
+  "kind": "redteam_group1",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Bienvenue dans le groupe Taches Rentables. Tu gagnes 5000 FCFA par tache: like des videos TikTok. Pour activer ton compte, verse 20.000 FCFA de caution, remboursable apres 10 taches."
+ },
+ {
+  "kind": "redteam_group2",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hi, you have been added to a paid tasks group. Simply rate products on Amazon and receive 3,000 FCFA per task. First deposit 10,000 FCFA to unlock the VIP tasks."
+ },
+ {
+  "kind": "redteam_sim1",
+  "label": "scam",
+  "sender": "6 80 14 14 14",
+  "text": "Bonjour, je suis du service Orange. Je me suis trompe en vous envoyant un code de verification, pouvez-vous me le retransmettre? C'est mon code, vous l'avez recu par SMS."
+ },
+ {
+  "kind": "redteam_sim2",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hi, I accidentally put your number for my WhatsApp registration. Please send me the 6 digit code you just received. Thank you so much."
+ },
+ {
+  "kind": "redteam_sim3",
+  "label": "scam",
+  "sender": "MTN",
+  "text": "MTN Cameroun: votre SIM doit etre mise a jour. Repondez avec votre numero, votre nom et le code PUK pour eviter la suspension de la ligne."
+ },
+ {
+  "kind": "redteam_float1",
+  "label": "scam",
+  "sender": "6 70 55 55 55",
+  "text": "Salut, je suis le nouveau gerant du kiosque a cote. J'ai envoye 100.000 de float sur ton compte, mais c'est le mauvais numero. Rends-moi 60.000 en cash et garde le reste pour ton service."
+ },
+ {
+  "kind": "redteam_float2",
+  "label": "scam",
+  "sender": "6 65 77 88 99",
+  "text": "Mama, this is Orange Money head agent. Your float limit don reach, you must send 50k to this account to upgrade to the bigger agent class and keep your shop."
+ },
+ {
+  "kind": "redteam_hard1",
+  "label": "unverifiable",
+  "sender": "6 77 03 03 03",
+  "text": "Bonjour, c'est Pasteur Tabe. Dieu m'a mis sur le coeur de vous contacter. Pouvez-vous m'envoyer 2000 FCFA de credit pour que j'appelle ma famille? Merci d'avance."
+ },
+ {
+  "kind": "redteam_hard2",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Hello, I hope you are well. I saw your CV on a job site. I have a small opening in my company. Could you please send me your ID card photo so I can prepare the contract?"
+ },
+ {
+  "kind": "redteam_hard3",
+  "label": "unverifiable",
+  "sender": "6 93 11 11 12",
+  "text": "Bonsoir, je vous ecris poliment. Mon epouse est malade et je n'ai pas assez pour l'ordonnance. Si vous pouvez m'aider avec 5000 sur MoMo ce soir, je vous en serai reconnaissant."
+ },
+ {
+  "kind": "redteam_hard4",
+  "label": "unverifiable",
+  "sender": "WhatsApp contact",
+  "text": "Good afternoon sir. Your name was recommended to me by a friend. Please kindly share your Orange Money number and the name registered on it, I want to send you something."
+ },
+ {
+  "kind": "redteam_hard5",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Hi, quick favor. Can you buy me a 10,000 FCFA Orange recharge card and send me the scratch code? I will refund you tomorrow morning."
+ },
+ {
+  "kind": "redteam_hard6",
+  "label": "unverifiable",
+  "sender": "recrutement.ngo.cm@gmail.com",
+  "text": "Bonjour, apres examen de votre dossier nous aimerions vous proposer un poste d'assistant de projet. Merci de nous envoyer votre numero de compte bancaire et une photo de votre CNI pour preparer votre contrat."
+ },
+ {
+  "kind": "redteam_hard7",
+  "label": "unverifiable",
+  "sender": "6 88 02 02 02",
+  "text": "Cher ami, je voudrais juste vous presenter une petite opportunite d'investissement sans risque. Pas de lien, appelez-moi simplement quand vous avez le temps, je vous expliquerai."
+ },
+ {
+  "kind": "redteam_hard8",
+  "label": "unverifiable",
+  "sender": "WhatsApp contact",
+  "text": "Hello, I am calling on behalf of the MTN Mobile Money team. We are updating customer records. Please confirm your name and the PIN you use for MoMo to complete the update."
+ },
+ {
+  "kind": "redteam_hard9",
+  "label": "unverifiable",
+  "sender": "6 59 44 33 22",
+  "text": "On y est mon frere, ma fille passe son bac, j'ai trouve quelqu'un qui peut corriger les notes. C'est discret, 100.000 FCFA seulement, la moitie avant."
+ },
+ {
+  "kind": "redteam_hard10",
+  "label": "scam",
+  "sender": "WhatsApp contact",
+  "text": "Congratulations, you won the Camtel customer raffle. No payment needed. Just reply with your full names and ID number and we will arrange delivery of your prize."
+ },
+ {
+  "kind": "redteam_hard11",
+  "label": "scam",
+  "sender": "6 70 19 19 19",
+  "text": "Vous avez ete choisi pour tester gratuitement une nouvelle application de gains. Installez l'APK que je vous envoie sur WhatsApp et connectez-vous avec votre numero MoMo."
+ },
+ {
+  "kind": "redteam_hard12",
+  "label": "scam",
+  "sender": "Telegram",
+  "text": "Friend, my uncle at the immigration office can speed up your passport. Normal fee is 75,000 official, but I can do it in a week if you send 150,000 to me directly."
+ }
+]

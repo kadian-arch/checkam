@@ -1,0 +1,530 @@
+[
+ {
+  "kind": "family",
+  "label": "genuine",
+  "sender": "Mama",
+  "text": "Maman here. Please call me when you reach Douala, your auntie wants to send something for your sister."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Brother Ngu",
+  "text": "Bro can you lend me 5000 for transport till Friday? I go return on Friday after salary. Na small money."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Paul",
+  "text": "Salut Paul, peux-tu me depanner de 3000 FCFA pour le taxi ? Je te rembourse samedi sans faute."
+ },
+ {
+  "kind": "family",
+  "label": "genuine",
+  "sender": "Aunty Beatrice",
+  "text": "Wetin dey happen? Una don reach Bamenda? Call me when una land make I send somebody for pick una."
+ },
+ {
+  "kind": "family",
+  "label": "genuine",
+  "sender": "Cousin Linda",
+  "text": "Happy birthday my dear! God bless you and give you many more years. Dinner at my place on Saturday 7pm."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "UB Registrar",
+  "text": "Hello, this is Mr. Tabe from the Registrar's office, University of Buea. Second semester results are now available on the student portal. Log in with your matricule to view. Fees balance can be paid at any Afriland branch."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "College Saint Joseph",
+  "text": "Chers parents, la rentree scolaire est fixee au lundi 4 septembre. Les frais de scolarite de la 1ere tranche (50 000 FCFA) sont payables a l'economat de l'ecole avant le 15 septembre. Le Directeur."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "Dept of Computer Science",
+  "text": "Notice: CA exams start Monday 13 November. Timetable is posted at the faculty notice board and on the department WhatsApp group. Arrive 30 minutes before each paper with your student ID."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "FET Buea",
+  "text": "Dear students, the Faculty of Engineering will hold a registration clinic on Wednesday at 10am in Amphi 250. Bring your admission letter and fee receipt."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "Pastor Fon",
+  "text": "Brethren, Sunday service starts 9am. Choir practice Thursday 5pm. Please bring your tithe envelopes and remember the widows offering this month."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "Mothers Union",
+  "text": "Mothers union meeting on Saturday at the parish hall after mass. Contribution is 2000 FCFA per member for the funeral of Mama Rose."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "Paroisse Notre Dame",
+  "text": "Chers fideles, la messe de minuit aura lieu a 22h a la cathedrale de Bafoussam. Quete pour les orphelins."
+ },
+ {
+  "kind": "delivery",
+  "label": "genuine",
+  "sender": "Jumia",
+  "text": "Your order #48213 from Jumia has been shipped and will arrive on 24 Nov. Track it in the Jumia app. Pay 18,500 FCFA cash on delivery."
+ },
+ {
+  "kind": "delivery",
+  "label": "genuine",
+  "sender": "Express Union",
+  "text": "Bonjour, votre colis est arrive a l'agence Express Union de Akwa. Presentez votre piece d'identite pour le retirer. Horaires: 8h-17h."
+ },
+ {
+  "kind": "delivery",
+  "label": "genuine",
+  "sender": "Glovo",
+  "text": "Hello Mrs Ayuk, your delivery from Glovo will arrive in 10 minutes. The rider Samuel will call you."
+ },
+ {
+  "kind": "shop",
+  "label": "genuine",
+  "sender": "Total Molyko",
+  "text": "Your gas cylinder refill is ready. Come pick it up before 6pm today at Total station Molyko. Thanks."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "Orange Cameroun",
+  "text": "We are hiring: Customer Service Agent at Orange Cameroun, Douala. Send CV to recrutement@orange.cm or apply on careers.orange.cm. Deadline 30 November. No fee is charged at any stage of recruitment."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "Guinness HR",
+  "text": "Dear candidate, your interview at Guinness Cameroun is scheduled Tuesday 25 Nov, 9am at our Bassa office, Douala. Please bring originals of your certificates. Contact HR on 233 37 50 00."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "TotalEnergies RH",
+  "text": "Cher candidat, votre entretien chez Total Energies Cameroun est confirme pour jeudi 10h au siege, Boulevard de la Liberte Douala. Aucune somme ne vous sera demandee."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "MTN",
+  "text": "MTN MoMo: You have received 15,000 FCFA from NGWA JOHN 677xxxx12. New balance 22,300 FCFA. Fee 0. Transaction ID 2398712344."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "MTN MoMo",
+  "text": "MTN MoMo: You have sent 5,000 FCFA to MARIE T 670xxxx45. Fee 100 FCFA. Balance 17,200 FCFA. Ref 88231."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "Orange Money",
+  "text": "Orange Money: Retrait de 20 000 FCFA effectue chez l'agent 690xxxx88. Nouveau solde: 4 500 FCFA. ID: MP231120.1234."
+ },
+ {
+  "kind": "bank",
+  "label": "genuine",
+  "sender": "Ecobank",
+  "text": "Ecobank: Debit of XAF 45,000 on your account ending 4421 on 20/11. Balance XAF 120,330. Not you? Call 233 43 22 00 or visit any branch."
+ },
+ {
+  "kind": "bank",
+  "label": "genuine",
+  "sender": "Afriland",
+  "text": "Afriland First Bank: Votre compte *****5521 a ete credite de 250 000 XAF le 19/11. Solde 612 400 XAF."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "MTN",
+  "text": "Your verification code is 482913. Do not share this code with anyone. MTN will never ask for it."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "WhatsApp",
+  "text": "Votre code de verification WhatsApp est 391-882. Ne le partagez avec personne."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "Orange Money",
+  "text": "Orange Money: votre code secret a ete modifie avec succes. Si ce n'est pas vous, appelez le 8 00 ou rendez-vous en agence Orange."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "ENEO",
+  "text": "ENEO: Votre facture d'electricite de octobre est de 14 250 FCFA, a payer avant le 30/11. Payez en agence ENEO, par MoMo ou Orange Money."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "ENEO",
+  "text": "ENEO: Planned power cut in Molyko and Bokwai on Saturday 22 Nov from 8am to 4pm for maintenance. Sorry for the inconvenience."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "CAMWATER",
+  "text": "CAMWATER: Votre facture d'eau de 6 800 FCFA est disponible. Echeance 05/12. Paiement aux guichets Camwater ou Orange Money."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "CAMWATER",
+  "text": "CAMWATER: Water supply will be interrupted in Bonamoussadi on Monday from 9am to 2pm due to pipe repairs."
+ },
+ {
+  "kind": "exam",
+  "label": "genuine",
+  "sender": "GCE Board",
+  "text": "GCE Board: Registration for the 2027 GCE Advanced Level is open from 1 to 30 December on the Board's official portal gceb.org. Fee 15,000 FCFA payable at bank, keep your receipt."
+ },
+ {
+  "kind": "exam",
+  "label": "genuine",
+  "sender": "OBC",
+  "text": "OBC: Les inscriptions au Baccalaureat 2027 sont ouvertes du 1er au 20 decembre dans votre etablissement. Les frais d'examen sont payes a l'etablissement contre recu."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "Gov Bilingual School",
+  "text": "Dear parents, BEPC mock exams hold next week. Students must come with their pens, a calculator and 1000 FCFA for photocopies."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Buea Hospital",
+  "text": "Reminder: You have an appointment at Buea Regional Hospital on Friday 21 Nov at 10:30am with Dr. Ekema, Cardiology. Please come 15 min early and bring your carnet."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Clinique Bonanjo",
+  "text": "Rappel de rendez-vous: Clinique Bonanjo, vendredi 14h, Dr Mbarga, dentiste. Si vous ne pouvez pas venir, appelez le 233 42 18 33."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Laquintinie",
+  "text": "Your lab results are ready for collection at Laquintinie Hospital, Laboratory, ground floor. Opening hours 7am to 4pm."
+ },
+ {
+  "kind": "rent",
+  "label": "genuine",
+  "sender": "Landlord Ndong",
+  "text": "Hello, rent for November is due on the 5th. The amount is 60,000 FCFA. You can send by MoMo to the usual number. Thanks. Mr Ndong."
+ },
+ {
+  "kind": "rent",
+  "label": "genuine",
+  "sender": "Mr Essomba",
+  "text": "Bonjour locataire, le loyer de decembre est de 75 000 FCFA. Merci de le deposer a mon compte comme d'habitude avant le 5. Bonne fin d'annee."
+ },
+ {
+  "kind": "community",
+  "label": "genuine",
+  "sender": "Block group",
+  "text": "Landlord say make we all pay 3000 each for the borehole repair. Money go to Njie our block treasurer, he go give receipt."
+ },
+ {
+  "kind": "chat",
+  "label": "genuine",
+  "sender": "Group Project",
+  "text": "Guys who is bringing the projector tomorrow? Presentation is at 9. Also Eric please send your part by tonight."
+ },
+ {
+  "kind": "chat",
+  "label": "genuine",
+  "sender": "Football gang",
+  "text": "Lmao that match was crazy. Who dey come watch Lions on Sunday for my place? Bring your own drink."
+ },
+ {
+  "kind": "chat",
+  "label": "genuine",
+  "sender": "Tontine",
+  "text": "Les gars, la reunion de la tontine c'est chez Jean samedi 16h. Cotisation 10 000 chacun comme d'hab."
+ },
+ {
+  "kind": "promo",
+  "label": "genuine",
+  "sender": "MTN",
+  "text": "MTN: Enjoy 1GB for 500 FCFA valid 24h. Dial *157# to subscribe. T&Cs apply. Opt out: STOP to 8080."
+ },
+ {
+  "kind": "promo",
+  "label": "genuine",
+  "sender": "Orange",
+  "text": "Orange: Pass Internet 3 Go a 1000 FCFA valable 7 jours. Tapez #123# pour activer. Offre valable jusqu'au 30/11."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "CAMTEL",
+  "text": "Camtel: Your internet bill for November is 25,000 FCFA. Pay at any Camtel agency or by Orange Money before 10 Dec."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Camair-Co",
+  "text": "Camair-Co: Your flight QC 307 Douala-Yaounde on 22 Nov departs 14:30. Check-in opens 2 hours before. Booking ref KT4P2Z."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Amour Mezam",
+  "text": "Your bus ticket Buea to Yaounde with Amour Mezam, Saturday 6am, seat 14. Please arrive 30 mins early at Mile 17 park. Ticket 7000 FCFA paid."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Garanti Express",
+  "text": "Billet Garanti Express: Douala - Bafoussam demain 7h, siege 22. Presentez ce message et votre CNI a l'agence."
+ },
+ {
+  "kind": "event",
+  "label": "genuine",
+  "sender": "Buea Tech",
+  "text": "Join us for the Buea Tech Meetup this Saturday 3pm at Silicon Mountain. Free entry, register at meetup.com/buea-tech."
+ },
+ {
+  "kind": "event",
+  "label": "genuine",
+  "sender": "UNICEF",
+  "text": "UNICEF Cameroon invites youth leaders to a free workshop on digital safety, 5 Dec at Hilton Yaounde. Register at unicef.org/cameroon. Participation is free of charge."
+ },
+ {
+  "kind": "event",
+  "label": "genuine",
+  "sender": "Red Cross Buea",
+  "text": "The Red Cross volunteers meeting holds Sunday 4pm. Come with your volunteer badge. No contribution is required."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Neighbor",
+  "text": "Hello, I am your neighbour. Please I need to borrow your ladder tomorrow morning. I go return am by noon."
+ },
+ {
+  "kind": "family",
+  "label": "genuine",
+  "sender": "Dad",
+  "text": "Dad: I sent 50,000 FCFA to your MoMo for your school fees top-up. Check your balance and confirm. Study well."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Daughter Ann",
+  "text": "Daddy pls send me 20,000 for my project printing. I go give you the receipt when I get back to school."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "MINESUP",
+  "text": "Nous sommes heureux de vous informer que votre demande de bourse a ete recue. Les resultats seront publies le 15 decembre sur le site officiel minesup.gov.cm."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "Grace Tradex",
+  "text": "Hi Samuel, ur CV looks good. We would like to invite you for a phone call tomorrow at 2pm. Please confirm if the time works. Regards, Grace, HR at Tradex Cameroon."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "MTN MoMo",
+  "text": "MTN MoMo: Your loan of 10,000 FCFA from MoMo Advance is due on 25 Nov. Repay by dialing *126# before the due date to avoid fees."
+ },
+ {
+  "kind": "momo",
+  "label": "genuine",
+  "sender": "Orange",
+  "text": "Orange Cameroun: Votre credit est faible: il vous reste 50 FCFA. Rechargez par Orange Money en composant #150#."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "PCC Molyko",
+  "text": "Please remember the church building fund. Send your pledge through the church MoMo account 670000123 in the name of PCC Molyko, or give cash on Sunday to the treasurer."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Brother Tanyi",
+  "text": "Brother, I am at the hospital with my wife, she is in labour. Please if you can send me 10,000 on MoMo, I will pay you back Monday. I will call you tonight."
+ },
+ {
+  "kind": "shop",
+  "label": "genuine",
+  "sender": "Garage Mbah",
+  "text": "Hello sir, your car is ready. Come pick it at the garage before 5pm. Total bill is 38,000 FCFA, you can pay by MoMo to the garage number or cash. Thank you."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "Univ Douala",
+  "text": "URGENT: Les cours de demain sont annules suite a la greve. Les examens reprennent lundi. Consultez le site officiel de l'universite pour la mise a jour."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Uncle Joseph",
+  "text": "Good evening my son. Please when you have small time, can you help me with 10,000 for my medicine? I will pay you when the pension comes. God bless you."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Mama",
+  "text": "Chéri, peux-tu m'envoyer 15 000 FCFA pour le marché de cette semaine ? Je te rappelle ce soir."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Eric (classmate)",
+  "text": "Hey Chi, can you send me the notes for CEC 301 on WhatsApp? Also can you pay my share of the printing 500 FCFA, I will give you Monday."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Madame Fotso",
+  "text": "Bonjour, c'est Mme Fotso la voisine. Pouvez-vous me prêter 2000 FCFA pour le gaz ? Je vous rends demain matin sans faute."
+ },
+ {
+  "kind": "utility",
+  "label": "genuine",
+  "sender": "ENEO",
+  "text": "ENEO: Facture n°4471209 de 18 900 FCFA disponible. Date limite 05/12. Payez par MoMo en composant *126# ou en agence ENEO. Merci."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "College Saint Joseph",
+  "text": "Chers parents, la 2eme tranche de la scolarite (45 000 FCFA) est a regler avant le 10 decembre a l'economat. Aucun eleve ne sera admis en classe sans le recu apres cette date. La Direction."
+ },
+ {
+  "kind": "school",
+  "label": "genuine",
+  "sender": "Govt High School Buea",
+  "text": "Dear parents, second term fees of 35,000 FCFA are payable at the bursar's office before 12 January. Pay at the bursary and collect your receipt. PTA levy 5,000 FCFA also due. The Principal."
+ },
+ {
+  "kind": "rent",
+  "label": "genuine",
+  "sender": "Mr Tabe",
+  "text": "Hello tenant, house rent for December 60,000 FCFA. Pay at my shop at Great Soppo on or before the 5th and collect your receipt. Merry Christmas in advance."
+ },
+ {
+  "kind": "rent",
+  "label": "genuine",
+  "sender": "Landlady Mrs Njoh",
+  "text": "Bonsoir, le loyer du mois est a payer avant le 5. Vous pouvez envoyer sur mon numero MTN MoMo habituel, merci de m'avertir apres. Cordialement."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "St Joseph Parish",
+  "text": "Dear parishioners, the harvest thanksgiving holds Sunday 30 Nov. Pledges can be made at the parish office after mass or through our MoMo account 650123456 (St Joseph Parish Bokwango). Thank you."
+ },
+ {
+  "kind": "church",
+  "label": "genuine",
+  "sender": "Pasteur Mballa",
+  "text": "Chers freres et soeurs, la collecte pour la construction de l'eglise se fait dimanche. Vous pouvez aussi donner par Orange Money au numero de la paroisse affiche sur le tableau. Dieu vous benisse."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "Ecobank",
+  "text": "Your Ecobank OTP is 774201. Valid for 5 minutes. Never share this OTP with anyone, including bank staff."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "Orange Money",
+  "text": "Orange Money: votre code de confirmation est 5530. Ne le communiquez jamais, meme a un agent Orange. Il expire dans 5 minutes."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "Afriland",
+  "text": "Afriland First Bank: Code de validation 203948 pour votre paiement de 12 500 XAF chez Jumia. Si vous n'etes pas a l'origine de cette operation, appelez le 233 42 10 10."
+ },
+ {
+  "kind": "otp",
+  "label": "genuine",
+  "sender": "Google",
+  "text": "G-582614 is your Google verification code. Do not share it with anyone."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "MTN Cameroon HR",
+  "text": "MTN Cameroon is recruiting a Network Engineer (Douala). Apply before 5 Dec by sending your CV and cover letter to careers@mtn.com. Only shortlisted candidates will be contacted. MTN does not charge any fee for recruitment."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "CAMTEL RH",
+  "text": "CAMTEL recrute un technicien reseau a Yaounde. Envoyez votre dossier a recrutement@camtel.cm avant le 12 decembre. Aucun frais n'est demande aux candidats."
+ },
+ {
+  "kind": "job",
+  "label": "genuine",
+  "sender": "Dr Ewane (UB)",
+  "text": "Dear Kum, your internship application at the Dept of Computer Science has been received. Please come to the HOD's office on Tuesday 10am with your CV and a copy of your transcript. Regards, Dr Ewane."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Hopital General Douala",
+  "text": "Rappel: vous avez rendez-vous demain mardi a 9h au service de cardiologie, Hopital General de Douala. Merci de vous presenter avec votre carnet et le recu de consultation. Tel accueil 233 40 11 12."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Buea Regional Hospital",
+  "text": "Dear patient, your appointment with Dr Fon is moved to Thursday 11am. The consultation fee of 5,000 FCFA is paid at the cashier on arrival. Please call 233 33 22 11 to reschedule."
+ },
+ {
+  "kind": "health",
+  "label": "genuine",
+  "sender": "Pharmacie du Rond-point",
+  "text": "Bonjour, vos medicaments sont disponibles a la pharmacie. Passez avant 19h. Total 12 400 FCFA, paiement en caisse ou par Orange Money."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Camair-Co",
+  "text": "Camair-Co: Flight QC 211 Yaounde-Douala on 25 Nov is retimed to 16:45. Check-in at the airport desk opens 2h before. For changes call 222 22 11 11 or visit camairco.cm. We apologise for the inconvenience."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Air Peace",
+  "text": "Air Peace: Your e-ticket for Douala to Lagos on 28 Nov, ref XK29PL, is confirmed. Check-in closes 60 minutes before departure. Bring your passport and yellow fever card."
+ },
+ {
+  "kind": "travel",
+  "label": "genuine",
+  "sender": "Finexs Voyages",
+  "text": "Votre billet Finexs Voyages Buea-Douala, dimanche 7h30, siege 9, 3 000 FCFA paye. Presentez-vous 20 minutes avant au depart de Mutengene. Bon voyage."
+ },
+ {
+  "kind": "favour",
+  "label": "genuine",
+  "sender": "Friend Nkeng",
+  "text": "Bro I dey stuck for Mile 17, my phone dey die. Abeg buy me 1000 airtime make I call my dad. I go pay you back today. Na Orange number."
+ }
+]
