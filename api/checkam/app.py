@@ -41,6 +41,7 @@ class CheckIn(BaseModel):
     text: str = Field("", max_length=4000)
     sender: str = Field("", max_length=80)
     language: str = Field("", max_length=5)
+    context: dict = Field(default_factory=dict)
 
 
 class RunIn(BaseModel):
@@ -67,7 +68,15 @@ def health():
 
 @app.post("/check")
 def check(body: CheckIn):
-    return agents.run_check(body.text, sender=body.sender, language=body.language)
+    return agents.run_check(body.text, sender=body.sender, language=body.language, context=body.context)
+
+
+def _ctx(raw: str) -> dict:
+    try:
+        d = json.loads(raw) if raw else {}
+    except ValueError:
+        return {}
+    return d if isinstance(d, dict) else {}
 
 
 def _stream(run):
@@ -97,7 +106,7 @@ def _stream(run):
 
 @app.post("/check/stream")
 def check_stream(body: CheckIn):
-    return _stream(lambda on_line: agents.run_check(body.text, sender=body.sender, language=body.language, on_line=on_line))
+    return _stream(lambda on_line: agents.run_check(body.text, sender=body.sender, language=body.language, on_line=on_line, context=body.context))
 
 
 IMAGE_TYPES = {b"\x89PNG": "image/png", b"\xff\xd8\xff": "image/jpeg", b"GIF8": "image/gif", b"RIFF": "image/webp"}
@@ -123,15 +132,15 @@ async def _images(uploads: list[UploadFile]) -> list[tuple[str, str]]:
 
 @app.post("/check/image/stream")
 async def check_image_stream(image: list[UploadFile] = File(...), text: str = Form("", max_length=4000), sender: str = Form("", max_length=80),
-                             language: str = Form("", max_length=5)):
+                             language: str = Form("", max_length=5), context: str = Form("", max_length=600)):
     imgs = await _images(image)
-    return _stream(lambda on_line: agents.run_check(text, images=imgs, sender=sender, language=language, on_line=on_line))
+    return _stream(lambda on_line: agents.run_check(text, images=imgs, sender=sender, language=language, on_line=on_line, context=_ctx(context)))
 
 
 @app.post("/check/image")
 async def check_image(image: list[UploadFile] = File(...), text: str = Form("", max_length=4000), sender: str = Form("", max_length=80),
-                      language: str = Form("", max_length=5)):
-    return agents.run_check(text, images=await _images(image), sender=sender, language=language)
+                      language: str = Form("", max_length=5), context: str = Form("", max_length=600)):
+    return agents.run_check(text, images=await _images(image), sender=sender, language=language, context=_ctx(context))
 
 
 class AfterIn(BaseModel):

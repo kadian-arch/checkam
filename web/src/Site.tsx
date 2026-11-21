@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, streamCheck, MAX_SHOTS, type Card, type TraceLine, type PublicStats } from "./api";
+import { api, streamCheck, MAX_SHOTS, type Card, type Context, type TraceLine, type PublicStats } from "./api";
 
 // which of the six visible stages a live agent step belongs to
 function phase(l: TraceLine): number {
@@ -120,6 +120,14 @@ export default function Site() {
   );
 }
 
+function cleanContext(c: Context): Context {
+  const out: Context = {};
+  if (c.channel) out.channel = c.channel;
+  if (c.relation) out.relation = c.relation;
+  if (c.wants?.length) out.wants = c.wants;
+  return out;
+}
+
 function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [text, setText] = useState(shared);
   const [sender, setSender] = useState("");
@@ -129,6 +137,9 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [card, setCard] = useState<Card | null>(null);
   const [err, setErr] = useState("");
   const [note, setNote] = useState("");
+  const [ctx, setCtx] = useState<Context>({});
+  const [listening, setListening] = useState(false);
+  const recog = useRef<{ stop: () => void } | null>(null);
   const top = useRef<HTMLElement>(null);
   const step = live.reduce((s, l) => Math.max(s, phase(l)), 0);
   const last = live[live.length - 1];
@@ -136,13 +147,35 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const gate = live.find((l) => l.action === "verdict_gate");
   const early = gate ? (() => { try { return JSON.parse(gate.output_summary || "{}").verdict as string; } catch { return ""; } })() : "";
 
+  // dictate the story in your own words: the browser turns speech into text, which is checked like a pasted message
+  function dictate() {
+    if (listening) { recog.current?.stop(); return; }
+    const R = (window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any }).SpeechRecognition
+      ?? (window as unknown as { webkitSpeechRecognition?: new () => any }).webkitSpeechRecognition;
+    if (!R) return;
+    const r = new R();
+    r.lang = lang === "fr" ? "fr-FR" : "en-GB";
+    r.interimResults = false;
+    r.continuous = true;
+    r.onresult = (e: any) => {
+      const said = Array.from(e.results as ArrayLike<any>).slice(e.resultIndex).map((x: any) => x[0].transcript).join(" ").trim();
+      if (said) setText((was) => (was ? was + " " : "") + said);
+    };
+    r.onend = () => setListening(false);
+    r.onerror = () => setListening(false);
+    recog.current = r;
+    setListening(true);
+    r.start();
+  }
+  const canDictate = typeof window !== "undefined" && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+
   async function go(who = sender, body = text) {
     if (!body.trim() && !files.length) return;
     setBusy(true);
     setErr("");
     setLive([]);
     try {
-      const c = await streamCheck({ text: body, sender: who, language: lang, files }, (l) => setLive((x) => [...x, l]));
+      const c = await streamCheck({ text: body, sender: who, language: lang, files, context: cleanContext(ctx) }, (l) => setLive((x) => [...x, l]));
       if (c.nothing) { setErr(""); setNote(c.error ?? ""); }  // a greeting is not a failure
       else if (c.error) setErr(c.error);
       else { setNote(""); setCard(c); }
@@ -181,6 +214,8 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
           <span className="field-head">{t.paste_label}
             {canPaste && <button type="button" className="chip-btn" disabled={busy}
               onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => {}); }}>{t.paste_btn}</button>}
+            {canDictate && <button type="button" className={listening ? "chip-btn rec" : "chip-btn"} disabled={busy} aria-pressed={listening}
+              onClick={(e) => { e.preventDefault(); dictate(); }}>{listening ? t.voice_stop : t.voice_start}</button>}
           </span>
           <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
         </label>
@@ -204,6 +239,24 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
                 <button type="button" className="link" disabled={busy} aria-label={`${t.remove} ${i + 1}`} onClick={() => setFiles((had) => had.filter((_, j) => j !== i))}>{t.remove}</button></li>
             ))}
           </ul>
+        )}
+
+        {!busy && (
+          <details className="context">
+            <summary>{t.ctx_title}</summary>
+            {([["channel", ["sms", "whatsapp", "call", "voice_note", "social", "email", "in_person"]],
+               ["relation", ["stranger", "claims_known", "known", "organisation"]]] as [keyof Context, string[]][]).map(([k, opts]) => (
+              <div key={k} className="ctx-group"><b>{t[`ctx_${k}` as keyof Dict] as string}</b>
+                <div className="chips">{opts.map((o) => (
+                  <button key={o} type="button" className={ctx[k] === o ? "chip on" : "chip"} onClick={() => setCtx((c) => ({ ...c, [k]: c[k] === o ? undefined : o }))}>{t[`ctx_${k}_${o}` as keyof Dict] as string}</button>
+                ))}</div></div>
+            ))}
+            <div className="ctx-group"><b>{t.ctx_wants}</b>
+              <div className="chips">{["money", "code", "link", "call", "documents"].map((o) => (
+                <button key={o} type="button" className={ctx.wants?.includes(o) ? "chip on" : "chip"}
+                  onClick={() => setCtx((c) => ({ ...c, wants: c.wants?.includes(o) ? c.wants.filter((x) => x !== o) : [...(c.wants ?? []), o] }))}>{t[`ctx_wants_${o}` as keyof Dict] as string}</button>
+              ))}</div></div>
+          </details>
         )}
 
         {busy ? (

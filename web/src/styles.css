@@ -492,3 +492,9 @@ a.primary, a.ghost { text-decoration: none; }
 .acted .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
 .acted .chip { border: 1px solid var(--line, #3a3a3a); background: transparent; color: inherit; padding: 8px 12px; border-radius: 999px; font: inherit; cursor: pointer; }
 .acted .chip.on { background: var(--amber, #f5a623); color: #111; border-color: transparent; }
+.context { margin: 4px 0 14px; } .context summary { cursor: pointer; font-size: 0.92rem; opacity: 0.85; }
+.ctx-group { margin-top: 10px; } .ctx-group b { display: block; font-size: 0.85rem; margin-bottom: 6px; }
+.context .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.context .chip { border: 1px solid var(--line, #3a3a3a); background: transparent; color: inherit; padding: 7px 11px; border-radius: 999px; font: inherit; cursor: pointer; }
+.context .chip.on { background: var(--amber, #f5a623); color: #111; border-color: transparent; }
+.chip-btn.rec { background: var(--danger, #d64545); color: #fff; }

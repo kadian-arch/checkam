@@ -27,7 +27,9 @@ async function call<T>(path: string, init: RequestInit = {}, token?: string): Pr
 // Runs a check and reports every agent step the moment it happens (server-sent events over POST).
 export const MAX_SHOTS = 6;
 
-export async function streamCheck(input: { text: string; sender: string; language: string; files?: File[] },
+export type Context = { channel?: string; relation?: string; wants?: string[] };
+
+export async function streamCheck(input: { text: string; sender: string; language: string; files?: File[]; context?: Context },
                                   onStep: (l: TraceLine) => void): Promise<Card> {
   let init: RequestInit;
   let path = "/check/stream";
@@ -37,10 +39,11 @@ export async function streamCheck(input: { text: string; sender: string; languag
     f.append("text", input.text);
     f.append("sender", input.sender);
     f.append("language", input.language);
+    if (input.context) f.append("context", JSON.stringify(input.context));
     init = { method: "POST", body: f };
     path = "/check/image/stream";
   } else {
-    init = { method: "POST", body: JSON.stringify({ text: input.text, sender: input.sender, language: input.language }), headers: { "Content-Type": "application/json" } };
+    init = { method: "POST", body: JSON.stringify({ text: input.text, sender: input.sender, language: input.language, context: input.context ?? {} }), headers: { "Content-Type": "application/json" } };
   }
   const r = await fetch(path, init);
   if (!r.ok || !r.body) throw new Error((await r.json().catch(() => ({}))).detail ?? r.statusText);
