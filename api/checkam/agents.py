@@ -1683,7 +1683,11 @@ def report(case: Case, verdict: str, confidence: float, trace: Trace) -> dict:
     nearest = max([x for x in (case.facts.get("nearest_scam"), next((e.get("similarity") for fd in case.findings if fd.tool == "genuine_twin" for e in fd.evidence if e.get("similarity") is not None), None)) if x is not None], default=None)
     novelty = None if nearest is None else round(1 - nearest, 2)
     # wording alone cannot say "new to us"; this needs the meaning-embeddings, and a sender name no phone can use is not new
-    unfamiliar = (novelty is not None and novelty >= 0.7 and "scam_vecs" in _cache and case.facts.get("sender_kind") not in ("official", "registered")
+    # and only for a message that carries something risky (a request, a promise, a link, a brand, a payment): our records hold
+    # operator messages and scams, so an ordinary personal message is far from all of them by construction, which says nothing
+    carries_risk = bool(case.facts["asks"] or case.facts.get("promise") or case.facts["links"] or case.facts["brands"] or pay_to_private(case.facts))
+    unfamiliar = (novelty is not None and novelty >= 0.7 and "scam_vecs" in _cache and carries_risk
+                  and case.facts.get("sender_kind") not in ("official", "registered", "contact") and case.facts.get("relation") != "known"
                   and verdict in ("looks_genuine", "cant_tell", "suspicious"))
     route = OFFICIAL_ROUTE.search(case.facts["text"])
     do_now, dont = advice.steps(verdict, scheme, case.facts, lang, route.group(0) if route else "", linkcheck.claimed(case.facts["text"], lang))

@@ -8,7 +8,7 @@ import time
 
 import httpx
 
-from .. import config
+from .. import config, privacy
 from ..trace import Trace, timer
 
 
@@ -108,6 +108,20 @@ def _post(path: str, body: dict, timeout: float) -> dict:
     raise RuntimeError(f"nvidia call failed: {last}")
 
 
+def _masked(messages: list[dict]) -> list[dict]:
+    """Nothing leaves this service with a real phone number or a secret code in it: numbers become codes and a
+    PIN typed into a message is removed. The rules run on the message here; the AI service reads the masked copy."""
+    out = []
+    for m in messages:
+        c = m.get("content")
+        if isinstance(c, str):
+            m = {**m, "content": privacy.mask(c)}
+        elif isinstance(c, list):
+            m = {**m, "content": [({**p, "text": privacy.mask(p["text"])} if isinstance(p, dict) and isinstance(p.get("text"), str) else p) for p in c]}
+        out.append(m)
+    return out
+
+
 def chat(messages: list[dict], *, model: str | None = None, trace: Trace | None = None, agent: str = "",
          action: str = "llm", max_tokens: int = 700, temperature: float = 0.2, timeout: float = 90, think: bool = False) -> str | None:
     if not enabled():
@@ -115,7 +129,7 @@ def chat(messages: list[dict], *, model: str | None = None, trace: Trace | None 
     model = model or config.MODEL_REASON
     with timer() as t:
         try:
-            body = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature}
+            body = {"model": model, "messages": _masked(messages), "max_tokens": max_tokens, "temperature": temperature}
             if not think and model in (config.MODEL_REASON, config.MODEL_FAST):
                 body["chat_template_kwargs"] = {"enable_thinking": False}
             out = _post("/chat/completions", body, timeout)
@@ -166,7 +180,7 @@ def embed(texts: list[str], trace: Trace | None = None, kind: str = "passage") -
         return None
     with timer() as t:
         try:
-            out = _post("/embeddings", {"model": config.MODEL_EMBED, "input": [x[:2000] for x in texts],
+            out = _post("/embeddings", {"model": config.MODEL_EMBED, "input": [privacy.mask(x)[:2000] for x in texts],
                                         "input_type": kind, "encoding_format": "float", "truncate": "END"}, 8 if kind == "query" else 90)
             vecs = [d["embedding"] for d in out["data"]]
             status = "ok"

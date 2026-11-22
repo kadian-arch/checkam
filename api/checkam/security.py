@@ -65,7 +65,7 @@ async def middleware(request: Request, call_next):
     size = request.headers.get("content-length", "")
     if size.isdigit() and int(size) > MAX_BODY:
         return JSONResponse({"detail": "Request too large."}, status_code=413)
-    if request.method != "GET" or request.url.path.startswith(("/analyst", "/traces")):
+    if request.method != "GET" or request.url.path.startswith(("/analyst", "/traces", "/stats", "/alerts", "/receipts", "/health")):
         ok, wait = allowed(client_ip(request), group(request.url.path))
         if not ok:
             return JSONResponse({"detail": f"Too many requests. Try again in {wait} s."}, status_code=429, headers={"Retry-After": str(wait)})
@@ -74,6 +74,11 @@ async def middleware(request: Request, call_next):
     resp.headers.setdefault("Referrer-Policy", "no-referrer")
     resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
     resp.headers.setdefault("X-Frame-Options", "DENY")
+    path = request.url.path
+    if path.startswith(("/check", "/advice", "/run", "/auth", "/analyst", "/traces", "/receipts", "/health")):
+        resp.headers.setdefault("Cache-Control", "no-store")  # a person's answer is for that person
+    elif path.startswith(("/stats", "/alerts")):
+        resp.headers.setdefault("Cache-Control", "public, max-age=60")
     if not request.url.path.startswith(("/docs", "/openapi")):
         resp.headers.setdefault("Content-Security-Policy", CSP)
     if request.headers.get("x-forwarded-proto") == "https":

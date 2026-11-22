@@ -288,3 +288,25 @@ def alerts(limit: int = 50, oldest_first: bool = False) -> list[dict]:
     order = "ASC" if oldest_first else "DESC"
     rows = conn().execute(f"SELECT * FROM alerts WHERE status='published' ORDER BY rowid {order} LIMIT ?", (limit,)).fetchall()
     return [{k: (json.loads(r[k]) if k == "numbers" else r[k]) for k in PUBLIC_ALERT_FIELDS} for r in rows]
+
+
+CHECK_KEEP_DAYS = 365   # a saved check (message with numbers as codes, verdict, scheme)
+ANSWER_KEEP_DAYS = 30   # the cache of finished answers that makes a repeated message instant
+
+
+def purge_old() -> dict:
+    """Delete what has outlived its use. Open review flags are kept until an analyst has read them."""
+    from datetime import timedelta
+    cut = lambda days: (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
+    old, stale = cut(CHECK_KEEP_DAYS), cut(ANSWER_KEEP_DAYS)
+    out = {}
+    with _lock:
+        for name, sql, arg in (
+            ("checks", "DELETE FROM checks WHERE created < ?", old),
+            ("receipts", "DELETE FROM receipts WHERE created < ?", old),
+            ("flags", "DELETE FROM flags WHERE created < ? AND status != 'open'", old),
+            ("answers", "DELETE FROM answers WHERE created < ?", stale),
+        ):
+            out[name] = conn().execute(sql, (arg,)).rowcount
+        conn().commit()
+    return out
