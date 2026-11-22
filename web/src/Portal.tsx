@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { api } from "./api";
+import { api, type LoginResult } from "./api";
 import Logo from "./Logo";
 import TraceView from "./TraceView";
 
 const KEY = "checkam.analyst";
 type Session = { token: string; name: string; org: string; role: string };
-type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "memory" } | { name: "alerts" } | { name: "admin" };
+type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "memory" } | { name: "alerts" } | { name: "admin" } | { name: "check"; id: string };
 
 export default function Portal() {
   const [s, setS] = useState<Session | null>(() => {
@@ -24,46 +24,108 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const go = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const [step, setStep] = useState<"password" | "setup" | "code" | "recovery">("password");
+  const [challenge, setChallenge] = useState("");
+  const [code, setCode] = useState("");
+  const [key, setKey] = useState<{ secret: string; uri: string } | null>(null);
+  const [saved, setSaved] = useState<{ session: Session; codes: string[] } | null>(null);
+  const session = (r: LoginResult): Session => ({ token: r.token ?? "", name: r.analyst?.name ?? "", org: r.analyst?.org ?? "", role: r.analyst?.role ?? "" });
+  const run = async (f: () => Promise<void>, fallback: string) => {
     setBusy(true);
     setErr("");
-    try {
-      const r = await api.login(email, pw);
-      onIn({ token: r.token, name: r.analyst.name, org: r.analyst.org, role: r.analyst.role ?? "" });
-    } catch {
-      setErr("Wrong email or password.");
-    } finally {
-      setBusy(false);
-    }
+    try { await f(); } catch (e) { setErr((e as Error).message || fallback); } finally { setBusy(false); }
   };
+  const password = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(async () => {
+      let r: LoginResult;
+      try { r = await api.login(email, pw); } catch { throw new Error("Wrong email or password."); }
+      if (r.token) return onIn(session(r));
+      setChallenge(r.challenge ?? "");
+      setCode("");
+      if (r.step === "setup") setKey(await api.twofaStart(r.challenge ?? ""));
+      setStep(r.step === "setup" ? "setup" : "code");
+    }, "Could not sign in.");
+  };
+  const second = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(async () => {
+      if (step === "setup") {
+        const r = await api.twofaSetup(challenge, code);
+        setSaved({ session: session(r), codes: r.recovery_codes ?? [] });
+        setStep("recovery");
+      } else {
+        onIn(session(await api.twofaVerify(challenge, code)));
+      }
+    }, "That code did not work.");
+  };
+  const grouped = (key?.secret.match(/.{1,4}/g) ?? []).join(" ");
   return (
     <div className="gate">
       <aside className="gate-art">
         <a className="brand" href="/"><Logo /><span>Check<b>Am</b> <small>Intel</small></span></a>
         <h1>See the campaign,<br />not just the message.</h1>
-        <p>Citizen checks, scam reports and public alerts, linked by the agents into campaigns you can act on. Every link carries its evidence.</p>
+        <p>Citizen checks, scam reports and public alerts, linked into campaigns you can act on. Every link carries its evidence.</p>
         <ul className="gate-points">
           <li>Scam reports and checks linked into campaigns you can act on</li>
           <li>Every link shows the evidence behind it</li>
           <li>Public alerts are signed before they go out</li>
         </ul>
       </aside>
-      <form className="gate-form" onSubmit={go}>
-        <h2>Analyst sign-in</h2>
-        <p className="muted small">Accounts are created by an administrator for verified fraud, CERT and fact-checking teams.</p>
-        <label className="field"><span>Work email</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required /></label>
-        <label className="field"><span>Password</span><input type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" required /></label>
-        <button className="primary" disabled={busy}>{busy ? "Signing in" : "Sign in"}</button>
-        {err && <p className="error">{err}</p>}
-        <a className="link small" href="/">← Back to CheckAm</a>
-      </form>
+      {step === "password" && (
+        <form className="gate-form" onSubmit={password}>
+          <h2>Analyst sign-in</h2>
+          <p className="muted small">Accounts are created by an administrator for verified fraud, CERT and fact-checking teams.</p>
+          <label className="field"><span>Work email</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required /></label>
+          <label className="field"><span>Password</span><input type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="current-password" required /></label>
+          <button className="primary" disabled={busy}>{busy ? "Signing in" : "Sign in"}</button>
+          {err && <p className="error" role="alert">{err}</p>}
+          <a className="link small" href="/">← Back to CheckAm</a>
+        </form>
+      )}
+      {step === "setup" && (
+        <form className="gate-form" onSubmit={second}>
+          <h2>Set up two-step sign-in</h2>
+          <p className="muted small">This account can change and delete things, so a password alone is not enough. Add CheckAm to an authenticator app once (Google Authenticator, Microsoft Authenticator, Authy or 1Password).</p>
+          <ol className="setup-steps">
+            <li>On your phone, open the app and choose to add an account with a setup key. Or, if you are on your phone now, <a href={key?.uri}>tap here to open the app</a>.</li>
+            <li>Type this key. Spaces do not matter:<div className="setup-key mono" aria-label="Setup key">{grouped}</div>
+              <button type="button" className="link small" onClick={() => navigator.clipboard?.writeText(key?.secret ?? "")}>Copy the key</button></li>
+            <li>Type the 6-digit code the app now shows:</li>
+          </ol>
+          <label className="field"><span>6-digit code</span><input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" maxLength={7} required /></label>
+          <button className="primary" disabled={busy || code.replace(/\s/g, "").length !== 6}>{busy ? "Checking" : "Confirm and continue"}</button>
+          {err && <p className="error" role="alert">{err}</p>}
+          <button type="button" className="link small" onClick={() => { setStep("password"); setErr(""); setPw(""); }}>← Start again</button>
+        </form>
+      )}
+      {step === "code" && (
+        <form className="gate-form" onSubmit={second}>
+          <h2>Enter your code</h2>
+          <p className="muted small">Open your authenticator app and type the 6-digit code for CheckAm. Lost your phone? Type one of your recovery codes instead (like a1b2-c3d4). Each works once.</p>
+          <label className="field"><span>Code</span><input value={code} onChange={(e) => setCode(e.target.value)} autoComplete="one-time-code" maxLength={9} required autoFocus /></label>
+          <button className="primary" disabled={busy || code.trim().length < 6}>{busy ? "Checking" : "Sign in"}</button>
+          {err && <p className="error" role="alert">{err}</p>}
+          <button type="button" className="link small" onClick={() => { setStep("password"); setErr(""); setPw(""); }}>← Back</button>
+        </form>
+      )}
+      {step === "recovery" && saved && (
+        <div className="gate-form">
+          <h2>Save your recovery codes</h2>
+          <p className="muted small">If you lose your phone, each of these signs you in once. They are shown only now. Store them somewhere safe, away from the phone (a password manager is ideal).</p>
+          <ul className="recovery mono">{saved.codes.map((c) => <li key={c}>{c}</li>)}</ul>
+          <button type="button" className="ghost" onClick={() => navigator.clipboard?.writeText(saved.codes.join("\n"))}>Copy all</button>
+          <button type="button" className="primary" onClick={() => onIn(saved.session)}>I have saved them, continue</button>
+        </div>
+      )}
     </div>
   );
 }
 
 function Desk({ s, out }: { s: Session; out: () => void }) {
   const [view, setView] = useState<View>({ name: "overview" });
+  const [toast, setToast] = useState("");
+  const say = (m: string) => { setToast(m); window.clearTimeout((say as unknown as { t?: number }).t); (say as unknown as { t?: number }).t = window.setTimeout(() => setToast(""), 8000); };
   const nav: [View["name"], string][] = [["overview", "Overview"], ["campaigns", "Campaigns"], ["checks", "Citizen checks"], ["memory", "Review & memory"], ["alerts", "Published alerts"], ...(s.role === "admin" ? [["admin", "Administration"] as [View["name"], string]] : [])];
   const guard = (p: Promise<any>) => p.catch((e) => { if (e.status === 401) out(); throw e; });
   return (
@@ -72,7 +134,7 @@ function Desk({ s, out }: { s: Session; out: () => void }) {
         <a className="brand" href="/"><Logo /><span>Check<b>Am</b> <small>Intel</small></span></a>
         <nav>
           {nav.map(([k, label]) => (
-            <button key={k} className={view.name === k || (k === "campaigns" && view.name === "dossier") ? "on" : ""} onClick={() => setView({ name: k } as View)}>{label}</button>
+            <button key={k} className={view.name === k || (k === "campaigns" && view.name === "dossier") || (k === "checks" && view.name === "check") ? "on" : ""} onClick={() => setView({ name: k } as View)}>{label}</button>
           ))}
         </nav>
         <div className="who"><b>{s.name}</b><span>{s.org}</span><button className="link small" onClick={out}>Sign out</button></div>
@@ -81,11 +143,13 @@ function Desk({ s, out }: { s: Session; out: () => void }) {
         {view.name === "overview" && <Overview token={s.token} guard={guard} open={(id) => setView({ name: "dossier", id })} />}
         {view.name === "campaigns" && <Campaigns token={s.token} guard={guard} open={(id) => setView({ name: "dossier", id })} />}
         {view.name === "dossier" && <Dossier token={s.token} guard={guard} id={view.id} back={() => setView({ name: "campaigns" })} />}
-        {view.name === "checks" && <Checks token={s.token} guard={guard} />}
-        {view.name === "memory" && <Memory token={s.token} guard={guard} />}
+        {view.name === "checks" && <Checks token={s.token} guard={guard} open={(id) => setView({ name: "check", id })} />}
+        {view.name === "check" && <CheckDetail token={s.token} guard={guard} id={view.id} say={say} back={() => setView({ name: "checks" })} openCampaign={(id) => setView({ name: "dossier", id })} />}
+        {view.name === "memory" && <Memory token={s.token} guard={guard} say={say} open={(id) => setView({ name: "check", id })} />}
         {view.name === "alerts" && <PublishedAlerts />}
-        {view.name === "admin" && s.role === "admin" && <AdminView token={s.token} guard={guard} />}
+        {view.name === "admin" && s.role === "admin" && <AdminView token={s.token} guard={guard} notify={say} />}
       </main>
+      {toast && <div className="toast" role="status" aria-live="polite"><span>{toast}</span><button className="link" onClick={() => setToast("")} aria-label="Dismiss">×</button></div>}
     </div>
   );
 }
@@ -338,22 +402,25 @@ function Dossier({ token, guard, id, back }: { token: string; guard: G; id: stri
   );
 }
 
-function Checks({ token, guard }: { token: string; guard: G }) {
+function Checks({ token, guard, open }: { token: string; guard: G; open: (id: string) => void }) {
   const [rows, setRows] = useState<any[] | null>(null);
   useEffect(() => { guard(api.checks(token)).then((r) => setRows(r.checks)).catch(() => {}); }, [token]);
   return (
     <>
-      <header className="pane-head"><h1>Citizen checks</h1><p className="muted">Stored without the person's number. Numbers inside messages appear only as codes.</p></header>
+      <header className="pane-head"><h1>Citizen checks</h1><p className="muted">Stored without the person's number. Numbers inside messages appear only as codes. Click a check to see everything held about it.</p></header>
       <section className="card wide flat">
         {!rows ? <p className="muted">Loading…</p> : (
-          <table className="tbl">
-            <thead><tr><th>When</th><th>Verdict</th><th>Message (masked)</th><th>Numbers</th><th>Campaign</th><th>Run</th></tr></thead>
-            <tbody>{rows.map((c) => (
-              <tr key={c.id}><td className="mono">{c.created.slice(0, 16).replace("T", " ")}</td><td><span className={`chip v-${c.verdict}`}>{VLABEL[c.verdict]}</span></td>
-                <td className="clip">{c.masked_text}</td><td className="mono">{c.numbers.join(" ") || "–"}</td><td className="mono">{c.campaign_id ? c.campaign_id.slice(-6) : "–"}</td>
-                <td className="mono"><a href={`/traces/${c.run_id}`} target="_blank" rel="noreferrer">{c.run_id}</a></td></tr>
-            ))}</tbody>
-          </table>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead><tr><th>When</th><th>Verdict</th><th>Message (masked)</th><th>Numbers</th><th>Campaign</th><th /></tr></thead>
+              <tbody>{rows.map((c) => (
+                <tr key={c.id} tabIndex={0} onClick={() => open(c.id)} onKeyDown={(e) => { if (e.key === "Enter") open(c.id); }} title="Open this check">
+                  <td className="mono">{c.created.slice(0, 16).replace("T", " ")}</td><td><span className={`chip v-${c.verdict}`}>{VLABEL[c.verdict]}</span></td>
+                  <td className="clip">{c.masked_text}</td><td className="mono">{c.numbers.join(" ") || "–"}</td><td className="mono">{c.campaign_id ? c.campaign_id.slice(-6) : "–"}</td>
+                  <td className="go">Open ›</td></tr>
+              ))}</tbody>
+            </table>
+          </div>
         )}
       </section>
     </>
@@ -362,57 +429,121 @@ function Checks({ token, guard }: { token: string; guard: G }) {
 
 // people's "this looks wrong" waits here; what an analyst confirms becomes memory (Meterless H-MEM) and
 // later checks of similar messages recall it as evidence
-function Memory({ token, guard }: { token: string; guard: G }) {
+function Memory({ token, guard, say, open }: { token: string; guard: G; say: (m: string) => void; open: (id: string) => void }) {
   const [flags, setFlags] = useState<any[] | null>(null);
   const [mem, setMem] = useState<{ health: any; memories: any[] } | null>(null);
   const [note, setNote] = useState<Record<string, string>>({});
-  const [msg, setMsg] = useState("");
   const load = () => {
     guard(api.flags(token)).then((r) => setFlags(r.flags)).catch(() => setFlags([]));
     guard(api.memory(token)).then(setMem).catch(() => setMem(null));
   };
   useEffect(load, [token]);
   const act = (f: any, action: "confirm" | "dismiss", verdict = "") =>
-    guard(api.review(token, f.id, action, verdict, note[f.id] ?? "")).then(() => { setMsg(action === "confirm" ? "Saved to memory. Similar checks will recall it." : "Dismissed."); load(); }).catch(() => setMsg("Could not save."));
-  const sleep = () => guard(api.sleep(token)).then((r) => { setMsg(`Sleep cycle done: ${r.report.consolidated} consolidated, ${r.report.archived} archived.`); load(); }).catch(() => setMsg("Memory engine unavailable."));
+    guard(api.review(token, f.id, action, verdict, note[f.id] ?? "")).then(() => { say(action === "confirm" ? "Saved. CheckAm will remember this and recall it on similar messages." : "Report dismissed. The answer stays as it was."); load(); }).catch((e) => say(e.message || "Could not save."));
+  const sleep = () => guard(api.sleep(token)).then((r) => { say(`Memory settled: ${r.report.consolidated} moved to long-term memory, ${r.report.archived} faded.`); load(); }).catch(() => say("The memory engine is not reachable."));
   return (
     <>
       <header className="pane-head"><h1>Review & memory</h1>
-        <p className="muted">When people say an answer looks wrong, it waits here. What you confirm is remembered by the Meterless H-MEM engine, and the agents recall it on similar messages. Nothing a citizen sends changes an answer by itself.</p></header>
-      {msg && <p className="note">{msg}</p>}
+        <p className="muted">When someone says an answer looks wrong, it waits here. Open a report to see the whole check, then confirm what it really was. CheckAm remembers what you confirm and recalls it on similar messages. Nothing a citizen sends changes an answer by itself.</p></header>
       <section className="card wide flat">
         <h3>Waiting for review {flags ? `(${flags.length})` : ""}</h3>
         {!flags ? <p className="muted">Loading…</p> : flags.length === 0 ? <p className="muted">Nothing waiting.</p> : (
-          <table className="tbl">
-            <thead><tr><th>When</th><th>Answer given</th><th>Person says</th><th>Message (masked)</th><th>Note</th><th>Decide</th></tr></thead>
-            <tbody>{flags.map((f) => (
-              <tr key={f.id}><td className="mono">{f.created.slice(0, 16).replace("T", " ")}</td>
-                <td><span className={`chip v-${f.verdict}`}>{VLABEL[f.verdict] ?? f.verdict}</span></td>
-                <td>{VLABEL[f.suggested] ?? "Not sure"}</td><td className="clip">{f.masked_text}</td>
-                <td><input className="mini" defaultValue={f.note} onChange={(e) => setNote({ ...note, [f.id]: e.target.value })} aria-label="Analyst note" /></td>
-                <td className="actions">
-                  <button className="ghost small" onClick={() => act(f, "confirm", "scam")}>Scam</button>
-                  <button className="ghost small" onClick={() => act(f, "confirm", "looks_genuine")}>Genuine</button>
-                  <button className="link small" onClick={() => act(f, "dismiss")}>Dismiss</button>
-                </td></tr>
-            ))}</tbody>
-          </table>
+          <ul className="flag-list">{flags.map((f) => (
+            <li key={f.id} className="flag-card" tabIndex={0} role="button" title="Open the whole check" onClick={() => open(f.check_id)} onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) open(f.check_id); }}>
+              <div className="flag-meta">
+                <span className="mono">{f.created.slice(0, 16).replace("T", " ")}</span>
+                <span>Answer given <span className={`chip v-${f.verdict}`}>{VLABEL[f.verdict] ?? f.verdict}</span></span>
+                <span>Person says <b>{VLABEL[f.suggested] ?? "not sure"}</b></span>
+                <span className="go">Open ›</span>
+              </div>
+              <p className="flag-text">{f.masked_text}</p>
+              <div className="flag-actions" onClick={(e) => e.stopPropagation()}>
+                <input className="mini" defaultValue={f.note} placeholder="Your note (optional)" onChange={(e) => setNote({ ...note, [f.id]: e.target.value })} aria-label="Analyst note" />
+                <button className="ghost small" title="Confirm this was a scam. CheckAm remembers it and warns on similar messages." onClick={() => act(f, "confirm", "scam")}>It is a scam</button>
+                <button className="ghost small" title="Confirm this was genuine. CheckAm remembers it so similar real messages are not flagged." onClick={() => act(f, "confirm", "looks_genuine")}>It is genuine</button>
+                <button className="link small" title="The report is mistaken. Close it and keep the answer as it was." onClick={() => act(f, "dismiss")}>Dismiss</button>
+              </div>
+            </li>
+          ))}</ul>
         )}
       </section>
       <section className="card wide flat">
         <h3>What CheckAm remembers {mem?.health ? `(${mem.health.memories}, ${mem.health.long_term} settled)` : ""}</h3>
-        <p className="muted small">Corrections start in working memory; the daily sleep cycle settles the ones that keep proving right and lets one-offs fade. Every change is in the H-MEM trust ledger.</p>
-        <button className="ghost small" onClick={sleep}>Run the sleep cycle now</button>
-        {!mem ? <p className="muted">Memory engine unavailable.</p> : (
-          <table className="tbl">
-            <thead><tr><th>Kind</th><th>Verdict</th><th>Layer</th><th>What was learned</th><th>From</th></tr></thead>
-            <tbody>{mem.memories.slice().reverse().map((m) => (
-              <tr key={m.id}><td>{m.kind}</td><td><span className={`chip v-${m.verdict}`}>{VLABEL[m.verdict] ?? m.verdict}</span></td>
-                <td className="mono">{m.layer}</td><td className="clip">{m.content}</td><td className="mono small">{m.source}</td></tr>
-            ))}</tbody>
-          </table>
+        <p className="muted small">A correction starts in short-term memory. Once a day the memory settles the ones that keep proving right into long-term memory and lets one-offs fade. Every change is recorded.</p>
+        <button className="ghost small" title="Runs the daily settling now. Corrections that keep proving right move to long-term memory; one-off ones fade. It also runs by itself once a day, so you rarely need this." onClick={sleep}>Settle memory now</button>
+        {!mem ? <p className="muted">The memory engine is not reachable.</p> : (
+          <div className="tbl-wrap">
+            <table className="tbl static">
+              <thead><tr><th>Kind</th><th>Verdict</th><th>Memory</th><th>What was learned</th><th>From</th></tr></thead>
+              <tbody>{mem.memories.slice().reverse().map((m) => (
+                <tr key={m.id}><td>{m.kind}</td><td><span className={`chip v-${m.verdict}`}>{VLABEL[m.verdict] ?? m.verdict}</span></td>
+                  <td className="mono">{m.layer}</td><td className="clip">{m.content}</td><td className="mono small">{m.source}</td></tr>
+              ))}</tbody>
+            </table>
+          </div>
         )}
       </section>
+    </>
+  );
+}
+
+function CheckDetail({ token, guard, id, say, back, openCampaign }: { token: string; guard: G; id: string; say: (m: string) => void; back: () => void; openCampaign: (id: string) => void }) {
+  const [d, setD] = useState<any>(null);
+  const [gone, setGone] = useState(false);
+  const [note, setNote] = useState("");
+  const load = () => guard(api.checkDetail(token, id)).then((x) => { setD(x); setGone(false); }).catch(() => setGone(true));
+  useEffect(() => { setD(null); setNote(""); load(); }, [id]);
+  if (gone) return <><button className="link" onClick={back}>← Back</button><p className="muted">This check is no longer in the live database. It may have been archived or deleted.</p></>;
+  if (!d) return <p className="muted">Loading…</p>;
+  const c = d.check;
+  const openFlags = d.flags.filter((f: any) => f.status === "open");
+  const decide = (verdict: string) => {
+    const call = openFlags.length ? api.review(token, openFlags[0].id, "confirm", verdict, note) : api.correct(token, c.id, verdict, note);
+    guard(call).then(() => { say("Saved. CheckAm will remember this and recall it on similar messages."); setNote(""); load(); }).catch((e) => say(e.message || "Could not save."));
+  };
+  const dismiss = () => guard(api.review(token, openFlags[0].id, "dismiss", "", note)).then(() => { say("Report dismissed. The answer stays as it was."); load(); }).catch((e) => say(e.message || "Could not save."));
+  const facts: [string, React.ReactNode][] = [
+    ["Checked", c.created.slice(0, 16).replace("T", " ")],
+    ["Answer given", <span className={`chip v-${c.verdict}`}>{VLABEL[c.verdict] ?? c.verdict}</span>],
+    ["Kind of scam", c.scheme || (c.scam_types || []).join(", ") || "–"],
+    ["Language", c.language || "–"], ["Arrived as", c.channel || "–"], ["Operator", c.operator || "–"],
+    ["Amount (FCFA)", c.amount_fcfa ?? "–"],
+    ["Numbers (codes)", <span className="mono">{(c.numbers || []).join(" ") || "–"}</span>],
+    ["Links", <span className="mono">{(c.links || []).join(" ") || "–"}</span>],
+    ["Campaign", c.campaign_id ? <button className="link" onClick={() => openCampaign(c.campaign_id)}>Open campaign {String(c.campaign_id).slice(-6)} ›</button> : "–"],
+  ];
+  return (
+    <>
+      <button className="link" onClick={back}>← Back</button>
+      <header className="pane-head"><h1>Check {c.id}</h1><p className="muted">Everything CheckAm holds about this check. The message is stored with numbers as codes.</p></header>
+      <section className="card wide">
+        <h3>Message (masked)</h3>
+        <blockquote className="msg-quote">{c.masked_text}</blockquote>
+      </section>
+      <section className="card wide">
+        <h3>What was found</h3>
+        <dl className="detail-grid">{facts.map(([k, v]) => (<div key={k}><dt>{k}</dt><dd>{v}</dd></div>))}</dl>
+        {d.receipt && <p className="small"><a href={`/v/${c.id}`} target="_blank" rel="noreferrer">Open the signed answer people see when it is shared ›</a></p>}
+      </section>
+      <section className="card wide">
+        <h3>Your decision</h3>
+        {openFlags.length > 0 ? <p className="muted small">{openFlags.length === 1 ? "Someone reported this answer as wrong" : `${openFlags.length} people reported this answer as wrong`}
+          {openFlags[0].suggested ? `, saying it is ${VLABEL[openFlags[0].suggested] ?? "not sure"}` : ""}.</p>
+          : <p className="muted small">No one has reported this answer. You can still correct it if you know better.</p>}
+        <input className="mini wide-input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Why (optional). Kept with the correction." aria-label="Note" />
+        <div className="row">
+          <button className="ghost" title="Confirm this was a scam. CheckAm remembers it and warns on similar messages." onClick={() => decide("scam")}>It is a scam</button>
+          <button className="ghost" title="Confirm this was genuine. CheckAm remembers it so similar real messages are not flagged." onClick={() => decide("looks_genuine")}>It is genuine</button>
+          {openFlags.length > 0 && <button className="link" title="The report is mistaken. Close it and keep the answer as it was." onClick={dismiss}>Dismiss the report</button>}
+        </div>
+        {d.flags.length > 0 && (<><h4>Reports on this check</h4><ul className="adm-list">{d.flags.map((f: any) => (
+          <li key={f.id}><span className="mono small">{f.created.slice(0, 16).replace("T", " ")}</span><span>says {VLABEL[f.suggested] ?? "not sure"}{f.note ? `: ${f.note}` : ""}</span><span className="muted small">{f.status}{f.reviewed_by ? ` by ${f.reviewed_by}` : ""}</span></li>
+        ))}</ul></>)}
+      </section>
+      <details className="card wide how-checked">
+        <summary>Every step the agents took ({d.trace.length})</summary>
+        {d.trace.length ? <TraceView lines={d.trace} /> : <p className="muted small">The step log for this check is no longer available.</p>}
+      </details>
     </>
   );
 }
@@ -443,7 +574,7 @@ const SETTING_LABELS: [string, string, string][] = [
   ["alert_show_days", "Show an alert on the public page (days)", "Older alerts leave the page but stay in the signed log, so their proof still verifies."],
 ];
 
-function AdminView({ token, guard }: { token: string; guard: G }) {
+function AdminView({ token, guard, notify }: { token: string; guard: G; notify: (m: string) => void }) {
   const [ov, setOv] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [form, setForm] = useState<Record<string, number>>({});
@@ -452,13 +583,15 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
   const [delId, setDelId] = useState("");
   const [people, setPeople] = useState<any[]>([]);
   const [np, setNp] = useState({ email: "", name: "", org: "", password: "" });
+  const [editing, setEditing] = useState<string | null>(null);
+  const [ed, setEd] = useState({ name: "", org: "", password: "" });
   const load = () => {
     guard(api.adminOverview(token)).then((x) => { setOv(x); setForm(x.settings); }).catch(() => setMsg("Could not load. Are you signed in as the administrator?"));
     guard(api.adminAlerts(token)).then((x) => setAlerts(x.alerts)).catch(() => {});
     guard(api.adminAnalysts(token)).then((x) => setPeople(x.analysts)).catch(() => {});
   };
   useEffect(load, [token]);
-  const say = (m: string) => { setMsg(m); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const say = (m: string) => { setMsg(m); notify(m); };
   const saveSettings = () => guard(api.adminSettings(token, form)).then(() => { say("Settings saved."); load(); }).catch((e) => say(e.message || "Could not save"));
   const dry = () => guard(api.adminRetention(token, true)).then(setPreview).catch((e) => say(e.message));
   const run = () => {
@@ -476,6 +609,11 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
     guard(api.adminDeleteCheck(token, delId.trim())).then((r) => { say(`Deleted: ${r.checks} check, ${r.receipts} signed answer, ${r.flags} flags.`); setDelId(""); load(); }).catch((e) => say(e.message || "Could not delete"));
   };
   const addPerson = () => guard(api.adminAddAnalyst(token, np)).then(() => { say(`Account created for ${np.email}.`); setNp({ email: "", name: "", org: "", password: "" }); load(); }).catch((e) => say(e.message || "Could not create the account (password needs 12 characters or more)"));
+  const saveEdit = (email: string) => {
+    const body: Record<string, string> = { email, name: ed.name, org: ed.org };
+    if (ed.password) body.password = ed.password;
+    guard(api.adminUpdateAnalyst(token, body)).then(() => { say(ed.password ? `Updated ${email} and changed the password.` : `Updated ${email}.`); setEditing(null); load(); }).catch((e) => say(e.message || "Could not update (a new password needs 12 characters or more)."));
+  };
   const removePerson = (email: string) => {
     if (!window.confirm(`Remove the account ${email}? They will no longer be able to sign in.`)) return;
     guard(api.adminRemoveAnalyst(token, email)).then(() => { say(`Removed ${email}.`); load(); }).catch((e) => say(e.message));
@@ -517,9 +655,9 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
           ))}
         </div>
         <div className="row">
-          <button className="primary inline" onClick={saveSettings}>Save settings</button>
-          <button className="ghost" onClick={dry}>Preview the cleanup</button>
-          <button className="ghost danger" onClick={run}>Run the cleanup now</button>
+          <button className="primary inline" title="Save the retention periods above" onClick={saveSettings}>Save settings</button>
+          <button className="ghost" title="Shows what the cleanup would archive and delete, without changing anything" onClick={dry}>Preview the cleanup</button>
+          <button className="ghost danger" title="Archives and deletes everything older than the keep period, now. It also runs by itself every day." onClick={run}>Run the cleanup now</button>
         </div>
         {preview && <p className="mono small">Would archive {preview.checks_due} checks. Would remove: {Object.entries(preview.would_delete).map(([k, v]) => `${v} ${k}`).join(", ")}. Nothing has changed yet.</p>}
         {ov.last_retention && <p className="muted small">Last cleanup {ov.last_retention.at?.slice(0, 16)} by {ov.last_retention.by}: {ov.last_retention.archived ?? 0} archived, {ov.last_retention.deleted?.checks ?? 0} removed.</p>}
@@ -537,7 +675,7 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
         <ul className="adm-list">{alerts.map((a) => (
           <li key={a.id}>
             <span><b>{a.title}</b> <span className="muted small">{a.created.slice(0, 10)}{a.title_fr ? "" : " · no French title"}{a.hidden ? ` · taken down${a.reason ? `: ${a.reason}` : ""}` : ""}</span></span>
-            {a.hidden ? <button className="link small" onClick={() => restore(a)}>Restore</button> : <button className="link small" onClick={() => retract(a)}>Take down</button>}
+            {a.hidden ? <button className="link small" title="Show this alert on the public page again" onClick={() => restore(a)}>Restore</button> : <button className="link small" title="Remove this alert from the public page. The signed record stays." onClick={() => retract(a)}>Take down</button>}
           </li>
         ))}</ul>
       </section>
@@ -545,8 +683,22 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
       <section className="card wide">
         <h3>Accounts</h3>
         <ul className="adm-list">{people.map((p) => (
-          <li key={p.email}><span><b>{p.name}</b> <span className="muted small">{p.email} · {p.org || "no organisation"} · {p.role}</span></span>
-            {p.role === "admin" ? <span className="muted small">set on the host</span> : <button className="link small" onClick={() => removePerson(p.email)}>Remove</button>}</li>
+          <li key={p.email} className="acct">
+            <span><b>{p.name}</b> <span className="muted small">{p.email} · {p.org || "no organisation"} · {p.role}</span></span>
+            <span className="acct-actions">
+              <button className="link small" title="Change the name, the organisation or the password" onClick={() => { setEditing(editing === p.email ? null : p.email); setEd({ name: p.name, org: p.org || "", password: "" }); }}>{editing === p.email ? "Close" : "Edit"}</button>
+              {p.role === "admin" ? <span className="muted small">set on the host</span> : <button className="link small" title="Remove this account. They can no longer sign in." onClick={() => removePerson(p.email)}>Remove</button>}
+            </span>
+            {editing === p.email && (
+              <div className="acct-edit">
+                <label className="field"><span>Name</span><input value={ed.name} onChange={(e) => setEd({ ...ed, name: e.target.value })} /></label>
+                <label className="field"><span>Organisation</span><input value={ed.org} onChange={(e) => setEd({ ...ed, org: e.target.value })} /></label>
+                <label className="field"><span>New password (leave empty to keep the current one)</span><input type="password" value={ed.password} onChange={(e) => setEd({ ...ed, password: e.target.value })} autoComplete="new-password" /></label>
+                <button className="primary inline" disabled={!ed.name || (ed.password.length > 0 && ed.password.length < 12)} onClick={() => saveEdit(p.email)}>Save changes</button>
+                {ed.password.length > 0 && ed.password.length < 12 && <small className="muted">{ed.password.length} of 12 characters</small>}
+              </div>
+            )}
+          </li>
         ))}</ul>
         <h4>Add an analyst</h4>
         <div className="adm-form">
@@ -556,6 +708,7 @@ function AdminView({ token, guard }: { token: string; guard: G }) {
           <label className="field"><span>Password (12 characters or more)</span><input type="password" value={np.password} onChange={(e) => setNp({ ...np, password: e.target.value })} autoComplete="new-password" /></label>
         </div>
         <button className="primary inline" disabled={!np.email || !np.name || np.password.length < 12} onClick={addPerson}>Create account</button>
+        {(!np.email || !np.name || np.password.length < 12) && <p className="muted small">{!np.email ? "Enter the work email." : !np.name ? "Enter the name." : `The password needs 12 characters or more (${np.password.length} so far).`}</p>}
       </section>
 
       <section className="card wide">

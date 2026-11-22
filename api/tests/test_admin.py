@@ -16,6 +16,9 @@ client = TestClient(app)
 def token(email: str, password: str, role: str) -> dict:
     store.add_analyst(email, password, email.split("@")[0], "Test", role=role)
     security._hits.clear()
+    if role == "admin":
+        # an administrator signs in with a code as well (tested in test_totp.py); here the session is issued directly
+        return {"Authorization": "Bearer " + store.make_token(email)}
     r = client.post("/auth/login", json={"email": email, "password": password})
     assert r.status_code == 200, r.text
     return {"Authorization": "Bearer " + r.json()["token"]}
@@ -54,14 +57,14 @@ def test_settings_are_checked_and_logged(admin):
     r = client.post("/admin/settings", json={"check_keep_days": 400, "alert_show_days": 60}, headers=admin)
     assert r.status_code == 200 and r.json()["settings"]["check_keep_days"] == 400
     assert any(a["action"] == "settings" for a in store.admin_audit(10))
-    client.post("/admin/settings", json={"check_keep_days": 365, "alert_show_days": 90}, headers=admin)
+    client.post("/admin/settings", json={"check_keep_days": 730, "alert_show_days": 90}, headers=admin)
 
 
 def test_a_dry_run_changes_nothing_and_a_real_run_archives_then_deletes(admin, monkeypatch, tmp_path):
     monkeypatch.setattr(retention, "archive_dir", lambda: tmp_path)
     monkeypatch.setattr(retention.world, "forget", lambda *a, **k: {"observations": 0, "edges": 0, "entities": 0})
-    put_check("C-0ld00001", 500)
-    put_check("C-0ld00002", 500, verdict="suspicious", scheme="job")
+    put_check("C-0ld00001", 900)
+    put_check("C-0ld00002", 900, verdict="suspicious", scheme="job")
     put_check("C-ne000001", 3)
     before = store.check_stats()["total"]
 
@@ -85,7 +88,7 @@ def test_a_dry_run_changes_nothing_and_a_real_run_archives_then_deletes(admin, m
 
 def test_archives_past_their_time_are_deleted(monkeypatch, tmp_path):
     monkeypatch.setattr(retention, "archive_dir", lambda: tmp_path)
-    old, recent = tmp_path / "checks-2019-01.jsonl.gz", tmp_path / f"checks-{datetime.now(timezone.utc):%Y-%m}.jsonl.gz"
+    old, recent = tmp_path / "checks-2010-01.jsonl.gz", tmp_path / f"checks-{datetime.now(timezone.utc):%Y-%m}.jsonl.gz"
     for f in (old, recent):
         f.write_bytes(b"x")
     gone = retention._expire_archives(store.settings())
@@ -159,3 +162,29 @@ def test_the_archive_sits_beside_the_database_so_it_survives_a_redeploy():
     from checkam import config
     if not config.env("CHECKAM_ARCHIVE_DIR"):
         assert config.ARCHIVE_DIR == config.DB_PATH.parent / "archive"
+
+
+def test_an_analyst_can_open_the_whole_story_of_a_check(plain):
+    put_check("C-5ee0de01", 1, verdict="suspicious", scheme="job")
+    store.add_flag("C-5ee0de01", "scam", "looks like the fake job from last week")
+    assert client.get("/analyst/checks/C-5ee0de01").status_code == 401
+    r = client.get("/analyst/checks/C-5ee0de01", headers=plain)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["check"]["id"] == "C-5ee0de01" and body["check"]["scheme"] == "job"
+    assert body["flags"] and body["flags"][0]["suggested"] == "scam" and body["flags"][0]["status"] == "open"
+    assert isinstance(body["trace"], list)
+    assert client.get("/analyst/checks/C-00000000", headers=plain).status_code == 404
+
+
+def test_the_administrator_can_change_a_password_and_the_old_one_stops_working(admin):
+    store.add_analyst("old.judge@example.org", "the-old-password-1", "Judge", "Hackathon", role="analyst")
+    r = client.post("/admin/analysts/update", json={"email": "old.judge@example.org", "org": "CheckAm", "password": "a-brand-new-password-2"}, headers=admin)
+    assert r.status_code == 200
+    security._hits.clear()
+    assert client.post("/auth/login", json={"email": "old.judge@example.org", "password": "the-old-password-1"}).status_code == 401
+    ok = client.post("/auth/login", json={"email": "old.judge@example.org", "password": "a-brand-new-password-2"})
+    assert ok.status_code == 200 and ok.json()["analyst"]["org"] == "CheckAm" and ok.json()["analyst"]["role"] == "analyst"
+    assert client.post("/admin/analysts/update", json={"email": "old.judge@example.org", "password": "short"}, headers=admin).status_code == 422
+    assert client.post("/admin/analysts/update", json={"email": "nobody@example.org", "name": "X"}, headers=admin).status_code == 404
+    assert any(a["action"] == "update_analyst" and "password changed" in a["detail"] for a in store.admin_audit(10))

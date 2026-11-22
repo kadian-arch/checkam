@@ -16,7 +16,7 @@ WEB = config.ROOT / "web" / "dist"
 
 
 def test_old_records_are_deleted_and_open_flags_are_kept():
-    old = (datetime.now(timezone.utc) - timedelta(days=400)).isoformat(timespec="seconds")
+    old = (datetime.now(timezone.utc) - timedelta(days=800)).isoformat(timespec="seconds")
     new = store.now()
     c = store.conn()
     with store._lock:
@@ -91,3 +91,11 @@ def test_nothing_leaves_for_the_ai_service_with_a_real_number_or_code(monkeypatc
     blob = " ".join(sent)
     assert "677 00 11 22" not in blob and "677001122" not in blob and "4821" not in blob
     assert "[PHONE:" in blob
+
+
+def test_the_page_is_allowed_to_use_the_microphone_for_speech_input():
+    """The header once said microphone=(), which told every browser the page may never use it: the Speak it button
+    failed with 'blocked' and never even asked."""
+    policy = client.get("/health").headers["permissions-policy"]
+    assert "microphone=(self)" in policy
+    assert "camera=()" in policy and "geolocation=()" in policy
