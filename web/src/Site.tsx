@@ -103,7 +103,7 @@ export default function Site() {
       </header>
 
       <main>
-      {onPrivacy ? <PrivacyPage t={t} /> : (<>
+      {onPrivacy ? <PrivacyPage t={t} keep={stats?.retention?.keep_months ?? 12} archive={stats?.retention?.archive_months ?? 36} /> : (<>
         <Hero t={t} lang={lang} shared={shared} />
         <Stats t={t} stats={stats} />
         <RadarStrip t={t} radar={stats?.radar} />
@@ -377,7 +377,7 @@ function How({ t }: { t: Dict }) {
   );
 }
 
-function PrivacyPage({ t }: { t: Dict }) {
+function PrivacyPage({ t, keep, archive }: { t: Dict; keep: number; archive: number }) {
   const parts = [1, 2, 3, 4, 5] as const;
   return (
     <section className="legal">
@@ -386,7 +386,7 @@ function PrivacyPage({ t }: { t: Dict }) {
       {parts.map((n) => (
         <div key={n}>
           <h2>{t[`privacy_h${n}` as keyof Dict] as string}</h2>
-          <p>{t[`privacy_p${n}` as keyof Dict] as string}</p>
+          <p>{fill((n === 4 && archive === 0 ? t.privacy_p4_none : t[`privacy_p${n}` as keyof Dict]) as string, { keep, archive })}</p>
         </div>
       ))}
       <p><a className="ghost" href="/">{t.privacy_back}</a></p>
@@ -407,7 +407,7 @@ function Alerts({ t, lang }: { t: Dict; lang: Lang }) {
         {alerts?.filter((a, i, all) => !a.campaign_id || all.findIndex((b) => b.campaign_id === a.campaign_id) === i).slice(0, 6).map((a) => (
           <article key={a.id} className="alert">
             <header><time>{a.created.slice(0, 10)}</time>{a.signature ? <span className="sig" title={a.signature}>✓ {t.verified}</span> : <span className="unsig">{t.not_signed}</span>}</header>
-            <h3>{a.title}</h3>
+            <h3>{(lang === "fr" && a.title_fr) || a.title}</h3>
             <p>{body(a)}</p>
             {a.numbers?.length > 0 && <footer>{a.numbers.map((n: string) => <code key={n}>{n}</code>)}</footer>}
           </article>

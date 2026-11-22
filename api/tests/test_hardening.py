@@ -68,6 +68,8 @@ def test_a_share_link_previews_with_its_verdict():
     assert "<title>CheckAm: Scam</title>" in page
     assert re.search(r'og:description" content="CheckAm found [^"]+', page)
     assert "<script" not in re.search(r'og:title" content="([^"]*)"', page).group(1)
+    fr = client.get(f"/v/{rid}", headers={"Accept-Language": "fr-FR"}).text
+    assert '<html lang="fr">' in fr and "<title>CheckAm : Arnaque</title>" in fr
     other = client.get("/v/C-00000000").text
     assert "<title>CheckAm</title>" in other  # an unknown answer keeps the plain page
 

@@ -35,6 +35,8 @@ DATA_DIR = Path(env("CHECKAM_DATA_DIR", str(ROOT / "data")))
 SAMPLE_DIR = DATA_DIR / "sample"
 LOG_DIR = Path(env("CHECKAM_LOG_DIR", str(ROOT / "logs")))
 DB_PATH = Path(env("CHECKAM_DB", str(DATA_DIR / "checkam.db")))
+# archives sit beside the database, so on the host they live on the persistent disk and survive a redeploy
+ARCHIVE_DIR = Path(env("CHECKAM_ARCHIVE_DIR", str(DB_PATH.parent / "archive")))
 
 ZETARIS_JDBC_URL = env("ZETARIS_JDBC_URL", "jdbc:zetaris:lightning@localhost:10000")
 ZETARIS_JDBC_JAR = env("ZETARIS_JDBC_JAR", str(ROOT.parent / "zetaris-platform" / "jdbc" / "ndp-jdbc-driver-2.4.3.1-7eff043-driver.jar"))

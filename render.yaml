@@ -33,6 +33,10 @@ services:
         sync: false
       - key: SCOUT_SECRET
         sync: false
+      - key: CHECKAM_ADMIN_EMAIL
+        sync: false
+      - key: CHECKAM_ADMIN_PASSWORD
+        sync: false
       - key: CHECKAM_JUDGE_EMAIL
         sync: false
       - key: CHECKAM_JUDGE_PASSWORD

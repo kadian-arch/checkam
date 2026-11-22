@@ -26,12 +26,14 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
   const [flagNote, setFlagNote] = useState("");
   const [acted, setActed] = useState("");
   const [after, setAfter] = useState<string[]>([]);
+  const [loadingAfter, setLoadingAfter] = useState(false);
   const pickActed = (a: string) => {
     setActed(a);
     if (a === "nothing") { setAfter([]); return; }
+    setLoadingAfter(true);
     const brands = ((card as unknown as { facts?: { brands?: string[] } }).facts?.brands) ?? [];
     api.afterAction({ acted: a, verdict: card.verdict, scheme: card.scheme ?? "", brands, why: card.why.map((w) => w.text), language: card.language })
-      .then((r) => setAfter(r.steps)).catch(() => setAfter([]));
+      .then((r) => setAfter(r.steps)).catch(() => setAfter([])).finally(() => setLoadingAfter(false));
   };
   const sendFlag = (suggested: string) =>
     api.flag(card.check_id, suggested, flagNote).then(() => setFlagged(true)).catch(() => setFlagged(true));
@@ -106,6 +108,7 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
                 <button key={a} type="button" aria-pressed={acted === a} className={acted === a ? "chip on" : "chip"} onClick={() => pickActed(a)}>{t[`acted_${a}` as keyof Dict] as string}</button>
               ))}
             </div>
+            {loadingAfter && <p className="muted small" role="status">{t.working_steps}</p>}
             {after.length > 0 && <ul className="do">{after.map((d) => <li key={d}>{d}</li>)}</ul>}
           </section>
         )}

@@ -256,6 +256,50 @@ export class WorldModel {
     return { changed: added + updated > 0, added, updated };
   }
 
+  // Forget what its owner no longer needs: one source's observations older than a date (or named ones), the links
+  // from them, and any entity of that source that nothing refers to any more. The audit keeps that it happened and
+  // how much, never the text. Other sources (the open dataset) are never touched.
+  forget(system: string, opts: { before?: string; ids?: string[] } = {}): { observations: number; edges: number; entities: number } {
+    const cut = opts.before ? iso(opts.before) : undefined;
+    const named = new Set(opts.ids ?? []);
+    const prefix = `observation:${system}:`;
+    const goneEntities = new Set<string>();
+    const goneRegistry: string[] = [];
+    for (const [ext, o] of Object.entries(this.s.observations)) {
+      const ent = this.s.entities[o.entityId];
+      if (!ent || !ent.id.startsWith(prefix)) continue;
+      const at = String((ent.attrs as Record<string, unknown>).at ?? ent.firstSeenAt);
+      if (named.has(ext) || (cut !== undefined && at < cut)) {
+        goneEntities.add(ent.id);
+        goneRegistry.push(ext);
+      }
+    }
+    let edges = 0;
+    for (const [id, e] of Object.entries(this.s.edges)) {
+      if (goneEntities.has(e.from) || goneEntities.has(e.to)) {
+        delete this.s.edges[id];
+        edges++;
+      }
+    }
+    for (const ext of goneRegistry) delete this.s.observations[ext];
+    for (const id of goneEntities) delete this.s.entities[id];
+    const referenced = new Set<string>();
+    for (const e of Object.values(this.s.edges)) {
+      referenced.add(e.from);
+      referenced.add(e.to);
+    }
+    let orphans = 0;
+    for (const [id, ent] of Object.entries(this.s.entities)) {
+      if (ent.source.kind === system && ent.type !== "observation" && !referenced.has(id)) {
+        delete this.s.entities[id];
+        orphans++;
+      }
+    }
+    if (goneEntities.size) this.log("forget", `${system}:${goneEntities.size}:${edges}:${orphans}`);
+    this.flush();
+    return { observations: goneEntities.size, edges, entities: orphans };
+  }
+
   entity(id: string): Entity | undefined {
     return this.s.entities[id];
   }

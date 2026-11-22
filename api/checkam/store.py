@@ -33,6 +33,11 @@ CREATE TABLE IF NOT EXISTS alerts (
   id TEXT PRIMARY KEY, created TEXT, published_by TEXT, campaign_id TEXT, title TEXT, body_en TEXT,
   body_fr TEXT, body_pcm TEXT, numbers TEXT, status TEXT, run_id TEXT
 );
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS monthly_stats (month TEXT, scheme TEXT, verdict TEXT, n INTEGER, PRIMARY KEY (month, scheme, verdict));
+CREATE TABLE IF NOT EXISTS alert_i18n (alert_id TEXT PRIMARY KEY, title_fr TEXT);
+CREATE TABLE IF NOT EXISTS alert_hidden (alert_id TEXT PRIMARY KEY, reason TEXT, at TEXT, by TEXT);
+CREATE TABLE IF NOT EXISTS admin_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, who TEXT, action TEXT, detail TEXT);
 """
 
 
@@ -147,6 +152,9 @@ def check_stats() -> dict:
     c = conn()
     total = c.execute("SELECT count(*) FROM checks").fetchone()[0]
     by = {r[0]: r[1] for r in c.execute("SELECT verdict, count(*) FROM checks GROUP BY verdict")}
+    for verdict, n in c.execute("SELECT verdict, sum(n) FROM monthly_stats GROUP BY verdict"):  # checks already archived
+        by[verdict] = by.get(verdict, 0) + (n or 0)
+        total += n or 0
     return {"total": total, "by_verdict": by}
 
 
@@ -283,22 +291,160 @@ def publish_alert(row: dict) -> dict:
     return row
 
 
-def alerts(limit: int = 50, oldest_first: bool = False) -> list[dict]:
-    """Public view: never includes who published (analyst emails stay private)."""
+def alerts(limit: int = 50, oldest_first: bool = False, display: bool = False) -> list[dict]:
+    """Public view: never includes who published (analyst emails stay private). display=True is the home-page list:
+    retracted alerts and alerts older than the display window are left out. The signed log (display=False) keeps all."""
     order = "ASC" if oldest_first else "DESC"
-    rows = conn().execute(f"SELECT * FROM alerts WHERE status='published' ORDER BY rowid {order} LIMIT ?", (limit,)).fetchall()
-    return [{k: (json.loads(r[k]) if k == "numbers" else r[k]) for k in PUBLIC_ALERT_FIELDS} for r in rows]
+    rows = conn().execute(f"SELECT * FROM alerts WHERE status='published' ORDER BY rowid {order}" + ("" if display else " LIMIT ?"),
+                          () if display else (limit,)).fetchall()
+    hidden = {r[0] for r in conn().execute("SELECT alert_id FROM alert_hidden")}
+    fr = {r[0]: r[1] for r in conn().execute("SELECT alert_id, title_fr FROM alert_i18n")}
+    cut = (datetime.now(timezone.utc) - timedelta(days=settings()["alert_show_days"])).isoformat(timespec="seconds") if display else ""
+    out = []
+    for r in rows:
+        if display and (r["id"] in hidden or r["created"] < cut):
+            continue
+        item = {k: (json.loads(r[k]) if k == "numbers" else r[k]) for k in PUBLIC_ALERT_FIELDS}
+        item["title_fr"] = fr.get(r["id"]) or ""
+        out.append(item)
+    return out[:limit]
 
 
-CHECK_KEEP_DAYS = 365   # a saved check (message with numbers as codes, verdict, scheme)
-ANSWER_KEEP_DAYS = 30   # the cache of finished answers that makes a repeated message instant
+def set_title_fr(alert_id: str, title_fr: str) -> None:
+    """The French title sits beside the signed record, not inside it: the signature covers the English title, and
+    adding a field to old signed alerts would break their proof."""
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO alert_i18n VALUES (?,?)", (alert_id, title_fr[:200]))
+        conn().commit()
+
+
+def alerts_missing_title_fr() -> list[dict]:
+    rows = conn().execute("SELECT a.id, a.title FROM alerts a LEFT JOIN alert_i18n i ON i.alert_id = a.id "
+                          "WHERE a.status='published' AND (i.title_fr IS NULL OR i.title_fr = '')").fetchall()
+    return [dict(r) for r in rows]
+
+
+def retract_alert(alert_id: str, reason: str, who: str) -> bool:
+    """Take an alert off the public page. The signed record stays in the log, so the chain still verifies."""
+    if not conn().execute("SELECT 1 FROM alerts WHERE id=?", (alert_id,)).fetchone():
+        return False
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO alert_hidden VALUES (?,?,?,?)", (alert_id, reason[:300], now(), who))
+        conn().commit()
+    return True
+
+
+def restore_alert(alert_id: str) -> bool:
+    with _lock:
+        n = conn().execute("DELETE FROM alert_hidden WHERE alert_id=?", (alert_id,)).rowcount
+        conn().commit()
+    return n > 0
+
+
+def all_alerts_for_admin() -> list[dict]:
+    hidden = {r[0]: r[1] for r in conn().execute("SELECT alert_id, reason FROM alert_hidden")}
+    out = []
+    for a in alerts(10_000):
+        out.append({"id": a["id"], "created": a["created"], "title": a["title"], "title_fr": a["title_fr"], "hidden": a["id"] in hidden, "reason": hidden.get(a["id"], "")})
+    return out
+
+
+# ---------- retention and administration ----------
+DEFAULTS = {"check_keep_days": 365, "archive_keep_days": 1095, "answer_keep_days": 30, "alert_show_days": 90}
+BOUNDS = {"check_keep_days": (30, 3650), "archive_keep_days": (0, 3650), "answer_keep_days": (1, 365), "alert_show_days": (7, 3650)}
+
+
+def settings() -> dict:
+    rows = {r[0]: r[1] for r in conn().execute("SELECT key, value FROM settings")}
+    out = dict(DEFAULTS)
+    for k in DEFAULTS:
+        if k in rows:
+            try:
+                out[k] = int(rows[k])
+            except ValueError:
+                pass
+    return out
+
+
+def set_setting(key: str, value: str) -> None:
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, value))
+        conn().commit()
+
+
+def get_setting(key: str, default: str = "") -> str:
+    r = conn().execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    return r[0] if r else default
+
+
+def update_settings(changes: dict) -> dict:
+    for k, v in changes.items():
+        if k not in DEFAULTS:
+            raise ValueError(f"unknown setting {k}")
+        lo, hi = BOUNDS[k]
+        if not isinstance(v, int) or isinstance(v, bool) or not lo <= v <= hi:
+            raise ValueError(f"{k} must be a whole number from {lo} to {hi}")
+    for k, v in changes.items():
+        set_setting(k, str(v))
+    return settings()
+
+
+def old_checks(cutoff: str) -> list[dict]:
+    return [dict(r) for r in conn().execute("SELECT * FROM checks WHERE created < ? ORDER BY created", (cutoff,)).fetchall()]
+
+
+def add_monthly(rows: list[dict]) -> None:
+    """Anonymous counts by month, kind of scam and verdict: kept for good, so totals and trends survive the archive."""
+    with _lock:
+        for r in rows:
+            conn().execute("INSERT INTO monthly_stats VALUES (?,?,?,1) ON CONFLICT(month, scheme, verdict) DO UPDATE SET n = n + 1",
+                           ((r.get("created") or "")[:7], r.get("scheme") or "unknown", r.get("verdict") or "unknown"))
+        conn().commit()
+
+
+def delete_check(check_id: str) -> dict:
+    """Remove one saved check and what hangs off it (its signed-answer record, review flags). Answers are cached by
+    message, not by check, so the cache is cleared too."""
+    with _lock:
+        out = {
+            "checks": conn().execute("DELETE FROM checks WHERE id = ?", (check_id,)).rowcount,
+            "receipts": conn().execute("DELETE FROM receipts WHERE id = ?", (check_id,)).rowcount,
+            "flags": conn().execute("DELETE FROM flags WHERE check_id = ?", (check_id,)).rowcount,
+        }
+        conn().commit()
+    cache_clear()
+    return out
+
+
+def admin_log(who: str, action: str, detail: str = "") -> None:
+    with _lock:
+        conn().execute("INSERT INTO admin_audit (at, who, action, detail) VALUES (?,?,?,?)", (now(), who, action, detail[:500]))
+        conn().commit()
+
+
+def admin_audit(limit: int = 50) -> list[dict]:
+    return [dict(r) for r in conn().execute("SELECT at, who, action, detail FROM admin_audit ORDER BY id DESC LIMIT ?", (limit,)).fetchall()]
+
+
+def analyst_role(email: str) -> str:
+    r = conn().execute("SELECT role FROM analysts WHERE email=?", (email.lower(),)).fetchone()
+    return (r["role"] if r else "") or ""
+
+
+def counts() -> dict:
+    c = conn()
+    one = lambda sql: c.execute(sql).fetchone()[0]
+    return {"checks": one("SELECT count(*) FROM checks"), "receipts": one("SELECT count(*) FROM receipts"), "answers_cached": one("SELECT count(*) FROM answers"),
+            "flags_open": one("SELECT count(*) FROM flags WHERE status='open'"), "alerts": one("SELECT count(*) FROM alerts WHERE status='published'"),
+            "alerts_hidden": one("SELECT count(*) FROM alert_hidden"), "archived_checks": one("SELECT coalesce(sum(n),0) FROM monthly_stats"),
+            "analysts": one("SELECT count(*) FROM analysts")}
 
 
 def purge_old() -> dict:
-    """Delete what has outlived its use. Open review flags are kept until an analyst has read them."""
-    from datetime import timedelta
+    """Delete what has outlived its use, using the retention settings. Open review flags are kept until an analyst has read them."""
+    cfg = settings()
     cut = lambda days: (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
-    old, stale = cut(CHECK_KEEP_DAYS), cut(ANSWER_KEEP_DAYS)
+    old, stale = cut(cfg["check_keep_days"]), cut(cfg["answer_keep_days"])
     out = {}
     with _lock:
         for name, sql, arg in (
@@ -310,3 +456,23 @@ def purge_old() -> dict:
             out[name] = conn().execute(sql, (arg,)).rowcount
         conn().commit()
     return out
+
+
+def purge_preview() -> dict:
+    cfg = settings()
+    cut = lambda days: (datetime.now(timezone.utc) - timedelta(days=days)).isoformat(timespec="seconds")
+    old, stale = cut(cfg["check_keep_days"]), cut(cfg["answer_keep_days"])
+    q = lambda sql, arg: conn().execute(sql, (arg,)).fetchone()[0]
+    return {"checks": q("SELECT count(*) FROM checks WHERE created < ?", old), "receipts": q("SELECT count(*) FROM receipts WHERE created < ?", old),
+            "flags": q("SELECT count(*) FROM flags WHERE created < ? AND status != 'open'", old), "answers": q("SELECT count(*) FROM answers WHERE created < ?", stale)}
+
+
+def list_analysts() -> list[dict]:
+    return [dict(r) for r in conn().execute("SELECT email, name, org, role, created FROM analysts ORDER BY created").fetchall()]
+
+
+def delete_analyst(email: str) -> bool:
+    with _lock:
+        n = conn().execute("DELETE FROM analysts WHERE email = ?", (email.lower(),)).rowcount
+        conn().commit()
+    return n > 0

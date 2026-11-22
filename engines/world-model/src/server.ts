@@ -55,6 +55,13 @@ createServer(async (req, res) => {
       const { embedding, ...attrs } = e.attrs as any;
       return send(res, 200, { ...e, attrs });
     }
+    if (req.method === "POST" && url.pathname === "/forget") {
+      const { system, before, ids } = await body(req);
+      if (typeof system !== "string" || !system) return send(res, 400, { error: "system is required" });
+      const r = world.forget(system, { before, ids });
+      cache = null;
+      return send(res, 200, { ...r, ms: Date.now() - t0 });
+    }
     if (req.method === "GET" && url.pathname === "/audit") return send(res, 200, { audit: world.audit().slice(-Number(url.searchParams.get("n") ?? 50)) });
     send(res, 404, { error: "not found" });
   } catch (err) {

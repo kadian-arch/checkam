@@ -23,7 +23,7 @@ export default function Receipt({ id }: { id: string }) {
   };
 
   useEffect(() => {
-    document.title = `CheckAm · ${id}`;
+    document.title = "CheckAm";
     fetch(`/receipts/${encodeURIComponent(id)}`).then((x) => (x.ok ? x.json() : Promise.reject())).then(setR).catch(() => setMissing(true));
   }, [id]);
 
@@ -33,16 +33,18 @@ export default function Receipt({ id }: { id: string }) {
   }
 
   const v = r?.receipt.verdict ?? "cant_tell";
+  useEffect(() => { if (r) document.title = `CheckAm: ${t[`verdict_${v}` as keyof typeof t] as string}`; }, [r, lang]);
   const when = r ? new Date(r.receipt.created).toLocaleString(lang === "fr" ? "fr-FR" : "en-GB", { dateStyle: "long", timeStyle: "short" }) : "";
   const kind = r?.receipt.scheme ? (t.schemes as Record<string, string>)[r.receipt.scheme] : "";
 
   return (
     <div className="site receipt-page">
+      <a className="skip-link" href="#answer">{t.skip}</a>
       <header className="masthead">
         <a className="brand" href="/" aria-label="CheckAm"><Logo /><span>Check<b>Am</b></span></a>
         <div className="actions"><button className="theme" onClick={flip} aria-label={theme === "light" ? t.aria_dark : t.aria_light}>{theme === "light" ? "☾" : "☀"}</button><button className="lang" onClick={() => setLang(lang === "en" ? "fr" : "en")}>{t.lang}</button></div>
       </header>
-      <main className="receipt-main">
+      <main className="receipt-main" id="answer" tabIndex={-1}>
         {missing && (
           <section className="report unsure receipt-card">
             <h1 className="report-title">{t.rc_missing_title}</h1>

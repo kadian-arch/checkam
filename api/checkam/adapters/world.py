@@ -41,3 +41,8 @@ def context(obs_id: str, source: str = CHECKS, trace: Trace | None = None, agent
 
 def observation(obs_id: str, source: str = SOURCE) -> dict | None:
     return _call("GET", f"/observation?source={source}&id={obs_id}", None, "", "")
+
+
+def forget(before: str | None = None, ids: list[str] | None = None) -> dict | None:
+    """Ask the campaign graph to forget old citizen checks (or named ones). The open dataset is never touched."""
+    return _call("POST", "/forget", None, "", "", json={"system": CHECKS, "before": before, "ids": ids or []})
