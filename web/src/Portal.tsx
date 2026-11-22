@@ -4,8 +4,8 @@ import Logo from "./Logo";
 import TraceView from "./TraceView";
 
 const KEY = "checkam.analyst";
-type Session = { token: string; name: string; org: string };
-type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "memory" } | { name: "alerts" };
+type Session = { token: string; name: string; org: string; role: string };
+type View = { name: "overview" } | { name: "campaigns" } | { name: "dossier"; id: string } | { name: "checks" } | { name: "memory" } | { name: "alerts" } | { name: "admin" };
 
 export default function Portal() {
   const [s, setS] = useState<Session | null>(() => {
@@ -30,7 +30,7 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
     setErr("");
     try {
       const r = await api.login(email, pw);
-      onIn({ token: r.token, name: r.analyst.name, org: r.analyst.org });
+      onIn({ token: r.token, name: r.analyst.name, org: r.analyst.org, role: r.analyst.role ?? "" });
     } catch {
       setErr("Wrong email or password.");
     } finally {
@@ -44,9 +44,9 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
         <h1>See the campaign,<br />not just the message.</h1>
         <p>Citizen checks, scam reports and public alerts, linked by the agents into campaigns you can act on. Every link carries its evidence.</p>
         <ul className="gate-points">
-          <li>Campaign graph built on the Meterless World Model</li>
-          <li>Evidence served live from Zetaris</li>
-          <li>Alerts signed with a Scout contract before they go public</li>
+          <li>Scam reports and checks linked into campaigns you can act on</li>
+          <li>Every link shows the evidence behind it</li>
+          <li>Public alerts are signed before they go out</li>
         </ul>
       </aside>
       <form className="gate-form" onSubmit={go}>
@@ -64,7 +64,7 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
 
 function Desk({ s, out }: { s: Session; out: () => void }) {
   const [view, setView] = useState<View>({ name: "overview" });
-  const nav: [View["name"], string][] = [["overview", "Overview"], ["campaigns", "Campaigns"], ["checks", "Citizen checks"], ["memory", "Review & memory"], ["alerts", "Published alerts"]];
+  const nav: [View["name"], string][] = [["overview", "Overview"], ["campaigns", "Campaigns"], ["checks", "Citizen checks"], ["memory", "Review & memory"], ["alerts", "Published alerts"], ...(s.role === "admin" ? [["admin", "Administration"] as [View["name"], string]] : [])];
   const guard = (p: Promise<any>) => p.catch((e) => { if (e.status === 401) out(); throw e; });
   return (
     <div className="desk">
@@ -84,6 +84,7 @@ function Desk({ s, out }: { s: Session; out: () => void }) {
         {view.name === "checks" && <Checks token={s.token} guard={guard} />}
         {view.name === "memory" && <Memory token={s.token} guard={guard} />}
         {view.name === "alerts" && <PublishedAlerts />}
+        {view.name === "admin" && s.role === "admin" && <AdminView token={s.token} guard={guard} />}
       </main>
     </div>
   );
@@ -113,7 +114,7 @@ function Overview({ token, guard, open }: { token: string; guard: G; open: (id: 
   const flagged = (st.by_verdict.scam ?? 0) + (st.by_verdict.suspicious ?? 0);
   return (
     <>
-      <header className="pane-head"><h1>Overview</h1><p className="muted">Live from the case store, the campaign graph and Zetaris ({st.data_backend}).</p></header>
+      <header className="pane-head"><h1>Overview</h1><p className="muted">Live from the case store and the campaign graph.</p></header>
       <div className="ops" role="group" aria-label="Operator">
         {OPS.map(([k, label]) => (
           <button key={k} className={`op ${k || "all"} ${op === k ? "on" : ""}`} onClick={() => setOp(k)} aria-pressed={op === k}>
@@ -318,7 +319,10 @@ function Dossier({ token, guard, id, back }: { token: string; guard: G; id: stri
             </div>
           ) : (
             <div className="editor">
-              <label className="field"><span>Title</span><input value={alert.title} onChange={(e) => setAlert({ ...alert, title: e.target.value })} /></label>
+              <div className="two">
+                <label className="field"><span>Title (English)</span><input value={alert.title} onChange={(e) => setAlert({ ...alert, title: e.target.value })} /></label>
+                <label className="field"><span>Titre (français)</span><input value={alert.title_fr ?? ""} placeholder="Left empty, it is translated for you" onChange={(e) => setAlert({ ...alert, title_fr: e.target.value })} /></label>
+              </div>
               <div className="two">
                 <label className="field"><span>English</span><textarea rows={4} value={alert.body_en} onChange={(e) => setAlert({ ...alert, body_en: e.target.value })} /></label>
                 <label className="field"><span>Français</span><textarea rows={4} value={alert.body_fr} onChange={(e) => setAlert({ ...alert, body_fr: e.target.value })} /></label>
@@ -426,6 +430,149 @@ function PublishedAlerts() {
           {a.signature && <p className="mono small sig">✓ signed {a.signature.slice(0, 24)}…</p>}
         </section>
       ))}</div>
+    </>
+  );
+}
+
+
+// The administrator desk: only an account with the admin role sees it, and the server checks the role again on every call.
+const SETTING_LABELS: [string, string, string][] = [
+  ["check_keep_days", "Keep saved checks (days)", "After this, a check is counted into monthly totals, archived and removed from the live database and the campaign graph."],
+  ["archive_keep_days", "Keep the compressed archive (days)", "Extra time the archive stays after the live period. 0 means no archive: old checks are deleted outright."],
+  ["answer_keep_days", "Keep the answer cache (days)", "Cached answers make a repeated message instant."],
+  ["alert_show_days", "Show an alert on the public page (days)", "Older alerts leave the page but stay in the signed log, so their proof still verifies."],
+];
+
+function AdminView({ token, guard }: { token: string; guard: G }) {
+  const [ov, setOv] = useState<any>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [form, setForm] = useState<Record<string, number>>({});
+  const [msg, setMsg] = useState("");
+  const [preview, setPreview] = useState<any>(null);
+  const [delId, setDelId] = useState("");
+  const [people, setPeople] = useState<any[]>([]);
+  const [np, setNp] = useState({ email: "", name: "", org: "", password: "" });
+  const load = () => {
+    guard(api.adminOverview(token)).then((x) => { setOv(x); setForm(x.settings); }).catch(() => setMsg("Could not load. Are you signed in as the administrator?"));
+    guard(api.adminAlerts(token)).then((x) => setAlerts(x.alerts)).catch(() => {});
+    guard(api.adminAnalysts(token)).then((x) => setPeople(x.analysts)).catch(() => {});
+  };
+  useEffect(load, [token]);
+  const say = (m: string) => { setMsg(m); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const saveSettings = () => guard(api.adminSettings(token, form)).then(() => { say("Settings saved."); load(); }).catch((e) => say(e.message || "Could not save"));
+  const dry = () => guard(api.adminRetention(token, true)).then(setPreview).catch((e) => say(e.message));
+  const run = () => {
+    if (!window.confirm("Archive and delete everything older than the keep period? This cannot be undone, apart from the compressed archive.")) return;
+    guard(api.adminRetention(token, false)).then((r) => { say(`Cleanup done: ${r.archived ?? 0} checks archived, ${r.deleted?.checks ?? 0} removed.`); setPreview(null); load(); }).catch((e) => say(e.message));
+  };
+  const retract = (a: any) => {
+    const reason = window.prompt(`Why take down "${a.title}"? (kept in the admin log)`, "");
+    if (reason === null) return;
+    guard(api.adminRetract(token, a.id, reason)).then(() => { say("Alert taken off the public page. The signed record is kept."); load(); }).catch((e) => say(e.message));
+  };
+  const restore = (a: any) => guard(api.adminRestore(token, a.id)).then(() => { say("Alert is public again."); load(); }).catch((e) => say(e.message));
+  const del = () => {
+    if (!window.confirm(`Delete check ${delId} everywhere (database, signed answer, review flags, campaign graph)?`)) return;
+    guard(api.adminDeleteCheck(token, delId.trim())).then((r) => { say(`Deleted: ${r.checks} check, ${r.receipts} signed answer, ${r.flags} flags.`); setDelId(""); load(); }).catch((e) => say(e.message || "Could not delete"));
+  };
+  const addPerson = () => guard(api.adminAddAnalyst(token, np)).then(() => { say(`Account created for ${np.email}.`); setNp({ email: "", name: "", org: "", password: "" }); load(); }).catch((e) => say(e.message || "Could not create the account (password needs 12 characters or more)"));
+  const removePerson = (email: string) => {
+    if (!window.confirm(`Remove the account ${email}? They will no longer be able to sign in.`)) return;
+    guard(api.adminRemoveAnalyst(token, email)).then(() => { say(`Removed ${email}.`); load(); }).catch((e) => say(e.message));
+  };
+  const download = async (name: string) => {
+    const r = await fetch(`/admin/archive/${name}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) return say("Could not download that archive.");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await r.blob());
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  if (!ov) return <p className="muted">{msg || "Loading administration…"}</p>;
+  const c = ov.counts;
+  return (
+    <>
+      <header className="pane-head"><h1>Administration</h1><p className="muted">Only this account can change retention, take alerts down or delete a check. Every action is written to the log at the bottom.</p></header>
+      {msg && <p className="note" role="status">{msg}</p>}
+
+      <section className="card wide">
+        <h3>What is stored</h3>
+        <div className="adm-tiles">
+          {([["Saved checks", c.checks], ["Archived checks (counted)", c.archived_checks], ["Cached answers", c.answers_cached], ["Open review flags", c.flags_open],
+            ["Published alerts", c.alerts], ["Taken down", c.alerts_hidden], ["Analyst accounts", c.analysts]] as [string, number][]).map(([k, v]) => (
+            <div key={k}><b>{v}</b><span>{k}</span></div>
+          ))}
+        </div>
+        <p className="muted small">Campaign graph: {ov.engine ? `${ov.engine.observations} observations, ${ov.engine.edges} links` : "not reachable"}.</p>
+      </section>
+
+      <section className="card wide">
+        <h3>Retention</h3>
+        <div className="adm-form">
+          {SETTING_LABELS.map(([k, label, help]) => (
+            <label key={k} className="field"><span>{label}</span>
+              <input type="number" min={0} value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: Number(e.target.value) })} />
+              <small className="muted">{help}</small></label>
+          ))}
+        </div>
+        <div className="row">
+          <button className="primary inline" onClick={saveSettings}>Save settings</button>
+          <button className="ghost" onClick={dry}>Preview the cleanup</button>
+          <button className="ghost danger" onClick={run}>Run the cleanup now</button>
+        </div>
+        {preview && <p className="mono small">Would archive {preview.checks_due} checks. Would remove: {Object.entries(preview.would_delete).map(([k, v]) => `${v} ${k}`).join(", ")}. Nothing has changed yet.</p>}
+        {ov.last_retention && <p className="muted small">Last cleanup {ov.last_retention.at?.slice(0, 16)} by {ov.last_retention.by}: {ov.last_retention.archived ?? 0} archived, {ov.last_retention.deleted?.checks ?? 0} removed.</p>}
+        <h4>Archive files</h4>
+        {ov.archive.length === 0 ? <p className="muted small">None yet.</p> : (
+          <ul className="adm-list">{ov.archive.map((f: any) => (
+            <li key={f.name}><span className="mono">{f.name}</span><span className="muted small">{(f.bytes / 1024).toFixed(1)} KB</span><button className="link small" onClick={() => download(f.name)}>Download</button></li>
+          ))}</ul>
+        )}
+      </section>
+
+      <section className="card wide">
+        <h3>Published alerts</h3>
+        <p className="muted small">Taking an alert down removes it from the public page. The signed record stays in the log, so the chain still verifies.</p>
+        <ul className="adm-list">{alerts.map((a) => (
+          <li key={a.id}>
+            <span><b>{a.title}</b> <span className="muted small">{a.created.slice(0, 10)}{a.title_fr ? "" : " · no French title"}{a.hidden ? ` · taken down${a.reason ? `: ${a.reason}` : ""}` : ""}</span></span>
+            {a.hidden ? <button className="link small" onClick={() => restore(a)}>Restore</button> : <button className="link small" onClick={() => retract(a)}>Take down</button>}
+          </li>
+        ))}</ul>
+      </section>
+
+      <section className="card wide">
+        <h3>Accounts</h3>
+        <ul className="adm-list">{people.map((p) => (
+          <li key={p.email}><span><b>{p.name}</b> <span className="muted small">{p.email} · {p.org || "no organisation"} · {p.role}</span></span>
+            {p.role === "admin" ? <span className="muted small">set on the host</span> : <button className="link small" onClick={() => removePerson(p.email)}>Remove</button>}</li>
+        ))}</ul>
+        <h4>Add an analyst</h4>
+        <div className="adm-form">
+          <label className="field"><span>Work email</span><input value={np.email} onChange={(e) => setNp({ ...np, email: e.target.value })} autoComplete="off" /></label>
+          <label className="field"><span>Name</span><input value={np.name} onChange={(e) => setNp({ ...np, name: e.target.value })} /></label>
+          <label className="field"><span>Organisation</span><input value={np.org} onChange={(e) => setNp({ ...np, org: e.target.value })} /></label>
+          <label className="field"><span>Password (12 characters or more)</span><input type="password" value={np.password} onChange={(e) => setNp({ ...np, password: e.target.value })} autoComplete="new-password" /></label>
+        </div>
+        <button className="primary inline" disabled={!np.email || !np.name || np.password.length < 12} onClick={addPerson}>Create account</button>
+      </section>
+
+      <section className="card wide">
+        <h3>Delete one check</h3>
+        <p className="muted small">Removes it from the database, its signed answer, any review flags and the campaign graph.</p>
+        <div className="row">
+          <input value={delId} onChange={(e) => setDelId(e.target.value)} placeholder="C-1a2b3c4d" aria-label="Check id" />
+          <button className="ghost danger" disabled={!/^C-[0-9a-f]{8}$/.test(delId.trim())} onClick={del}>Delete</button>
+        </div>
+      </section>
+
+      <section className="card wide">
+        <h3>Administration log</h3>
+        <ul className="adm-list">{ov.audit.map((a: any, i: number) => (
+          <li key={i}><span className="mono small">{a.at.slice(0, 16)}</span><span>{a.who}</span><span><b>{a.action}</b> <span className="muted small">{a.detail}</span></span></li>
+        ))}</ul>
+      </section>
     </>
   );
 }

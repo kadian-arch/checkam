@@ -526,3 +526,8 @@ a.primary, a.ghost { text-decoration: none; }
 :root[data-theme="dark"] .privacy, :root[data-theme="dark"] .console-bar code { color: #a9b6c9; }
 .skip-link { position: absolute; left: -999px; top: 8px; z-index: 60; padding: 10px 14px; background: var(--paper); color: var(--ink); border-radius: 8px; }
 .skip-link:focus { left: 8px; }
+.adm-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 10px 0; }
+.adm-tiles div { padding: 12px; border: 1px solid var(--line); border-radius: 12px; } .adm-tiles b { display: block; font-size: 1.5rem; } .adm-tiles span { color: var(--muted); font-size: .85rem; }
+.adm-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 10px 0; }
+.adm-list { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; } .adm-list li { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.ghost.danger { border-color: var(--danger, #d64545); color: var(--danger, #d64545); }

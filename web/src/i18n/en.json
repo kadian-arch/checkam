@@ -247,9 +247,11 @@
   "privacy_h3": "How the answer is made",
   "privacy_p3": "CheckAm uses AI services to read a message and write the answer. They receive the message with phone numbers already turned into codes and PINs removed. A screenshot is sent as an image so its text can be read, and it is not kept.",
   "privacy_h4": "Why a record is kept",
-  "privacy_p4": "Saved records let CheckAm spot the same scam going round and warn people sooner. Because numbers are codes, a record cannot be traced back to your phone.",
+  "privacy_p4": "Saved records let CheckAm spot the same scam going round and warn people sooner. Because numbers are codes, a record cannot be traced back to your phone. A record is kept for {keep} months. After that it is counted into anonymous monthly totals and moved to a compressed archive that only the CheckAm administrator can open, and the archive is deleted after another {archive} months.",
   "privacy_h5": "Sharing and corrections",
   "privacy_p5": "A share link shows the verdict and a signed proof that CheckAm gave it, never the message. If you tell us an answer looks wrong, an analyst may read the saved record to correct it.",
   "privacy_back": "Back to CheckAm",
-  "skip": "Skip to the checker"
+  "skip": "Skip to the checker",
+  "working_steps": "Working out what to do…",
+  "privacy_p4_none": "Saved records let CheckAm spot the same scam going round and warn people sooner. Because numbers are codes, a record cannot be traced back to your phone. A record is kept for {keep} months, then it is counted into anonymous monthly totals and deleted."
 }

@@ -6,7 +6,7 @@ export type TraceLine = {
 };
 export type Verdict = "scam" | "suspicious" | "looks_genuine" | "cant_tell";
 export type Radar = { days: number; checks: number; flagged: number; top: { scheme: string; n: number }[] };
-export type PublicStats = { checks: number; flagged: number; alerts: number; radar?: Radar };
+export type PublicStats = { checks: number; flagged: number; alerts: number; radar?: Radar; retention?: { keep_months: number; archive_months: number } };
 export type Card = {
   check_id: string; run_id: string; verdict: Verdict; confidence: number; evidence_level?: "strong" | "positive" | "limited" | "none" | "quiet"; quiet?: boolean; nothing?: boolean; headline: string;
   explain: string; why: Why[]; language: string; do_now: string[]; dont: string[]; questions?: string[]; ask_sender?: boolean; genuine_twin: Evidence | null;
@@ -83,7 +83,17 @@ export const api = {
   alerts: () => call<{ alerts: any[] }>("/alerts"),
   publicStats: () => call<PublicStats>("/stats/public"),
   login: (email: string, password: string) =>
-    call<{ token: string; analyst: { name: string; email: string; org: string } }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+    call<{ token: string; analyst: { name: string; email: string; org: string; role?: string } }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+  adminOverview: (t: string) => call<any>("/admin/overview", {}, t),
+  adminSettings: (t: string, body: Record<string, number>) => call<any>("/admin/settings", { method: "POST", body: JSON.stringify(body) }, t),
+  adminRetention: (t: string, dry_run: boolean) => call<any>("/admin/retention", { method: "POST", body: JSON.stringify({ dry_run }) }, t),
+  adminAnalysts: (t: string) => call<{ analysts: any[] }>("/admin/analysts", {}, t),
+  adminAddAnalyst: (t: string, body: Record<string, string>) => call<any>("/admin/analysts", { method: "POST", body: JSON.stringify(body) }, t),
+  adminRemoveAnalyst: (t: string, email: string) => call<any>("/admin/analysts/delete", { method: "POST", body: JSON.stringify({ email }) }, t),
+  adminAlerts: (t: string) => call<{ alerts: any[]; show_days: number }>("/admin/alerts", {}, t),
+  adminRetract: (t: string, id: string, reason: string) => call<any>(`/admin/alerts/${id}/retract`, { method: "POST", body: JSON.stringify({ reason }) }, t),
+  adminRestore: (t: string, id: string) => call<any>(`/admin/alerts/${id}/restore`, { method: "POST" }, t),
+  adminDeleteCheck: (t: string, check_id: string) => call<any>("/admin/checks/delete", { method: "POST", body: JSON.stringify({ check_id }) }, t),
   stats: (t: string, operator = "") => call<any>(`/analyst/stats${operator ? `?operator=${operator}` : ""}`, {}, t),
   campaigns: (t: string) => call<{ campaigns: any[]; checks: any }>("/analyst/campaigns", {}, t),
   dossier: (t: string, id: string) => call<any>(`/analyst/campaigns/${id}`, {}, t),

@@ -247,9 +247,11 @@
   "privacy_h3": "Comment la réponse est produite",
   "privacy_p3": "CheckAm utilise des services d'IA pour lire un message et rédiger la réponse. Ils reçoivent le message avec les numéros de téléphone déjà transformés en codes et les codes secrets supprimés. Une capture d'écran est envoyée sous forme d'image pour que son texte soit lu, et elle n'est pas conservée.",
   "privacy_h4": "Pourquoi un enregistrement est conservé",
-  "privacy_p4": "Les enregistrements permettent à CheckAm de repérer la même arnaque qui circule et d'avertir plus tôt. Comme les numéros sont des codes, un enregistrement ne peut pas être relié à votre téléphone.",
+  "privacy_p4": "Les enregistrements permettent à CheckAm de repérer la même arnaque qui circule et d'avertir plus tôt. Comme les numéros sont des codes, un enregistrement ne peut pas être relié à votre téléphone. Un enregistrement est conservé {keep} mois. Ensuite, il est compté dans des totaux mensuels anonymes et déplacé dans une archive compressée que seul l'administrateur de CheckAm peut ouvrir, et l'archive est supprimée {archive} mois plus tard.",
   "privacy_h5": "Partage et corrections",
   "privacy_p5": "Un lien de partage montre le verdict et une preuve signée que CheckAm l'a donné, jamais le message. Si vous nous dites qu'une réponse semble fausse, un analyste peut lire l'enregistrement pour la corriger.",
   "privacy_back": "Retour à CheckAm",
-  "skip": "Aller au vérificateur"
+  "skip": "Aller au vérificateur",
+  "working_steps": "Recherche de ce qu'il faut faire…",
+  "privacy_p4_none": "Les enregistrements permettent à CheckAm de repérer la même arnaque qui circule et d'avertir plus tôt. Comme les numéros sont des codes, un enregistrement ne peut pas être relié à votre téléphone. Un enregistrement est conservé {keep} mois, puis il est compté dans des totaux mensuels anonymes et supprimé."
 }
