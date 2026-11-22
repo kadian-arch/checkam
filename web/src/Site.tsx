@@ -72,49 +72,58 @@ export default function Site() {
 
   // text shared from another app ("Share → CheckAm") arrives as ?text=
   const q = new URLSearchParams(location.search);
-  const shared = [q.get("title"), q.get("text"), q.get("url")].filter(Boolean).join("\n");
+  const shared = (q.get("text") || q.get("title") || q.get("url") || "").trim();
+  useEffect(() => { if (location.search) history.replaceState(null, "", location.pathname); }, []);
+  const onPrivacy = location.pathname === "/privacy";
+  useEffect(() => {
+    if (location.pathname === "/" || onPrivacy) {
+      document.title = onPrivacy ? `${t.privacy_title} · CheckAm` : t.meta_title;
+      document.querySelector("meta[name=description]")?.setAttribute("content", t.meta_desc);
+    }
+  }, [lang, onPrivacy]);
 
   return (
     <div className="site">
+      <a className="skip-link" href="#check">{t.skip}</a>
       <header className="masthead">
         <a className="brand" href="/" aria-label="CheckAm"><Logo /><span>Check<b>Am</b></span></a>
         <nav className="links">
-          <a href="#how">{t.nav_how}</a>
-          <a href="#alerts">{t.nav_alerts}</a>
-          <a href="/analyst">{t.nav_analysts}</a>
+          <a href="/#how">{t.nav_how}</a>
+          <a href="/#alerts">{t.nav_alerts}</a>
         </nav>
+        <details className="menu">
+          <summary aria-label={t.nav_menu}>☰</summary>
+          <div><a href="/#how">{t.nav_how}</a><a href="/#alerts">{t.nav_alerts}</a><a href="/privacy">{t.privacy_link}</a></div>
+        </details>
         <div className="actions">
-          <button className="theme" onClick={toggleTheme} aria-label={theme === "light" ? "Dark mode" : "Light mode"}>{theme === "light" ? "☾" : "☀"}</button>
-          <button className="lang" onClick={() => setLang(lang === "en" ? "fr" : "en")} aria-label="Change language">{t.lang}</button>
+          <button className="theme" onClick={toggleTheme} aria-label={theme === "light" ? t.aria_dark : t.aria_light}>{theme === "light" ? "☾" : "☀"}</button>
+          <button className="lang" onClick={() => setLang(lang === "en" ? "fr" : "en")} aria-label={t.aria_lang}>{t.lang}</button>
           {install && <button className="pill-btn" onClick={() => install.prompt()}>{t.install}</button>}
         </div>
       </header>
 
       <main>
+      {onPrivacy ? <PrivacyPage t={t} /> : (<>
         <Hero t={t} lang={lang} shared={shared} />
         <Stats t={t} stats={stats} />
         <RadarStrip t={t} radar={stats?.radar} />
         <How t={t} />
         <Alerts t={t} lang={lang} />
-        <section className="duo">
+        <section className="duo single">
           <div className="panel install">
             <h3>{t.install_title}</h3>
             <p>{t.install_sub}</p>
-            <div className="phone-steps"><span>SMS</span><i>→</i><span>Share</span><i>→</i><span className="hl">CheckAm</span></div>
+            <div className="phone-steps"><span>SMS</span><i>→</i><span>{t.share_word}</span><i>→</i><span className="hl">CheckAm</span></div>
             {install ? <button className="primary" onClick={() => install.prompt()}>{t.install}</button> : <p className="muted small">{t.install_ios}</p>}
           </div>
-          <div className="panel analysts">
-            <h3>{t.analyst_title}</h3>
-            <p>{t.analyst_sub}</p>
-            <a className="ghost" href="/analyst">{t.analyst_cta} →</a>
-          </div>
         </section>
+      </>)}
       </main>
 
       <footer className="foot">
         <div className="brand small"><Logo /><span>Check<b>Am</b></span></div>
-        <p>{t.footer_data} <a href="https://doi.org/10.5281/zenodo.23287617" target="_blank" rel="noreferrer">DOI 10.5281/zenodo.23287617</a></p>
-        <p className="muted small">Ground Truth · Open Agent Hackathon 2026 · Zetaris · Meterless · NVIDIA Nemotron</p>
+        <p>{t.footer_data}</p>
+        <p className="foot-links"><a href="/privacy">{t.privacy_link}</a> · <a href="/analyst">{t.footer_analysts}</a></p>
       </footer>
     </div>
   );
@@ -139,6 +148,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [note, setNote] = useState("");
   const [ctx, setCtx] = useState<Context>({});
   const [listening, setListening] = useState(false);
+  const [voiceMsg, setVoiceMsg] = useState("");
   const recog = useRef<{ stop: () => void } | null>(null);
   const top = useRef<HTMLElement>(null);
   const step = live.reduce((s, l) => Math.max(s, phase(l)), 0);
@@ -147,25 +157,44 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const gate = live.find((l) => l.action === "verdict_gate");
   const early = gate ? (() => { try { return JSON.parse(gate.output_summary || "{}").verdict as string; } catch { return ""; } })() : "";
 
-  // dictate the story in your own words: the browser turns speech into text, which is checked like a pasted message
+  // dictate the story in your own words: the browser turns speech into text, which is checked like a pasted message.
+  // Every way it can fail says so on screen, with what to do: a silent button is worse than no button
   function dictate() {
     if (listening) { recog.current?.stop(); return; }
+    setVoiceMsg("");
     const R = (window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any }).SpeechRecognition
       ?? (window as unknown as { webkitSpeechRecognition?: new () => any }).webkitSpeechRecognition;
-    if (!R) return;
+    if (!R) { setVoiceMsg(t.voice_unsupported); return; }
+    let heard = false;
+    let failed = false;
     const r = new R();
     r.lang = lang === "fr" ? "fr-FR" : "en-GB";
     r.interimResults = false;
-    r.continuous = true;
+    r.continuous = false;
+    r.onstart = () => setVoiceMsg(t.voice_listening);
     r.onresult = (e: any) => {
       const said = Array.from(e.results as ArrayLike<any>).slice(e.resultIndex).map((x: any) => x[0].transcript).join(" ").trim();
-      if (said) setText((was) => (was ? was + " " : "") + said);
+      if (said) { heard = true; setText((was) => (was ? was + " " : "") + said); }
     };
-    r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
+    r.onerror = (e: any) => {
+      failed = true;
+      const code = String(e?.error ?? "");
+      const msg = code === "not-allowed" || code === "service-not-allowed" ? t.voice_blocked
+        : code === "no-speech" ? t.voice_nospeech
+        : code === "audio-capture" ? t.voice_nomic
+        : code === "network" ? t.voice_network
+        : code === "aborted" ? "" : t.voice_failed;
+      setVoiceMsg(msg);
+      setListening(false);
+    };
+    r.onend = () => {
+      setListening(false);
+      if (!heard && !failed) setVoiceMsg(t.voice_nospeech);
+      else if (heard) setVoiceMsg(t.voice_done);
+    };
     recog.current = r;
     setListening(true);
-    r.start();
+    try { r.start(); } catch { setListening(false); setVoiceMsg(t.voice_failed); }
   }
   const canDictate = typeof window !== "undefined" && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 
@@ -173,6 +202,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     if (!body.trim() && !files.length) return;
     setBusy(true);
     setErr("");
+    setNote("");  // an older note never stays beside a new check
     setLive([]);
     try {
       const c = await streamCheck({ text: body, sender: who, language: lang, files, context: cleanContext(ctx) }, (l) => setLive((x) => [...x, l]));
@@ -213,12 +243,13 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
         <label className="field">
           <span className="field-head">{t.paste_label}
             {canPaste && <button type="button" className="chip-btn" disabled={busy}
-              onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => {}); }}>{t.paste_btn}</button>}
+              onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => setVoiceMsg(t.paste_blocked)); }}>{t.paste_btn}</button>}
             {canDictate && <button type="button" className={listening ? "chip-btn rec" : "chip-btn"} disabled={busy} aria-pressed={listening}
               onClick={(e) => { e.preventDefault(); dictate(); }}>{listening ? t.voice_stop : t.voice_start}</button>}
           </span>
           <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
         </label>
+        {(voiceMsg || !canDictate) && <p className="voice-msg" role="status" aria-live="polite">{voiceMsg || t.voice_hint}</p>}
         <div className="row">
           <label className="field grow">
             <span>{t.sender_label}</span>
@@ -226,8 +257,8 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
           </label>
           <label className="file">
             {/* each pick adds to the list: a long chat is several screenshots, read in the order they were added */}
-            <input type="file" accept="image/*" multiple hidden disabled={busy}
-              onChange={(e) => { const picked = Array.from(e.target.files ?? []); e.target.value = ""; setFiles((had) => [...had, ...picked].slice(0, MAX_SHOTS)); }} />
+            <input type="file" accept="image/*" multiple className="sr-only" disabled={busy}
+              onChange={(e) => { const picked = Array.from(e.target.files ?? []); e.target.value = ""; const all = [...files, ...picked]; if (all.length > MAX_SHOTS) setNote(fill(t.shots_limit, { n: MAX_SHOTS })); setFiles(all.slice(0, MAX_SHOTS)); }} />
             <svg viewBox="0 0 24 24" aria-hidden><path d="M4 7h3l2-2h6l2 2h3v12H4z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></svg>
             {files.length ? fill(t.screenshots_n, { n: files.length }) : t.screenshot}
           </label>
@@ -235,7 +266,7 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
         {files.length > 0 && (
           <ul className="shots">
             {files.map((f, i) => (
-              <li key={`${f.name}-${f.lastModified}-${i}`}><b>{i + 1}</b><span>{f.name.slice(0, 22)}</span>
+              <li key={`${f.name}-${f.lastModified}-${i}`}><Thumb file={f} n={i + 1} />
                 <button type="button" className="link" disabled={busy} aria-label={`${t.remove} ${i + 1}`} onClick={() => setFiles((had) => had.filter((_, j) => j !== i))}>{t.remove}</button></li>
             ))}
           </ul>
@@ -248,12 +279,12 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
                ["relation", ["stranger", "claims_known", "known", "organisation"]]] as [keyof Context, string[]][]).map(([k, opts]) => (
               <div key={k} className="ctx-group"><b>{t[`ctx_${k}` as keyof Dict] as string}</b>
                 <div className="chips">{opts.map((o) => (
-                  <button key={o} type="button" className={ctx[k] === o ? "chip on" : "chip"} onClick={() => setCtx((c) => ({ ...c, [k]: c[k] === o ? undefined : o }))}>{t[`ctx_${k}_${o}` as keyof Dict] as string}</button>
+                  <button key={o} type="button" aria-pressed={ctx[k] === o} className={ctx[k] === o ? "chip on" : "chip"} onClick={() => setCtx((c) => ({ ...c, [k]: c[k] === o ? undefined : o }))}>{t[`ctx_${k}_${o}` as keyof Dict] as string}</button>
                 ))}</div></div>
             ))}
             <div className="ctx-group"><b>{t.ctx_wants}</b>
               <div className="chips">{["money", "code", "link", "call", "documents"].map((o) => (
-                <button key={o} type="button" className={ctx.wants?.includes(o) ? "chip on" : "chip"}
+                <button key={o} type="button" aria-pressed={!!ctx.wants?.includes(o)} className={ctx.wants?.includes(o) ? "chip on" : "chip"}
                   onClick={() => setCtx((c) => ({ ...c, wants: c.wants?.includes(o) ? c.wants.filter((x) => x !== o) : [...(c.wants ?? []), o] }))}>{t[`ctx_wants_${o}` as keyof Dict] as string}</button>
               ))}</div></div>
           </details>
@@ -266,13 +297,6 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
             </ol>
             {early && (
               <p className={`early ${early}`} role="status"><b>{t[`verdict_${early}` as keyof Dict] as string}</b> <span>{t.writing_explanation}</span></p>
-            )}
-            {last && (
-              <p className="ticker" key={live.length}>
-                <b>{(t.agents as Record<string, string>)[last.agent_name] ?? last.agent_name}</b> <span>{(t.acts as Record<string, string>)[last.action] ?? t.working}</span>
-                {last.sponsor !== "none" && <em className={`sp ${last.sponsor}`}>{last.sponsor === "nvidia" ? "Nemotron" : last.sponsor[0].toUpperCase() + last.sponsor.slice(1)}</em>}
-                <small>{fill(t.steps_done, { n: live.length })}</small>
-              </p>
             )}
           </div>
         ) : (
@@ -329,28 +353,43 @@ function Stats({ t, stats }: { t: Dict; stats: { checks: number; flagged: number
   );
 }
 
-const AGENTS = ["intake", "planner", "investigator", "critic", "reporter"] as const;
+function Thumb({ file, n }: { file: File; n: number }) {
+  const [url, setUrl] = useState("");
+  useEffect(() => { const u = URL.createObjectURL(file); setUrl(u); return () => URL.revokeObjectURL(u); }, [file]);
+  return <>{url ? <img src={url} alt="" /> : <b>{n}</b>}<span>{file.name.slice(0, 22)}</span></>;
+}
 
 function How({ t }: { t: Dict }) {
   return (
     <section className="how" id="how">
       <h2>{t.how_title}</h2>
       <p className="lede">{t.how_sub}</p>
-      <ol className="agents">
-        {AGENTS.map((a, i) => (
-          <li key={a} style={{ animationDelay: `${i * 90}ms` }}>
-            <span className="n">0{i + 1}</span>
-            <h4>{a[0].toUpperCase() + a.slice(1)}</h4>
-            <p>{t[`agent_${a}` as keyof Dict] as string}</p>
-            {a === "critic" && <span className="loop">↺ sends work back</span>}
+      <ol className="steps3">
+        {([1, 2, 3] as const).map((n) => (
+          <li key={n}>
+            <span className="n">0{n}</span>
+            <h4>{t[`how_${n}_t` as keyof Dict] as string}</h4>
+            <p>{t[`how_${n}_d` as keyof Dict] as string}</p>
           </li>
         ))}
       </ol>
-      <div className="sponsors">
-        <span>Evidence in <b>Zetaris</b></span>
-        <span>Campaign graph and guard by <b>Meterless</b></span>
-        <span>Reasoning by <b>NVIDIA Nemotron</b></span>
-      </div>
+    </section>
+  );
+}
+
+function PrivacyPage({ t }: { t: Dict }) {
+  const parts = [1, 2, 3, 4, 5] as const;
+  return (
+    <section className="legal">
+      <h1>{t.privacy_title}</h1>
+      <p className="lede">{t.privacy_intro}</p>
+      {parts.map((n) => (
+        <div key={n}>
+          <h2>{t[`privacy_h${n}` as keyof Dict] as string}</h2>
+          <p>{t[`privacy_p${n}` as keyof Dict] as string}</p>
+        </div>
+      ))}
+      <p><a className="ghost" href="/">{t.privacy_back}</a></p>
     </section>
   );
 }
@@ -365,7 +404,7 @@ function Alerts({ t, lang }: { t: Dict; lang: Lang }) {
       <p className="lede">{t.alerts_sub}</p>
       {alerts?.length === 0 && <p className="muted">{t.alerts_empty}</p>}
       <div className="alert-grid">
-        {alerts?.slice(0, 6).map((a) => (
+        {alerts?.filter((a, i, all) => !a.campaign_id || all.findIndex((b) => b.campaign_id === a.campaign_id) === i).slice(0, 6).map((a) => (
           <article key={a.id} className="alert">
             <header><time>{a.created.slice(0, 10)}</time>{a.signature ? <span className="sig" title={a.signature}>✓ {t.verified}</span> : <span className="unsig">{t.not_signed}</span>}</header>
             <h3>{a.title}</h3>

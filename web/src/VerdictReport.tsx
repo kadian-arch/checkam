@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { api, type Card, type Evidence } from "./api";
 import { fill, type Dict } from "./i18n";
-import TraceView from "./TraceView";
 
 const TONE: Record<Card["verdict"], string> = { scam: "danger", suspicious: "caution", looks_genuine: "safe", cant_tell: "unsure" };
 
@@ -89,7 +88,7 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
                   <p>{w.text}</p>
                   {w.evidence.length > 0 && (
                     <details>
-                      <summary>{w.evidence.length} {t.evidence}</summary>
+                      <summary>{w.evidence.length} {w.evidence.length === 1 ? t.evidence_one : t.evidence_many}</summary>
                       <ul>{w.evidence.map((e, j) => <li key={j}><b>{source(e, t)}</b>{plain(e, t) ? <span> {plain(e, t)}</span> : null}</li>)}</ul>
                     </details>
                   )}
@@ -104,7 +103,7 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
             <h2>{t.acted_q}</h2>
             <div className="chips">
               {(["nothing", "clicked", "code", "money", "documents", "installed"] as const).map((a) => (
-                <button key={a} type="button" className={acted === a ? "chip on" : "chip"} onClick={() => pickActed(a)}>{t[`acted_${a}` as keyof Dict] as string}</button>
+                <button key={a} type="button" aria-pressed={acted === a} className={acted === a ? "chip on" : "chip"} onClick={() => pickActed(a)}>{t[`acted_${a}` as keyof Dict] as string}</button>
               ))}
             </div>
             {after.length > 0 && <ul className="do">{after.map((d) => <li key={d}>{d}</li>)}</ul>}
@@ -112,8 +111,8 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
         )}
 
         <section className="sheet steps">
-          <h2>{t.do_now}</h2>
-          <ul className="do">{card.do_now.map((d) => <li key={d}>{d}</li>)}</ul>
+          {after.length === 0 && <h2>{t.do_now}</h2>}
+          {after.length === 0 && <ul className="do">{card.do_now.map((d) => <li key={d}>{d}</li>)}</ul>}
           {card.dont.length > 0 && (<><h2>{t.dont}</h2><ul className="dont">{card.dont.map((d) => <li key={d}>{d}</li>)}</ul></>)}
         </section>
       </div>
@@ -127,11 +126,6 @@ export default function VerdictReport({ card, t, onAgain, askSender, followUp }:
           )}
         </section>
       )}
-
-      <details className="sheet how-checked">
-        <summary>{t.how_we_checked}</summary>
-        <TraceView lines={card.trace} rounds={card.rounds} />
-      </details>
 
       <footer className="report-actions">
         <button className="ghost" onClick={share}>{t.share}</button>

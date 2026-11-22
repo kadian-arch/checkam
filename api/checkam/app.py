@@ -5,9 +5,10 @@ import json
 import queue
 import threading
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi.exceptions import RequestValidationError
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -15,7 +16,10 @@ from . import agents, config, dossier, ledger, security, seed, store, telegram
 from .adapters import memory, nvidia, scout, world
 from .adapters.data import data
 
-app = FastAPI(title="CheckAm", version="0.1.0", description="Before you send, CheckAm.")
+# the interactive API pages are for developers: off on the live site unless CHECKAM_DOCS is set
+_docs = config.flag("CHECKAM_DOCS", False)
+app = FastAPI(title="CheckAm", version="0.1.0", description="Before you send, CheckAm.",
+              docs_url="/docs" if _docs else None, redoc_url=None, openapi_url="/openapi.json" if _docs else None)
 # the web app is served from the same origin; other origins only when listed in CHECKAM_ORIGINS
 origins = [o.strip() for o in config.env("CHECKAM_ORIGINS").split(",") if o.strip()]
 if origins:
@@ -35,6 +39,23 @@ def _startup():
             seed.run()
 
     threading.Thread(target=warm, daemon=True).start()
+
+    def tidy():
+        import time
+        while True:
+            try:
+                store.purge_old()
+            except Exception:
+                pass  # tidying never takes the service down
+            time.sleep(24 * 3600)
+
+    threading.Thread(target=tidy, daemon=True).start()
+
+
+@app.exception_handler(RequestValidationError)
+async def bad_request(_, exc: RequestValidationError):
+    """What is wrong with the request, without echoing what the person typed."""
+    return JSONResponse({"detail": [{"loc": list(e.get("loc", ())), "msg": e.get("msg", ""), "type": e.get("type", "")} for e in exc.errors()]}, status_code=422)
 
 
 class CheckIn(BaseModel):
@@ -61,9 +82,8 @@ def analyst(authorization: str = Header(default="")) -> str:
 
 @app.get("/health")
 def health():
-    w = world.health()
-    return {"ok": True, "data_backend": data().mode, "sample_mode": config.SAMPLE_MODE, "nvidia": nvidia.enabled(),
-            "world_model": bool(w), "world": w, "checks": store.check_stats()}
+    """Alive or not. Counts and engine details are analyst-only (/analyst/stats)."""
+    return {"ok": True}
 
 
 @app.post("/check")
@@ -169,9 +189,10 @@ def advice_after(body: AfterIn):
 
 
 @app.post("/run")
-def run(body: RunIn):
+def run(body: RunIn, authorization: str = Header(default="")):
     """Programmatic entry point for judges: {"mode": "check"|"investigate", ...}."""
     if body.mode == "investigate":
+        analyst(authorization)  # a dossier is analyst work and spends model calls: signed-in analysts only
         return dossier.investigate(body.campaign_id or None)
     return agents.run_check(body.text, sender=body.sender, language=body.language)
 
@@ -385,9 +406,42 @@ if WEB.exists():
 
     ROOT_WEB = WEB.resolve()
 
+    VERDICT_WORDS = {
+        "en": {"scam": "Scam", "suspicious": "Be careful", "looks_genuine": "Looks genuine", "cant_tell": "Needs a closer look"},
+        "fr": {"scam": "Arnaque", "suspicious": "Attention", "looks_genuine": "Semble authentique", "cant_tell": "À vérifier de plus près"},
+    }
+
+    def _share_page(rid: str, request: Request):
+        """The app page with this answer's verdict in the link preview (WhatsApp, Telegram, Facebook read these tags)."""
+        import html as _html
+        from . import advice
+        page = (WEB / "index.html").read_text(encoding="utf-8")
+        rec = store.get_receipt(rid) if re.fullmatch(r"C-[0-9a-f]{8}", rid) else None
+        if not rec:
+            return HTMLResponse(page)
+        fr = request.headers.get("accept-language", "").lower().startswith("fr")
+        lang = "fr" if fr else "en"
+        word = VERDICT_WORDS[lang].get(rec.get("verdict"), "CheckAm")
+        kind = advice.label(rec.get("scheme"), lang) if rec.get("scheme") and rec.get("verdict") in ("scam", "suspicious") else ""
+        title = f"CheckAm : {word}" if fr else f"CheckAm: {word}"
+        desc = ((f"CheckAm a trouvé : {kind}. " if kind else "") + "Ouvrez pour voir la réponse signée.") if fr else ((f"CheckAm found {kind}. " if kind else "") + "Open to see the signed answer.")
+        t, d = _html.escape(title, quote=True), _html.escape(desc, quote=True)
+        page = re.sub(r"<title>.*?</title>", f"<title>{t}</title>", page, count=1, flags=re.S)
+        page = re.sub(r'(<meta property="og:title" content=")[^"]*(")', lambda m: m.group(1) + t + m.group(2), page, count=1)
+        page = re.sub(r'(<meta property="og:description" content=")[^"]*(")', lambda m: m.group(1) + d + m.group(2), page, count=1)
+        page = re.sub(r'(<meta name="description" content=")[^"]*(")', lambda m: m.group(1) + d + m.group(2), page, count=1)
+        page = re.sub(r'(<meta property="og:url" content=")[^"]*(")', lambda m: m.group(1) + _html.escape(f"https://checkam.me/v/{rid}", quote=True) + m.group(2), page, count=1)
+        return HTMLResponse(page, headers={"Cache-Control": "no-store"})
+
     @app.get("/{path:path}")
-    def spa(path: str):
+    def spa(path: str, request: Request):
         # only files inside the built web folder; anything else ("../.env" included) gets the app page
         f = (WEB / path).resolve()
         inside = f == ROOT_WEB or ROOT_WEB in f.parents
-        return FileResponse(f if path and inside and f.is_file() else WEB / "index.html")
+        if path and inside and f.is_file():
+            return FileResponse(f)
+        if "." in path.rsplit("/", 1)[-1]:
+            raise HTTPException(404, "Not found")  # a missing file is not the app page
+        if path.startswith("v/"):
+            return _share_page(path[2:], request)
+        return FileResponse(WEB / "index.html")

@@ -14,6 +14,13 @@ export default function Receipt({ id }: { id: string }) {
   const [missing, setMissing] = useState(false);
   const [text, setText] = useState("");
   const [same, setSame] = useState<boolean | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() => (document.documentElement.dataset.theme === "light" ? "light" : "dark"));
+  const flip = () => {
+    const next = theme === "light" ? "dark" : "light";
+    try { localStorage.setItem("checkam.theme", next); } catch {}
+    document.documentElement.dataset.theme = next;
+    setTheme(next);
+  };
 
   useEffect(() => {
     document.title = `CheckAm · ${id}`;
@@ -33,7 +40,7 @@ export default function Receipt({ id }: { id: string }) {
     <div className="site receipt-page">
       <header className="masthead">
         <a className="brand" href="/" aria-label="CheckAm"><Logo /><span>Check<b>Am</b></span></a>
-        <div className="actions"><button className="lang" onClick={() => setLang(lang === "en" ? "fr" : "en")}>{t.lang}</button></div>
+        <div className="actions"><button className="theme" onClick={flip} aria-label={theme === "light" ? t.aria_dark : t.aria_light}>{theme === "light" ? "☾" : "☀"}</button><button className="lang" onClick={() => setLang(lang === "en" ? "fr" : "en")}>{t.lang}</button></div>
       </header>
       <main className="receipt-main">
         {missing && (

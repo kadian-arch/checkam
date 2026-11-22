@@ -114,10 +114,15 @@ f1 = 2 * prec * rec / (prec + rec) if prec + rec else 0
 fpr = fp / (fp + tn) if fp + tn else 0
 by = Counter((r["label"], r["verdict"]) for r in results)
 origin = Counter((r["origin"], r["text_type"], r["verdict"] in POS) for r in results if r["label"] == "scam")
+# a retold account ("he called and I hung up") is a person describing a scam, not a message that can be checked:
+# the headline recall counts every scam record, and this figure leaves the retold ones out, so neither is hidden
+retold = [r for r in results if r["label"] == "scam" and r.get("text_type") == "retold"]
+checkable = [r for r in results if r["label"] == "scam" and r.get("text_type") != "retold"]
+rec_msgs = sum(1 for r in checkable if r["verdict"] in POS) / len(checkable) if checkable else 0
 
 mode = f"data={data().mode}, nemotron={'on' if config.MODEL_API_KEY else 'off'}"
 summary = {"tag": args.tag, "split": args.split, "with_sender": args.with_sender, "near_copies_hidden": not args.loose, "n": len(results), "mode": mode, "seconds": round(elapsed), "precision": round(prec, 4),
-           "recall": round(rec, 4), "f1": round(f1, 4), "false_alarm_rate": round(fpr, 4), "cant_tell": cant,
+           "recall": round(rec, 4), "recall_checkable_messages": round(rec_msgs, 4), "scam_records_retold": len(retold), "f1": round(f1, 4), "false_alarm_rate": round(fpr, 4), "cant_tell": cant,
            "confusion": {f"{k[0]}->{k[1]}": v for k, v in sorted(by.items())},
            "recall_by_source": {f"{k[0]}/{k[1]}": v for k, v in sorted(origin.items(), key=str)}}
 out = ROOT / "evals" / f"results-{args.tag}-{args.split}.json"

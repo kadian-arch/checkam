@@ -1,0 +1,636 @@
+{
+  "summary": {
+    "tag": "v5-ids-modeloff",
+    "split": "all",
+    "with_sender": true,
+    "near_copies_hidden": true,
+    "n": 11,
+    "mode": "data=sample-duckdb, nemotron=off",
+    "seconds": 5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0,
+    "false_alarm_rate": 0.5,
+    "cant_tell": 5,
+    "confusion": {
+      "not_scam->cant_tell": 1,
+      "not_scam->looks_genuine": 2,
+      "not_scam->scam": 3,
+      "scam->cant_tell": 4,
+      "scam->looks_genuine": 1
+    },
+    "recall_by_source": {
+      "public_alert/verbatim": 2,
+      "report/retold": 3
+    }
+  },
+  "results": [
+    {
+      "id": "A-51461d35",
+      "text": "Le directeur général de la Cameroon Civil Aviation Authority (CCAA), Etablissement public Administratif, chargé de la gestion et de l'administration de l'aviation civil au Cameroun",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "train",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 2.0,
+      "rounds": 1,
+      "why": [
+        "Il ne vous demande rien, ne promet rien et ne contient ni lien ni numéro à appeler : rien dedans ne peut vous coûter de l'argent"
+      ],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "no_harm_path",
+          "direction": "genuine",
+          "weight": "strong",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": false,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": false
+    },
+    {
+      "id": "A-e5ecc6be",
+      "text": "Avis de recrutement. Dans le renouvellement de son effectif et dans sa participation dans la lutte contre le chômage dans la zone du Cameroun, la grande multinationale, le groupe Total Énergie vous informe par le biais de [NAME] une campagne de recrutement du personnel prêt à travailler (…)",
+      "label": "scam",
+      "origin": "public_alert",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "train",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 2.6,
+      "rounds": 1,
+      "why": [],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "opportunity",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": false,
+        "claims": [
+          "opportunity"
+        ],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": false
+    },
+    {
+      "id": "G-0f1cab47",
+      "text": "Your payment of 500 XAF to MTN Bundle Boost has been completed at 2026-09-29 07:16:06. Your new balance: 53 XAF. Fee was 0 XAF. Message: Receiver's number(Numero destinataire) [PHONE:671-bqvcpz]. Transaction Id: [TXN_ID]. Back-to-School is Here... MoMo Got You! For any transactions from XAF 5,237,  stand a chance to win everyday : A Laptop + XAF 50,000 + a Home Box every day. Dial *126*6# or download the New MoMo App : link[.]mtn[.]cm/NewMoMoAppRef. More info: 8787 | WhatsApp 650 528 787.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 0.9,
+      "rounds": 2,
+      "why": [
+        "Everything it asks you to do goes through official channels: a code you dial yourself, a short number or the official app"
+      ],
+      "signals": [
+        {
+          "tool": "number_history",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "official_route",
+          "direction": "genuine",
+          "weight": "medium",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": false,
+        "claims": [],
+        "official_route": true,
+        "score": 0
+      },
+      "sender_given": true
+    },
+    {
+      "id": "G-18f5247a",
+      "text": "You have received an advance of 50XAF on 2026-09-15 11:33:07 from MMC to repay with Access Fee:1XAF  Fee:0.5% daily,Max Fee:18.5% Transact ID:[TXN_ID] EGR:186.0. Your transaction is pending, wait for final SMS",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 0.6,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported"
+      ],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "scam",
+          "weight": "strong",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 1,
+        "click": false,
+        "promise": true,
+        "links": 0,
+        "sender_kind": "official",
+        "retold": false,
+        "claims": [
+          "money_received"
+        ],
+        "official_route": false,
+        "score": 7
+      },
+      "sender_given": true
+    },
+    {
+      "id": "G-29708bd5",
+      "text": "You have received an advance of 1000XAF on 2026-09-17 07:30:42 from MMC to repay with Access Fee:35XAF  Fee:0.5% daily,Max Fee:18.5% Transact ID:[TXN_ID] EGR:186.0. Your transaction is pending, wait for final SMS",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 0.6,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported"
+      ],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "scam",
+          "weight": "strong",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 1,
+        "click": false,
+        "promise": true,
+        "links": 0,
+        "sender_kind": "official",
+        "retold": false,
+        "claims": [
+          "money_received"
+        ],
+        "official_route": false,
+        "score": 7
+      },
+      "sender_given": true
+    },
+    {
+      "id": "G-9682a565",
+      "text": "You have received an advance of 50XAF on 2026-09-17 13:12:44 from MMC to repay with Access Fee:1XAF  Fee:0.5% daily,Max Fee:18.5% Transact ID:[TXN_ID] EGR:186.0. Your transaction is pending, wait for final SMS",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 0.6,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported"
+      ],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "scam",
+          "weight": "strong",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 1,
+        "click": false,
+        "promise": true,
+        "links": 0,
+        "sender_kind": "official",
+        "retold": false,
+        "claims": [
+          "money_received"
+        ],
+        "official_route": false,
+        "score": 7
+      },
+      "sender_given": true
+    },
+    {
+      "id": "G-98db3d94",
+      "text": "Bienvenue sur PlayVOD! Profitez des meilleurs films et series. ACCES: hxxps://c-up[.]me/ue1fb2 LOGIN : [CREDENTIAL] PASS : [CREDENTIAL] Cout: 200F/jour (ou moins selon votre credit)",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "fr",
+      "split": "train",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 1.8,
+      "rounds": 1,
+      "why": [
+        "Il vient de 8710, un nom qu'un téléphone personnel ne peut pas utiliser, et ne demande ni argent, ni code, ni appel, ni lien extérieur"
+      ],
+      "signals": [
+        {
+          "tool": "link_history",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "sender",
+          "direction": "genuine",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "no_harm_path",
+          "direction": "genuine",
+          "weight": "medium",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 1,
+        "sender_kind": "registered",
+        "retold": false,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": true
+    },
+    {
+      "id": "G-b2c73cd1",
+      "text": "Back-to-school is here! Pay for your AI subscriptions with the MoMo Virtual Card. Get yours for 2,500F via […] or via the App: link[.]mtn[.]cm/NewMoMoAppRef",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "looks_genuine",
+      "confidence": 0.75,
+      "seconds": 0.3,
+      "rounds": 2,
+      "why": [
+        "It comes from MoMo eCard, a name a personal phone cannot use, and asks for no money, no code, no call and no outside link"
+      ],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "sender",
+          "direction": "genuine",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "no_harm_path",
+          "direction": "genuine",
+          "weight": "medium",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "registered",
+        "retold": false,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": true
+    },
+    {
+      "id": "R-3db27758",
+      "text": "It just said money was sent to my account in the same way MTN would send their messages",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "train",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 0.2,
+      "rounds": 1,
+      "why": [],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": true,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": true
+    },
+    {
+      "id": "R-cb11294e",
+      "text": "It was somehow convincing but I cut the call",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "train",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 0.1,
+      "rounds": 1,
+      "why": [],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": true,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": false
+    },
+    {
+      "id": "R-f7824e3a",
+      "text": "The last scam attempt came in as a mobile l money message telling me I had received a sum of 35000frs but looking closely I realized that the message wasn't from MTN mobile money but rather a personal number",
+      "label": "scam",
+      "origin": "report",
+      "text_type": "retold",
+      "language": "en",
+      "split": "train",
+      "verdict": "cant_tell",
+      "confidence": 0.4,
+      "seconds": 0.3,
+      "rounds": 2,
+      "why": [],
+      "signals": [
+        {
+          "tool": "similar_scams",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": false,
+        "promise": false,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": true,
+        "claims": [],
+        "official_route": false,
+        "score": 0
+      },
+      "sender_given": true
+    }
+  ]
+}
