@@ -153,17 +153,27 @@ def read_image(image_b64: str, mime: str, trace: Trace | None = None) -> str | N
     return chat(msg, model=config.MODEL_REASON, trace=trace, agent="Intake", action="read_screenshot", max_tokens=900, timeout=90)
 
 
+_embed_down_until = 0.0  # when the embedding service last failed a person's check: skip it for a minute
+
+
 def embed(texts: list[str], trace: Trace | None = None, kind: str = "passage") -> list[list[float]] | None:
+    """A person's own message (kind "query") gets a short budget: the check has a wording match to fall back on, so one
+    slow embedding call must never hold up an answer. After a failure the call is skipped for a minute."""
+    global _embed_down_until
     if not enabled() or not texts:
+        return None
+    if kind == "query" and time.monotonic() < _embed_down_until:
         return None
     with timer() as t:
         try:
             out = _post("/embeddings", {"model": config.MODEL_EMBED, "input": [x[:2000] for x in texts],
-                                        "input_type": kind, "encoding_format": "float", "truncate": "END"}, 90)
+                                        "input_type": kind, "encoding_format": "float", "truncate": "END"}, 8 if kind == "query" else 90)
             vecs = [d["embedding"] for d in out["data"]]
             status = "ok"
         except Exception as e:
             vecs, status = None, f"error: {e}"
+            if kind == "query":
+                _embed_down_until = time.monotonic() + 60
     if trace:
         trace.log("Investigator", "embed", input=f"{len(texts)} texts", output=f"{len(vecs)} vectors" if vecs else status,
                   status="ok" if vecs else "error", sponsor="nvidia", latency_ms=t.ms, model=config.MODEL_EMBED)
