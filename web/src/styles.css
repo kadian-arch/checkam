@@ -554,3 +554,4 @@ a.primary, a.ghost { text-decoration: none; }
 .setup-steps { padding-left: 20px; display: grid; gap: 12px; margin: 10px 0 14px; color: var(--text); }
 .setup-key { margin: 8px 0 2px; padding: 12px 14px; border: 1px dashed var(--line-2); border-radius: 10px; font-size: 1.15rem; letter-spacing: .08em; overflow-wrap: anywhere; user-select: all; }
 .recovery { list-style: none; padding: 14px; margin: 10px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; border: 1px solid var(--line); border-radius: 12px; font-size: 1.05rem; }
+.setup-qr { display: block; margin: 12px auto; background: #fff; padding: 8px; border-radius: 12px; }

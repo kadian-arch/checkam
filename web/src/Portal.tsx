@@ -29,6 +29,9 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
   const [code, setCode] = useState("");
   const [key, setKey] = useState<{ secret: string; uri: string } | null>(null);
   const [saved, setSaved] = useState<{ session: Session; codes: string[] } | null>(null);
+  const [qr, setQr] = useState("");
+  // the QR code is made in the browser from the key; it is loaded only on this screen
+  useEffect(() => { if (key) import("qrcode").then((m) => m.toDataURL(key.uri, { margin: 1, width: 220 })).then(setQr).catch(() => setQr("")); }, [key]);
   const session = (r: LoginResult): Session => ({ token: r.token ?? "", name: r.analyst?.name ?? "", org: r.analyst?.org ?? "", role: r.analyst?.role ?? "" });
   const run = async (f: () => Promise<void>, fallback: string) => {
     setBusy(true);
@@ -87,9 +90,10 @@ function Login({ onIn }: { onIn: (s: Session) => void }) {
         <form className="gate-form" onSubmit={second}>
           <h2>Set up two-step sign-in</h2>
           <p className="muted small">This account can change and delete things, so a password alone is not enough. Add CheckAm to an authenticator app once (Google Authenticator, Microsoft Authenticator, Authy or 1Password).</p>
+          {qr && <img className="setup-qr" src={qr} alt="QR code that adds CheckAm to your authenticator app" width={200} height={200} />}
           <ol className="setup-steps">
-            <li>On your phone, open the app and choose to add an account with a setup key. Or, if you are on your phone now, <a href={key?.uri}>tap here to open the app</a>.</li>
-            <li>Type this key. Spaces do not matter:<div className="setup-key mono" aria-label="Setup key">{grouped}</div>
+            <li>On your phone, open the app, choose to add an account and scan the code above. Signing in from your phone? <a href={key?.uri}>Tap here to open the app instead</a>.</li>
+            <li>Cannot scan? Choose to enter a setup key and type this one (spaces do not matter):<div className="setup-key mono" aria-label="Setup key">{grouped}</div>
               <button type="button" className="link small" onClick={() => navigator.clipboard?.writeText(key?.secret ?? "")}>Copy the key</button></li>
             <li>Type the 6-digit code the app now shows:</li>
           </ol>
