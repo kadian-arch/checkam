@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
 CREATE TABLE IF NOT EXISTS monthly_stats (month TEXT, scheme TEXT, verdict TEXT, n INTEGER, PRIMARY KEY (month, scheme, verdict));
 CREATE TABLE IF NOT EXISTS alert_i18n (alert_id TEXT PRIMARY KEY, title_fr TEXT);
 CREATE TABLE IF NOT EXISTS alert_hidden (alert_id TEXT PRIMARY KEY, reason TEXT, at TEXT, by TEXT);
+CREATE TABLE IF NOT EXISTS admin_2fa (email TEXT PRIMARY KEY, secret_enc TEXT, enrolled_at TEXT, last_step INTEGER DEFAULT 0, recovery TEXT DEFAULT '[]');
 CREATE TABLE IF NOT EXISTS admin_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, who TEXT, action TEXT, detail TEXT);
 """
 
@@ -350,7 +351,7 @@ def all_alerts_for_admin() -> list[dict]:
 
 
 # ---------- retention and administration ----------
-DEFAULTS = {"check_keep_days": 365, "archive_keep_days": 1095, "answer_keep_days": 30, "alert_show_days": 90}
+DEFAULTS = {"check_keep_days": 730, "archive_keep_days": 2190, "answer_keep_days": 30, "alert_show_days": 90}
 BOUNDS = {"check_keep_days": (30, 3650), "archive_keep_days": (0, 3650), "answer_keep_days": (1, 365), "alert_show_days": (7, 3650)}
 
 
@@ -476,3 +477,85 @@ def delete_analyst(email: str) -> bool:
         n = conn().execute("DELETE FROM analysts WHERE email = ?", (email.lower(),)).rowcount
         conn().commit()
     return n > 0
+
+
+def flags_for_check(check_id: str) -> list[dict]:
+    return [dict(r) for r in conn().execute("SELECT id, created, verdict, suggested, note, status, reviewed_by FROM flags WHERE check_id = ? ORDER BY created DESC", (check_id,)).fetchall()]
+
+
+def check_detail(check_id: str) -> dict | None:
+    r = conn().execute("SELECT * FROM checks WHERE id = ?", (check_id,)).fetchone()
+    if not r:
+        return None
+    d = dict(r)
+    for k in ("numbers", "links", "scam_types"):
+        try:
+            d[k] = json.loads(d.get(k) or "[]")
+        except ValueError:
+            d[k] = []
+    return d
+
+
+def update_analyst(email: str, name: str | None, org: str | None, password: str | None) -> bool:
+    """Change an account's name, organisation or password. The role never changes here."""
+    r = conn().execute("SELECT * FROM analysts WHERE email = ?", (email.lower(),)).fetchone()
+    if not r:
+        return False
+    salt, pw_hash = r["salt"], r["pw_hash"]
+    if password:
+        salt = os.urandom(16).hex()
+        pw_hash = _hash(password, salt)
+    with _lock:
+        conn().execute("UPDATE analysts SET name = ?, org = ?, salt = ?, pw_hash = ? WHERE email = ?",
+                       (name if name is not None else r["name"], org if org is not None else r["org"], salt, pw_hash, email.lower()))
+        conn().commit()
+    return True
+
+
+# ---------- two-step sign-in (the administrator) ----------
+def twofa_get(email: str) -> dict | None:
+    r = conn().execute("SELECT * FROM admin_2fa WHERE email = ?", (email.lower(),)).fetchone()
+    return dict(r) if r else None
+
+
+def twofa_start(email: str, secret_enc: str) -> None:
+    """A pending secret, replaced each time set-up is shown again, until a first code proves the phone has it."""
+    with _lock:
+        conn().execute("INSERT OR REPLACE INTO admin_2fa (email, secret_enc, enrolled_at, last_step, recovery) VALUES (?,?,NULL,0,'[]')", (email.lower(), secret_enc))
+        conn().commit()
+
+
+def twofa_enroll(email: str, step: int, recovery_hashes: list[str]) -> None:
+    with _lock:
+        conn().execute("UPDATE admin_2fa SET enrolled_at = ?, last_step = ?, recovery = ? WHERE email = ?", (now(), step, json.dumps(recovery_hashes), email.lower()))
+        conn().commit()
+
+
+def twofa_step(email: str, step: int) -> None:
+    with _lock:
+        conn().execute("UPDATE admin_2fa SET last_step = ? WHERE email = ?", (step, email.lower()))
+        conn().commit()
+
+
+def twofa_use_recovery(email: str, code_hash: str) -> bool:
+    """A recovery code works once."""
+    with _lock:
+        r = conn().execute("SELECT recovery FROM admin_2fa WHERE email = ?", (email.lower(),)).fetchone()
+        codes = json.loads(r["recovery"]) if r else []
+        if code_hash not in codes:
+            return False
+        codes.remove(code_hash)
+        conn().execute("UPDATE admin_2fa SET recovery = ? WHERE email = ?", (json.dumps(codes), email.lower()))
+        conn().commit()
+    return True
+
+
+def twofa_clear(email: str) -> None:
+    with _lock:
+        conn().execute("DELETE FROM admin_2fa WHERE email = ?", (email.lower(),))
+        conn().commit()
+
+
+def analyst_public(email: str) -> dict | None:
+    r = conn().execute("SELECT email, name, org, role FROM analysts WHERE email = ?", (email.lower(),)).fetchone()
+    return dict(r) if r else None

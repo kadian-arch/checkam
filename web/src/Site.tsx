@@ -103,7 +103,7 @@ export default function Site() {
       </header>
 
       <main>
-      {onPrivacy ? <PrivacyPage t={t} keep={stats?.retention?.keep_months ?? 12} archive={stats?.retention?.archive_months ?? 36} /> : (<>
+      {onPrivacy ? <PrivacyPage t={t} keep={stats?.retention?.keep_months ?? 24} archive={stats?.retention?.archive_months ?? 72} /> : (<>
         <Hero t={t} lang={lang} shared={shared} />
         <Stats t={t} stats={stats} />
         <RadarStrip t={t} radar={stats?.radar} />
@@ -165,6 +165,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     const R = (window as unknown as { SpeechRecognition?: new () => any; webkitSpeechRecognition?: new () => any }).SpeechRecognition
       ?? (window as unknown as { webkitSpeechRecognition?: new () => any }).webkitSpeechRecognition;
     if (!R) { setVoiceMsg(t.voice_unsupported); return; }
+    const begin = () => {
     let heard = false;
     let failed = false;
     const r = new R();
@@ -195,6 +196,12 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     recog.current = r;
     setListening(true);
     try { r.start(); } catch { setListening(false); setVoiceMsg(t.voice_failed); }
+    };
+    // if the person already blocked the microphone for this site, say so at once instead of flashing and failing;
+    // otherwise the browser asks the first time and remembers the answer
+    const perms = (navigator as unknown as { permissions?: { query: (d: { name: string }) => Promise<{ state: string }> } }).permissions;
+    if (perms) perms.query({ name: "microphone" }).then((p) => (p.state === "denied" ? setVoiceMsg(t.voice_blocked) : begin())).catch(() => begin());
+    else begin();
   }
   const canDictate = typeof window !== "undefined" && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 

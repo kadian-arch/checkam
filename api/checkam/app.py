@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Streamin
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import agents, config, dossier, ledger, retention, security, seed, store, telegram
+from . import agents, config, dossier, ledger, retention, security, seed, store, telegram, totp
 from .adapters import memory, nvidia, scout, world
 from .adapters.data import data
 
@@ -32,6 +32,8 @@ app.add_middleware(security.Compress)
 def _startup():
     if config.env("CHECKAM_ADMIN_EMAIL") and config.env("CHECKAM_ADMIN_PASSWORD"):
         store.add_analyst(config.env("CHECKAM_ADMIN_EMAIL"), config.env("CHECKAM_ADMIN_PASSWORD"), "Administrator", "CheckAm", role="admin")
+    if config.env("CHECKAM_ADMIN_EMAIL") and config.flag("CHECKAM_ADMIN_RESET_2FA", False):
+        store.twofa_clear(config.env("CHECKAM_ADMIN_EMAIL"))  # remove the variable again after signing in and setting up a new phone
     if config.env("CHECKAM_JUDGE_EMAIL"):
         store.add_analyst(config.env("CHECKAM_JUDGE_EMAIL"), config.env("CHECKAM_JUDGE_PASSWORD"), "Judge analyst", "Open Agent Hackathon")
     def warm():
@@ -230,12 +232,86 @@ class Login(BaseModel):
     password: str = Field(max_length=200)
 
 
+def _session(who: dict) -> dict:
+    return {"token": store.make_token(who["email"]), "analyst": who}
+
+
 @app.post("/auth/login")
 def login(body: Login):
     who = store.verify_analyst(body.email, body.password)
     if not who:
         raise HTTPException(401, "Wrong email or password")
-    return {"token": store.make_token(who["email"]), "analyst": who}
+    if who["role"] == "admin" and config.flag("CHECKAM_ADMIN_2FA", True):
+        # the password alone never opens the administrator account: a code from the authenticator app comes next
+        row = store.twofa_get(who["email"])
+        enrolled = bool(row and row["enrolled_at"])
+        return {"step": "code" if enrolled else "setup", "challenge": totp.challenge(who["email"], "code" if enrolled else "setup")}
+    return _session(who)
+
+
+class TwoStep(BaseModel):
+    challenge: str = Field(max_length=300)
+    code: str = Field("", max_length=40)
+
+
+def _twofa_guard(email: str) -> None:
+    ok, wait = security.allowed("2fa:" + email, "login")
+    if not ok:
+        raise HTTPException(429, f"Too many tries. Try again in {wait} s.")
+
+
+@app.post("/auth/2fa/start")
+def twofa_start(body: TwoStep):
+    """Show the secret for the authenticator app. Only after the password, and only while no phone is set up."""
+    email = totp.read_challenge(body.challenge, "setup")
+    if not email:
+        raise HTTPException(401, "Sign in again")
+    row = store.twofa_get(email)
+    if row and row["enrolled_at"]:
+        raise HTTPException(400, "Two-step sign-in is already set up")
+    secret = totp.new_secret()
+    store.twofa_start(email, totp.seal(secret))
+    return {"secret": secret, "uri": totp.otpauth_uri(email, secret)}
+
+
+@app.post("/auth/2fa/setup")
+def twofa_setup(body: TwoStep):
+    """The first code from the phone proves it holds the secret. Recovery codes are shown once, here."""
+    email = totp.read_challenge(body.challenge, "setup")
+    if not email:
+        raise HTTPException(401, "Sign in again")
+    _twofa_guard(email)
+    row = store.twofa_get(email)
+    if not row or row["enrolled_at"]:
+        raise HTTPException(400, "Start the set-up first")
+    step = totp.verify(totp.unseal(row["secret_enc"]), body.code)
+    if step is None:
+        raise HTTPException(401, "That code is not right. Check the code in the app and that your phone's clock is correct.")
+    codes = totp.new_recovery_codes()
+    store.twofa_enroll(email, step, [totp.hash_code(c) for c in codes])
+    store.admin_log(email, "two_step_set_up", "")
+    return {**_session(store.analyst_public(email)), "recovery_codes": codes}
+
+
+@app.post("/auth/2fa/verify")
+def twofa_verify(body: TwoStep):
+    email = totp.read_challenge(body.challenge, "code")
+    if not email:
+        raise HTTPException(401, "Sign in again")
+    _twofa_guard(email)
+    row = store.twofa_get(email)
+    if not row or not row["enrolled_at"]:
+        raise HTTPException(400, "Two-step sign-in is not set up")
+    if totp.is_recovery_code(body.code):
+        if not store.twofa_use_recovery(email, totp.hash_code(body.code)):
+            raise HTTPException(401, "That recovery code is not valid")
+        store.admin_log(email, "recovery_code_used", "")
+    else:
+        step = totp.verify(totp.unseal(row["secret_enc"]), body.code, row["last_step"])
+        if step is None:
+            raise HTTPException(401, "That code is not right or was already used. Wait for the next code and try again.")
+        store.twofa_step(email, step)
+    return _session(store.analyst_public(email))
 
 
 @app.get("/analyst/campaigns")
@@ -270,6 +346,17 @@ def public_stats():
 @app.get("/analyst/checks")
 def checks(_: str = Depends(analyst)):
     return {"checks": store.recent_checks(100), "stats": store.check_stats()}
+
+
+@app.get("/analyst/checks/{check_id}")
+def check_detail(check_id: str, _: str = Depends(analyst)):
+    """Everything held about one check: the saved record, the review flags on it, the signed answer and the agents' steps."""
+    c = store.check_detail(check_id)
+    if not c:
+        raise HTTPException(404, "No such check")
+    p = config.LOG_DIR / f"trace-{c['run_id']}.jsonl" if c.get("run_id") and str(c["run_id"]).isalnum() else None
+    trace = [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines()] if p and p.exists() else []
+    return {"check": c, "flags": store.flags_for_check(check_id), "trace": trace, "receipt": store.get_receipt(check_id)}
 
 
 class AlertIn(BaseModel):
@@ -491,6 +578,22 @@ def admin_remove_analyst(body: RemoveAnalyst, who: str = Depends(admin)):
     if not store.delete_analyst(target):
         raise HTTPException(404, "No such account")
     store.admin_log(who, "remove_analyst", target)
+    return {"ok": True}
+
+
+class UpdateAnalyst(BaseModel):
+    email: str = Field(max_length=200)
+    name: str | None = Field(None, min_length=1, max_length=80)
+    org: str | None = Field(None, max_length=80)
+    password: str | None = Field(None, min_length=12, max_length=200)
+
+
+@app.post("/admin/analysts/update")
+def admin_update_analyst(body: UpdateAnalyst, who: str = Depends(admin)):
+    """Change a name, an organisation or a password (for example the old judge account's). The role never changes here."""
+    if not store.update_analyst(body.email, body.name, body.org, body.password):
+        raise HTTPException(404, "No such account")
+    store.admin_log(who, "update_analyst", body.email.lower() + (" (password changed)" if body.password else ""))
     return {"ok": True}
 
 

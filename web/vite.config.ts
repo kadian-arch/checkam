@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 const api = process.env.CHECKAM_API ?? "http://localhost:8000";
-const routes = ["/check", "/run", "/auth", "/analyst", "/alerts", "/traces", "/health"];
+const routes = ["/check", "/run", "/auth", "/analyst", "/admin", "/advice", "/alerts", "/stats", "/receipts", "/traces", "/health"];
 
 export default defineConfig({
   plugins: [react()],

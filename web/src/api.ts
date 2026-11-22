@@ -14,13 +14,27 @@ export type Card = {
   receipt?: { id: string; url: string }; cached?: number; scheme?: string | null;
 };
 
+export type LoginResult = { token?: string; analyst?: { name: string; email: string; org: string; role?: string }; step?: "setup" | "code"; challenge?: string; recovery_codes?: string[] };
+
+// sign-in calls answer with their own sentence (wrong password, wrong code, too many tries), so they are read as they come
+async function authPost<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Something went wrong. Try again.");
+  return j as T;
+}
+
 async function call<T>(path: string, init: RequestInit = {}, token?: string): Promise<T> {
   const headers: Record<string, string> = { ...(init.headers as Record<string, string>) };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (init.body && !(init.body instanceof FormData)) headers["Content-Type"] = "application/json";
   const r = await fetch(path, { ...init, headers });
   if (r.status === 401) throw Object.assign(new Error("signed-out"), { status: 401 });
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? r.statusText);
+  if (!r.ok) {
+    // the server answers with a sentence, or with a list of what is wrong with the form: say it in words
+    const d = (await r.json().catch(() => ({}))).detail;
+    throw new Error(typeof d === "string" ? d : Array.isArray(d) ? d.map((x: { loc?: unknown[]; msg?: string }) => `${(x.loc ?? []).slice(-1)[0] ?? ""} ${x.msg ?? ""}`.trim()).join("; ") : r.statusText);
+  }
   return r.json();
 }
 
@@ -82,14 +96,18 @@ export const api = {
   },
   alerts: () => call<{ alerts: any[] }>("/alerts"),
   publicStats: () => call<PublicStats>("/stats/public"),
-  login: (email: string, password: string) =>
-    call<{ token: string; analyst: { name: string; email: string; org: string; role?: string } }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+  login: (email: string, password: string) => authPost<LoginResult>("/auth/login", { email, password }),
+  twofaStart: (challenge: string) => authPost<{ secret: string; uri: string }>("/auth/2fa/start", { challenge }),
+  twofaSetup: (challenge: string, code: string) => authPost<LoginResult>("/auth/2fa/setup", { challenge, code }),
+  twofaVerify: (challenge: string, code: string) => authPost<LoginResult>("/auth/2fa/verify", { challenge, code }),
   adminOverview: (t: string) => call<any>("/admin/overview", {}, t),
   adminSettings: (t: string, body: Record<string, number>) => call<any>("/admin/settings", { method: "POST", body: JSON.stringify(body) }, t),
   adminRetention: (t: string, dry_run: boolean) => call<any>("/admin/retention", { method: "POST", body: JSON.stringify({ dry_run }) }, t),
   adminAnalysts: (t: string) => call<{ analysts: any[] }>("/admin/analysts", {}, t),
   adminAddAnalyst: (t: string, body: Record<string, string>) => call<any>("/admin/analysts", { method: "POST", body: JSON.stringify(body) }, t),
   adminRemoveAnalyst: (t: string, email: string) => call<any>("/admin/analysts/delete", { method: "POST", body: JSON.stringify({ email }) }, t),
+  adminUpdateAnalyst: (t: string, body: Record<string, string>) => call<any>("/admin/analysts/update", { method: "POST", body: JSON.stringify(body) }, t),
+  checkDetail: (t: string, id: string) => call<any>(`/analyst/checks/${id}`, {}, t),
   adminAlerts: (t: string) => call<{ alerts: any[]; show_days: number }>("/admin/alerts", {}, t),
   adminRetract: (t: string, id: string, reason: string) => call<any>(`/admin/alerts/${id}/retract`, { method: "POST", body: JSON.stringify({ reason }) }, t),
   adminRestore: (t: string, id: string) => call<any>(`/admin/alerts/${id}/restore`, { method: "POST" }, t),

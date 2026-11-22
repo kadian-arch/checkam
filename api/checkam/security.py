@@ -72,7 +72,7 @@ async def middleware(request: Request, call_next):
     resp = await call_next(request)
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("Referrer-Policy", "no-referrer")
-    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(self), geolocation=()")
     resp.headers.setdefault("X-Frame-Options", "DENY")
     path = request.url.path
     if path.startswith(("/check", "/advice", "/run", "/auth", "/analyst", "/admin", "/traces", "/receipts", "/health")):

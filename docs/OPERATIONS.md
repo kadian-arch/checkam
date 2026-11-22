@@ -12,6 +12,18 @@ Notes for whoever runs the live site. Everything here is enforced by the code an
 - The administrator creates and removes analyst accounts from the Administration tab (password of at least 12
   characters). The administrator account cannot be created or removed from the screen.
 
+### Two-step sign-in (administrator)
+
+The administrator signs in with the password and then a 6-digit code from an authenticator app (Google Authenticator,
+Microsoft Authenticator, Authy, 1Password). The first sign-in after this was added walks through the set-up: add the key
+to the app, type the first code, then save the 8 one-time recovery codes, which are shown only once. A code works once,
+and sign-in is limited to 5 tries a minute.
+
+If the phone and the recovery codes are both lost: on the host (Render, Environment) add `CHECKAM_ADMIN_RESET_2FA` with the
+value `true`, let it redeploy, sign in with the password and set up a new phone, then delete the variable again. The
+variable only clears the set-up; it never lets anyone in without the password. `CHECKAM_ADMIN_2FA=false` turns the second
+step off entirely (for local development only).
+
 Use a long passphrase from a password manager, a login email nobody else knows, and never reuse them elsewhere. Sign-in is
 limited to 5 tries a minute per address, and a session lasts 12 hours.
 
@@ -19,10 +31,10 @@ limited to 5 tries a minute per address, and a session lasts 12 hours.
 
 | Record | Default | Then |
 |---|---|---|
-| Saved check (message with numbers as codes, verdict, kind of scam) | 12 months | Counted into anonymous monthly totals, written to a compressed archive, removed from the database and from the campaign graph |
-| Compressed archive (`checks-YYYY-MM.jsonl.gz`) | 36 months after the live period | Deleted |
+| Saved check (message with numbers as codes, verdict, kind of scam) | 24 months | Counted into anonymous monthly totals, written to a compressed archive, removed from the database and from the campaign graph |
+| Compressed archive (`checks-YYYY-MM.jsonl.gz`) | 72 months after the live period | Deleted |
 | Cache of finished answers | 30 days | Deleted |
-| Review flags | Until an analyst reads them, then 12 months | Deleted |
+| Review flags | Until an analyst reads them, then 24 months | Deleted |
 | Monthly totals | Kept | They keep the public counter correct |
 | Published alerts | Public page shows 90 days | Older alerts leave the page and stay in the signed log |
 
