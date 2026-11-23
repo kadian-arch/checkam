@@ -41,7 +41,7 @@ async function call<T>(path: string, init: RequestInit = {}, token?: string): Pr
 // Runs a check and reports every agent step the moment it happens (server-sent events over POST).
 export const MAX_SHOTS = 6;
 
-export type Context = { channel?: string; relation?: string; wants?: string[] };
+export type Context = { channel?: string; relation?: string; wants?: string[]; dictated?: boolean };
 
 export async function streamCheck(input: { text: string; sender: string; language: string; files?: File[]; context?: Context },
                                   onStep: (l: TraceLine) => void): Promise<Card> {

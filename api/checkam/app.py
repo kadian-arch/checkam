@@ -146,7 +146,9 @@ def _stream(run):
             card = run(lambda line: q.put(("step", line)))
             q.put(("card", card))
         except Exception as e:  # the stream must always end with something the app can show
-            q.put(("error", {"detail": str(e)[:200]}))
+            import logging
+            logging.getLogger("checkam").exception("check stream failed")
+            q.put(("error", {"detail": "Something went wrong on our side. Please try again."}))
         q.put(None)
 
     threading.Thread(target=work, daemon=True).start()
@@ -274,11 +276,19 @@ def twofa_start(body: TwoStep):
     email = totp.read_challenge(body.challenge, "setup")
     if not email:
         raise HTTPException(401, "Sign in again")
+    _twofa_guard(email)
     row = store.twofa_get(email)
     if row and row["enrolled_at"]:
         raise HTTPException(400, "Two-step sign-in is already set up")
-    secret = totp.new_secret()
-    store.twofa_start(email, totp.seal(secret))
+    secret = None
+    if row and row.get("secret_enc"):
+        try:
+            secret = totp.unseal(row["secret_enc"])  # the pending key stays the same, so a second call never invalidates the first
+        except Exception:
+            secret = None
+    if not secret:
+        secret = totp.new_secret()
+        store.twofa_start(email, totp.seal(secret))
     return {"secret": secret, "uri": totp.otpauth_uri(email, secret)}
 
 
@@ -712,6 +722,8 @@ if WEB.exists():
 
     @app.get("/{path:path}")
     def spa(path: str, request: Request):
+        if path in ("docs", "redoc", "openapi.json") and not _docs:
+            raise HTTPException(404, "Not found")
         # only files inside the built web folder; anything else ("../.env" included) gets the app page
         f = (WEB / path).resolve()
         inside = f == ROOT_WEB or ROOT_WEB in f.parents

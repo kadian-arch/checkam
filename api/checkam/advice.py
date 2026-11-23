@@ -89,7 +89,8 @@ LINES = {
                "Les vraies promotions sont sur la page officielle de l'opérateur et ne demandent jamais de payer pour recevoir un gain"),
         "dont": [("Do not pay any fee to receive a prize", "Ne payez aucun frais pour recevoir un gain")]},
     "seller": {
-        "do": ("Pay only on delivery, after you have seen the item", "Payez seulement à la livraison, après avoir vu l'article"),
+        "do": ("Check the seller and the item first: meet in a public place and pay only once you hold what you bought",
+               "Vérifiez d'abord le vendeur et l'article : rencontrez-le dans un lieu public et ne payez qu'une fois l'article en main"),
         "dont": [("Do not pay delivery or customs fees in advance", "Ne payez pas de frais de livraison ou de douane à l'avance")]},
     "family": {
         "do": ("Call your relative on the number you already know before you do anything", "Appelez votre proche sur le numéro que vous connaissez déjà avant de faire quoi que ce soit"),
@@ -219,6 +220,73 @@ def label(scheme: str | None, lang: str) -> str:
     return SCHEMES[scheme][2 if lang == "fr" else 1]
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# What a message DOES decides the advice, whatever name the scam has. Each rule is a thing a message can do and the one
+# line that is true whenever it does it. These come first on the card; a kind's own lines are added only when the message
+# really shows that kind (see scheme_supported), so no advice is ever written for a different scam.
+BEHAVIOURS = [
+    (r"seed phrase|recovery phrase|secret phrase|phrase (?:de r[ée]cup[ée]ration|secr[èe]te)|private key|cl[ée] priv[ée]e|connect (?:your )?wallet|connectez votre (?:wallet|portefeuille)",
+     [], [("Never type your seed phrase or private key anywhere, and never connect your wallet to a site from a message: whoever has them can empty the wallet",
+           "Ne tapez jamais votre phrase secrète ni votre clé privée, et ne connectez jamais votre portefeuille à un site reçu par message : qui les a peut le vider")]),
+    (r"recharge cards?|cartes? de recharge|scratch cards?|gift cards?|cartes? cadeau|recharge (?:numbers?|codes?)|num[ée]ros? (?:de )?recharge|code de recharge",
+     [], [("A recharge or gift card number is cash: never read it out or send it to anyone",
+           "Le numéro d'une carte de recharge ou cadeau, c'est de l'argent : ne le lisez ni ne l'envoyez à personne")]),
+    (r"keep (?:it|this|that|our (?:contact|talk|conversation)) (?:a )?secret|tell (?:no one|nobody)|don'?t tell (?:anyone|anybody)|ne le dites [àa] personne|gardez (?:le|ce) secret|gardons (?:le|ça) secret|ne dites rien [àa]",
+     [], [("A message that tells you to keep it secret is built to stop you checking: tell someone you trust before you do anything",
+           "Un message qui vous demande de garder le secret est fait pour vous empêcher de vérifier : parlez-en à une personne de confiance avant d'agir")]),
+    (r"at your door|came to (?:your|the) (?:house|home|door)|[àa] votre porte|inspector at|inspecteur (?:chez|[àa])",
+     [("Do not let them in or pay them. Ask for an ID and a written order, and call the company on a number you find yourself",
+       "Ne les laissez pas entrer et ne les payez pas. Demandez une pièce d'identité et un ordre écrit, et appelez l'entreprise à un numéro que vous trouvez vous-même")], []),
+    (r"(?:director|boss|ceo|manager|directeur|patron|\bdg\b)\b[^.\n]{0,80}\b(?:transfer|virement|transf[ée]r|send|envoy)|(?:do not|don'?t|ne) (?:tell|dites)[^.\n]{0,30}(?:accounts|comptab)|urgent(?:ly)? (?:transfer|virement)",
+     [("Confirm any payment request from a boss in person or on a number you already have, and let a second person approve it",
+       "Confirmez toute demande de paiement d'un chef en personne ou à un numéro que vous avez déjà, et faites-la valider par une deuxième personne")],
+     [("Never pay on a voice note or a message alone, even if the voice sounds like your boss: voices can be copied",
+       "Ne payez jamais sur un message vocal ou un texte seul, même si la voix ressemble à celle de votre chef : les voix peuvent être copiées")]),
+    (r"terrain|plot of land|land (?:for sale|title)|parcelle|titre foncier|house for sale|maison [àa] vendre|property for sale",
+     [("Visit the land with the owner, and check the land title at the land registry or with a notary, before you pay anything",
+       "Visitez le terrain avec le propriétaire et vérifiez le titre foncier au service des domaines ou chez un notaire avant de payer quoi que ce soit")], []),
+    (r"\bseed (?:offering|of \d)|sow(?:ing)? a seed|sem(?:ez|er) (?:une )?semence|miracle|breakthrough|deliverance|man of god|homme de dieu|prophet|proph[èe]te|prayer slot",
+     [], [("A blessing, a healing or a breakthrough cannot be bought: do not pay under a deadline, or to a personal number",
+           "Une bénédiction, une guérison ou une percée ne s'achètent pas : ne payez ni sous pression de délai ni à un numéro personnel")]),
+    (r"\bfibre\b|\bfiber\b|installation|raccordement|branchement|connection fee|frais de connexion",
+     [("Pay installation or connection fees only at the company's own office or in its official app, never to a personal number",
+       "Payez les frais d'installation ou de raccordement seulement au bureau de l'entreprise ou dans son application officielle, jamais à un numéro personnel")], []),
+    (r"\btower\b|antenna|antenne|land lease|bail du terrain|rent your land|louer votre terrain",
+     [], [("A company that wants to rent your land never asks you to pay first",
+           "Une entreprise qui veut louer votre terrain ne vous demande jamais de payer d'abord")]),
+]
+
+
+def behaviours(text: str, i: int) -> tuple[list[str], list[str]]:
+    """The do and dont lines for what this message actually does, in the order of BEHAVIOURS."""
+    do, dont = [], []
+    for rx, d, n in BEHAVIOURS:
+        if re.search(rx, text or "", re.I):
+            do += [x[i] for x in d]
+            dont += [x[i] for x in n]
+    return do, dont
+
+
+# a kind's own advice is true only when the message shows that kind: its words are in the text, and for the two kinds whose
+# advice is about a person or a payout, the person or the payout is in the text too
+SUPPORT_EXTRA = {
+    "family": r"maman|papa|\bmum\b|\bmom\b|\bdad\b|tonton|tata|uncle|aunt|tante|oncle|brother|sister|fr[èe]re|s[œo]eur|cousin|my (?:son|daughter)|mon (?:fils|fille)|new number|nouveau num[ée]ro|changed my number|na me\b",
+    "advance_fee": r"gain|h[ée]ritage|inherit|subvention|grant|\bprime\b|bourse|payout|prize|virement|transferred|fonds|funds|d[ée]blocage|unlock|release|colis|parcel|loan|pr[êe]t|reward|r[ée]compense",
+}
+
+
+def scheme_supported(scheme: str | None, text: str) -> bool:
+    """Does the text itself show this kind of scam? A model's pick with nothing in the text behind it is not enough for a
+    card to speak as if it were sure, and then no advice written for that kind is shown."""
+    if not scheme or scheme not in SCHEMES:
+        return False
+    rx = rf"(?<![^\W_])(?:{SCHEMES[scheme][0]}" + (f"|{NAMING_HINTS[scheme]}" if scheme in NAMING_HINTS else "") + ")"
+    if not re.search(rx, text or "", flags=re.I):
+        return False
+    extra = SUPPORT_EXTRA.get(scheme)
+    return not extra or bool(re.search(extra, text or "", flags=re.I))
+
+
 def steps(verdict: str, scheme: str | None, facts: dict, lang: str, route: str = "", claimed: tuple | None = None) -> tuple[list[str], list[str]]:
     """do_now and dont for the card: at most three of each, every one relevant to this message."""
     i = 1 if lang == "fr" else 0
@@ -242,36 +310,43 @@ def steps(verdict: str, scheme: str | None, facts: dict, lang: str, route: str =
         do.append(("If anyone later asks for your PIN or a code about it, stop: that part would be a scam",
                    "Si quelqu'un vous demande ensuite votre code secret ou un code à ce sujet, arrêtez : ce serait une arnaque")[i])
         return do, dont
+    b_do, b_dont = behaviours(facts.get("text", ""), i)
     if verdict == "cant_tell":
         do.append(NOT_YET[i])
-        if brand:
-            do.append(OPERATOR[brand][lang if lang in ("en", "fr") else "en"])
+        do += b_do
+        dont += b_dont
         for a in ("click_link", "call_back", "pin", "send_money"):
             if a in asks or (a == "click_link" and facts.get("links")):
                 dont.append(ASK_LINES[a][i])
-        return do[:3], dont[:3]
+        return list(dict.fromkeys(do))[:3], list(dict.fromkeys(dont))[:3]
     plan = LINES.get(scheme or "", {})
-    if claimed and scheme in ANNOUNCEMENTS:
+    fit = scheme_supported(scheme, facts.get("text", ""))  # the kind's own lines only when the message really shows that kind
+    do += b_do
+    if claimed and scheme in ANNOUNCEMENTS and fit:
         # the institution the message names, and the only site that can speak for it
         do.append((f"Check on the official site of {claimed[0]} yourself ({claimed[1][0]}). Real programmes never recruit through WhatsApp or Telegram links, and never ask for fees by mobile money",
                    f"Vérifiez vous-même sur le site officiel de {claimed[0]} ({claimed[1][0]}). Les vrais programmes ne recrutent jamais par lien WhatsApp ou Telegram, et ne demandent jamais de frais par mobile money")[i])
-    elif plan.get("do"):
+    elif fit and plan.get("do"):
         do.append(plan["do"][i])
-    money_scheme = scheme in ("reversal", "credential", None) or brand is not None
+    else:
+        do.append(NOT_YET[i])  # no kind the text supports: what is true for every scam, nothing written for a different one
+    money_scheme = fit and scheme in ("reversal", "credential")  # the operator's balance line fits money that may have moved
     if brand and money_scheme:
         do.append(OPERATOR[brand][lang if lang in ("en", "fr") else "en"])
-    if scheme == "job" and facts.get("body_numbers"):
+    if scheme == "job" and fit and facts.get("body_numbers"):
         do.append(JOB_SAFETY[i])  # an employer who is only a phone number: how to check it before you go
     do.append(WARN_OTHERS[i])
-    dont += [d[i] for d in plan.get("dont", [])]
+    dont += b_dont
+    scheme_dont = [d[i] for d in plan.get("dont", [])] if fit else []
     for a in ("pin", "click_link", "call_back", "personal_info", "send_money"):
         line = ASK_LINES[a][i]
         wanted = a in asks or (a == "click_link" and facts.get("links"))
-        if wanted and line not in dont and not (a == "send_money" and dont):
+        if wanted and line not in dont and not (a == "send_money" and (dont or scheme_dont)):
             dont.append(line)
+    dont += scheme_dont
     if not dont:
         dont.append(ASK_LINES["send_money"][i])
-    return do[:3], dont[:3]
+    return list(dict.fromkeys(do))[:4], list(dict.fromkeys(dont))[:4]
 
 
 # ---------------------------------------------------------------------------------------------------------------

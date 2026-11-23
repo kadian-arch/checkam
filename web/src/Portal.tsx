@@ -332,7 +332,7 @@ function Dossier({ token, guard, id, back }: { token: string; guard: G; id: stri
   const [done, setDone] = useState<any>(null);
   const [err, setErr] = useState("");
   useEffect(() => { guard(api.dossier(token, id)).then((x) => { setD(x); setAlert(x.alert); }).catch(() => {}); }, [id]);
-  if (!d) return <><button className="link" onClick={back}>← Campaigns</button><p className="muted">The agents are investigating this campaign: pulling records from Zetaris, checking every link, writing the dossier…</p></>;
+  if (!d) return <><button className="link" onClick={back}>← Campaigns</button><p className="muted">The agents are investigating this campaign: pulling the records, checking every link, writing the dossier…</p></>;
   const publish = async () => {
     setErr("");
     try {

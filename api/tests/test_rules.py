@@ -59,12 +59,12 @@ def test_advice_fits_the_scheme_and_never_mixes_them_up():
     visa = "CANADA VISA LOTTERY 2026. Host: Canada Government. Sponsored travel, work permit. Apply here https://istincy.com/CANADA-VISA-2026"
     s = advice.scheme_of(visa, [], "visa lottery scam")
     assert s == "visa_scholarship"
-    do, dont = advice.steps("scam", s, {"brands": [], "asks": ["click_link"], "links": ["istincy.com"]}, "en")
+    do, dont = advice.steps("scam", s, {"brands": [], "asks": ["click_link"], "links": ["istincy.com"], "text": visa}, "en")
     text = " ".join(do + dont)
     assert "canada.ca" in text and "fee" in text
     assert "PIN" not in text and "by mistake" not in text  # nothing about other schemes
     rev = "Je vous ai envoye 25 000 FCFA par erreur sur votre compte Mobile Money, renvoyez-les"
-    do, dont = advice.steps("scam", advice.scheme_of(rev, [], ""), {"brands": ["mtn"], "asks": ["send_money"], "links": []}, "fr")
+    do, dont = advice.steps("scam", advice.scheme_of(rev, [], ""), {"brands": ["mtn"], "asks": ["send_money"], "links": [], "text": rev}, "fr")
     assert any("*126#" in d for d in do) and any("erreur" in d for d in dont)
 
 
@@ -91,7 +91,7 @@ def test_advice_points_to_the_institution_the_message_names():
     from checkam.adapters import linkcheck
     msg = "Bourses du MINESUP 2026: payez 15 000 FCFA de frais de dossier pour valider votre place"
     who = linkcheck.claimed(msg, "fr")
-    do, _ = advice.steps("scam", "visa_scholarship", {"brands": [], "asks": ["send_money"], "links": []}, "fr", "", who)
+    do, _ = advice.steps("scam", "visa_scholarship", {"brands": [], "asks": ["send_money"], "links": [], "text": msg}, "fr", "", who)
     assert "gov.cm" in do[0] and "canada" not in do[0].lower()
 
 

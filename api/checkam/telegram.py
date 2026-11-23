@@ -27,26 +27,32 @@ EVIDENCE = {
 }
 TEXT = {
     "en": {"start": "Hi, I'm CheckAm 🛡️\n\nForward me anything that feels off (a message, a job or scholarship offer, a prize, a seller, a romance, a threat), or send screenshots. "
-                    "Five agents check it against real scam reports and official messages, then tell you what it is, why, and what to do.\n\nTry it: forward the last suspicious message you got.",
+                    "I compare it with real scam reports and official messages, then tell you what it is, why, and what to do. There is no sign-up and I do not keep your number.\n\nTry it: forward the last suspicious message you got.",
            "wait": "🔎 Checking…", "busy": "Too many checks from this chat. Try again in {s} s.",
            "why": "Why", "do": "What to do", "dont": "Don't", "error": "The check failed. Please try again in a minute.",
            "web": "🔏 Signed answer", "warn": "📣 Warn a friend", "share": "I checked this message with CheckAm: {v}. Check yours before you send money:",
            "who": "Who sent it? Reply with the name or number shown at the top of the message on your phone, and I'll check again.",
            "ask": "To decide, I need to know:", "reply": "Just reply here in your own words and I'll check again with your answer.",
-           "seconds": "checked in {s} s", "more": "(What I can add:", "unsupported": "I can check text and screenshots. Forward the message itself, or send a screenshot of it.", "again": "Seen before: same answer as {n} earlier check(s)",
-           "stage": {"Intake": "📖 Reading the message", "Planner": "🧭 Planning the checks", "Investigator": "🔍 Searching scam reports and real operator messages",
-                     "Critic": "⚖️ The critic is arguing the other side", "Reporter": "✍️ Writing your answer"}},
+           "seconds": "checked in {s} s", "more": "(What I can add:", "unsupported": "I cannot listen to voice notes or open files yet. Type or paste what was said, or send a screenshot of the message, and I will check it.", "again": "Seen before: same answer as {n} earlier check(s)",
+           "stage": {"Intake": "📖 Reading your message", "Planner": "🧭 Choosing what to check", "Investigator": "🔍 Checking it against known scams",
+                     "Critic": "⚖️ Weighing the evidence", "Reporter": "✍️ Writing your answer"},
+           "after_title": "What to do now, since you already {did}", "thanks": "Thank you. An analyst will look at this.", "gone": "I no longer have that check.",
+           "did": {"money": "sent money", "code": "gave a code", "documents": "sent your ID", "clicked": "opened the link", "installed": "installed an app"},
+           "paid": "💸 I paid", "gavecode": "🔑 I gave a code", "sentid": "🪪 I sent my ID", "right": "👍 Right answer", "wrong": "👎 Wrong answer"},
     "fr": {"start": "Bonjour, je suis CheckAm 🛡️\n\nTransférez-moi tout ce qui vous paraît louche (message, offre d'emploi ou de bourse, gain, vendeur, relation, menace), ou des captures d'écran. "
-                    "Cinq agents le vérifient avec de vrais signalements et de vrais messages officiels, puis vous disent ce que c'est, pourquoi, et quoi faire.\n\nEssayez : transférez le dernier message suspect que vous avez reçu.",
+                    "Je le compare à de vrais signalements et de vrais messages officiels, puis je vous dis ce que c'est, pourquoi, et quoi faire. Aucune inscription, et je ne garde pas votre numéro.\n\nEssayez : transférez le dernier message suspect que vous avez reçu.",
            "wait": "🔎 Vérification…", "busy": "Trop de vérifications depuis ce chat. Réessayez dans {s} s.",
            "why": "Pourquoi", "do": "Que faire", "dont": "À ne pas faire", "error": "La vérification a échoué. Réessayez dans une minute.",
            "web": "🔏 Réponse signée", "warn": "📣 Prévenir un proche", "share": "J'ai vérifié ce message avec CheckAm : {v}. Vérifiez les vôtres avant d'envoyer de l'argent :",
            "who": "Qui l'a envoyé ? Répondez avec le nom ou le numéro affiché en haut du message sur votre téléphone, et je vérifie à nouveau.",
            "ask": "Pour trancher, j'ai besoin de savoir :", "reply": "Répondez simplement ici avec vos mots et je vérifie à nouveau avec votre réponse.",
            "more": "(Ce que je peux ajouter :",
-           "seconds": "vérifié en {s} s", "unsupported": "Je vérifie les textes et les captures d'écran. Transférez le message lui-même, ou envoyez-en une capture.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
-           "stage": {"Intake": "📖 Lecture du message", "Planner": "🧭 Choix des vérifications", "Investigator": "🔍 Recherche dans les signalements et les vrais messages",
-                     "Critic": "⚖️ Le critique défend l'autre hypothèse", "Reporter": "✍️ Rédaction de votre réponse"}},
+           "seconds": "vérifié en {s} s", "unsupported": "Je ne peux pas encore écouter les messages vocaux ni ouvrir les fichiers. Écrivez ou collez ce qui a été dit, ou envoyez des captures d'écran du message, et je vérifie.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
+           "stage": {"Intake": "📖 Lecture de votre message", "Planner": "🧭 Choix des vérifications", "Investigator": "🔍 Comparaison avec les arnaques connues",
+                     "Critic": "⚖️ Pesée des preuves", "Reporter": "✍️ Rédaction de votre réponse"},
+           "after_title": "Que faire maintenant, puisque vous avez déjà {did}", "thanks": "Merci. Un analyste va regarder cela.", "gone": "Je n'ai plus cette vérification.",
+           "did": {"money": "envoyé de l'argent", "code": "donné un code", "documents": "envoyé votre pièce d'identité", "clicked": "ouvert le lien", "installed": "installé une application"},
+           "paid": "💸 J'ai payé", "gavecode": "🔑 J'ai donné un code", "sentid": "🪪 J'ai envoyé ma pièce", "right": "👍 Bonne réponse", "wrong": "👎 Mauvaise réponse"},
 }
 # a message worth checking carries something that can cost money: a link, a number, an amount, a code, a demand
 SIGNALS = re.compile(r"(?i)https?://|www\.|\b[a-z0-9-]+\.(com|cm|net|org|me|xyz|top|online|site|link|info|app)\b|[*#]\d{2,4}|\b[26]\d{8}\b|\d[\d .,]*\s*(f|fcfa|xaf|frs?|francs?)\b|"
@@ -115,7 +121,14 @@ def buttons(card: dict, ui: str) -> list:
     # the signed answer travels with the warning, so whoever receives it can check it is real
     link = (card.get("receipt") or {}).get("url") or SITE
     share = f"https://t.me/share/url?url={quote(link)}&text={quote(t['share'].format(v=verdict))}"
-    return [[{"text": t["web"], "url": link}, {"text": t["warn"], "url": share}]]
+    rows = [[{"text": t["web"], "url": link}, {"text": t["warn"], "url": share}]]
+    cid = card.get("check_id")
+    if cid and re.fullmatch(r"C-[0-9a-f]{8}", cid):
+        if card["verdict"] != "looks_genuine" and not card.get("quiet"):
+            rows.append([{"text": t["paid"], "callback_data": f"a:money:{cid}"}, {"text": t["gavecode"], "callback_data": f"a:code:{cid}"},
+                         {"text": t["sentid"], "callback_data": f"a:documents:{cid}"}])
+        rows.append([{"text": t["right"], "callback_data": f"f:right:{cid}"}, {"text": t["wrong"], "callback_data": f"f:wrong:{cid}"}])
+    return rows
 
 
 def _photo(file_id: str) -> tuple[str, str] | None:
@@ -222,7 +235,43 @@ def _album_done(key: tuple[int, str], ui: str) -> None:
     _check(chat_id, ui, album["text"], [fid for _, fid in sorted(album["shots"])])
 
 
+def _callback(cq: dict) -> None:
+    """A press on one of the answer's buttons: what to do after what you already did, or whether the answer was right."""
+    from . import advice, store
+    chat_id = ((cq.get("message") or {}).get("chat") or {}).get("id")
+    ui = _lang((cq.get("from") or {}).get("language_code", ""))
+    t = TEXT[ui]
+    m = re.fullmatch(r"([af]):([a-z_]+):(C-[0-9a-f]{8})", cq.get("data") or "")
+    if not chat_id or not m:
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"))
+        return
+    ok, _ = security.allowed(f"tgcb:{chat_id}", "default")
+    if not ok:
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"))
+        return
+    kind, what, check_id = m.groups()
+    row = store.get_check(check_id)
+    if not row:
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"), text=t["gone"])
+        return
+    lang = row.get("language") if row.get("language") in TEXT else ui
+    t = TEXT[lang]
+    if kind == "a" and what in advice.ACTED:
+        steps = advice.after_action(what, [row.get("operator") or ""], lang)
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"))
+        _send(chat_id, f"<b>{html.escape(t['after_title'].format(did=t['did'].get(what, what)), quote=False)}</b>\n" + "\n".join(f"✅ {html.escape(x, quote=False)}" for x in steps))
+    elif kind == "f" and what in ("right", "wrong"):
+        if what == "wrong":
+            store.add_flag(check_id, "", "via Telegram: the person says this answer is wrong")
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"), text=t["thanks"])
+    else:
+        _call("answerCallbackQuery", callback_query_id=cq.get("id"))
+
+
 def handle(update: dict) -> None:
+    if update.get("callback_query"):
+        _callback(update["callback_query"])
+        return
     msg = update.get("message") or {}  # edits are ignored: a corrected message is not checked twice
     chat_id = (msg.get("chat") or {}).get("id")
     if not chat_id:

@@ -17,7 +17,7 @@ def call(method: str, **body) -> str:
 
 
 print(call("setWebhook", url=f"{base}/telegram/{telegram.SECRET}", secret_token=telegram.SECRET,
-           allowed_updates=["message"], drop_pending_updates=True, max_connections=20))
+           allowed_updates=["message", "callback_query"], drop_pending_updates=True, max_connections=20))
 for lang, (about, desc, start, check) in {
     "": ("Forward a suspicious money message. Five AI agents check it and tell you why. Free, English and French.",
          "CheckAm checks suspicious mobile money, job, scholarship and prize messages against real scam reports in Cameroon. "
