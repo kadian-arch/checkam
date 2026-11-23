@@ -12,14 +12,14 @@ OPERATOR = {
 
 SCHEMES = {
     # name: (pattern over text + scam types + the model's scheme name, label en, label fr)
-    "visa_scholarship": (r"visa|lottery|loterie|scholarship|bourse|immigra|study abroad|[ée]tudier [àa] l'[ée]tranger|work permit|permis de travail|green card|dv ?lottery|fake_scholarship_visa",
+    "visa_scholarship": (r"visa|diversity (?:visa )?lottery|green card lottery|loterie (?:du |de la )?(?:visa|green card)|scholarship|bourse|immigra|study abroad|[ée]tudier [àa] l'[ée]tranger|work permit|permis de travail|green card|dv ?lottery|fake_scholarship_visa",
                          "a fake visa or scholarship offer", "une fausse offre de visa ou de bourse"),
     "job": (r"recrut|recruit|job|emploi|hiring|embauche|stage|internship|salaire|salary|fake_job|candidat|volontaire|volunteer|rejoign\w* (?:notre|nos|l'|la|le)|join our|type de contrat|temps plein|full[- ]time|former \d+ jeunes|vacanc|postule[rz]|"
             r"terms of reference|termes de r[ée]f[ée]rence|apply (?:before|through)|is looking for an?\b",
             "a fake job offer", "une fausse offre d'emploi"),
     "exam": (r"concours|admission|[ée]preuves|leaked (?:exam|paper|question)|exam (?:results?|papers?|questions?)|fuite d(?:es|'[ée]preuves)|fake_concours_admission|enam\b|emia\b",
              "a fake concours or admission offer", "une fausse offre de concours ou d'admission"),
-    "investment": (r"invest|ponzi|crypto|bitcoin|forex|trading|minage|mining|machine|doubl|retrait|withdraw(?!al_trap)|solde retirable|invitation[_ ]code|parrain|referral|rendement|profit",
+    "investment": (r"invest|ponzi|crypto|bitcoin|forex|trading|minage|mining|machine|doubl(?:e|er|ez|ons)? (?:votre|vos|your|ton|ta|tes|l'argent|money|mise|capital)|doublez|retrait|withdraw(?!al_trap)|solde retirable|invitation[_ ]code|parrain|referral|rendement|profit",
                    "a fake investment", "un faux investissement"),
     "loan": (r"loan|pr[êe]t|cr[ée]dit rapide|borrow|emprunt|loan_scam", "a fake loan", "un faux prêt"),
     "reversal": (r"par erreur|by mistake|mistaken|wrong number|wrong_number_reversal|deposit_withdrawal_trap|renvoy|send (?:it )?back|rembours|refund|accidental (?:transfer|deposit|payment)|"
@@ -28,10 +28,10 @@ SCHEMES = {
     "credential": (r"\bpin\b|code secret|otp|mot de passe|password|credential_request|account_blocked|bloqu|suspend|fake_agent|agent|service client|customer care|sim_swap|"
                    r"\d[- ]digit code|code (?:[àa] \d chiffres|de v[ée]rification)|verification code|forward (?:it|the code|me the code)|transf[ée]re[rz]?[- ]le",
                    "someone after your PIN or account", "quelqu'un qui veut votre code ou votre compte"),
-    "prize": (r"gagn|won|winner|prize|lot |cadeau|gift|promo|f[ée]licitations|congratulations|anniversaire|tirage|fake_prize_promo",
+    "prize": (r"gagn|won|winner|prize|lottery|loterie|tombola|raffle|jackpot|lot |cadeau|gift|promo|f[ée]licitations|congratulations|anniversaire|tirage|fake_prize_promo",
               "a fake prize", "un faux gain"),
     "seller": (r"livraison|delivery|colis|parcel|douane|customs|seller|vendeur|commande|order|fake_seller_delivery", "a fake seller or delivery", "un faux vendeur ou une fausse livraison"),
-    "family": (r"maman|papa|tonton|tata|my dear|ma ch[ée]rie|mon fr[èe]re|ma s[œo]e?ur|hospital|h[ôo]pital|accident(?!al)s?|urgence|emergency|stuck|bloqu[ée]e? [àa]|border|fronti[èe]re|"
+    "family": (r"maman|papa|tonton|tata|ma ch[ée]rie|mon fr[èe]re|ma s[œo]e?ur|hospital|h[ôo]pital|accident(?!al)s?|urgence|emergency|stuck|bloqu[ée]e? [àa]|border|fronti[èe]re|"
                r"phone is (?:almost )?(?:off|dead)|batterie|family_emergency|hacked_account_money", "a fake emergency from someone you know",
                "une fausse urgence d'un proche"),
     "romance": (r"romance|my love|mon amour|darling|sweetheart|i love you|je t'aime|soulmate|[âa]me s[œo]e?ur|marry|[ée]pouser|dating|site de rencontres?|fianc[ée]",
@@ -47,6 +47,10 @@ SCHEMES = {
     "phishing": (r"phishing_link|log ?in\b|sign in|connectez-vous|verify your (?:account|identity)|v[ée]rifie[rz] votre (?:compte|identit[ée])|confirm your (?:account|identity)|"
                  r"confirme[rz] votre (?:compte|identit[ée])|update your (?:account|details)|mettre? [àa] jour votre compte",
                  "a link made to steal your login", "un lien fait pour voler vos identifiants"),
+    "rental": (r"loyer|\brent\b|caution\b|house for rent|maison [àa] louer|chambre [àa] louer|appartement|\bstudio\b|landlord|bailleur|propri[ée]taire|deposit for (?:the )?(?:house|apartment|room|flat)",
+               "a fake rental or housing deposit", "un faux loyer ou une fausse caution"),
+    "charity": (r"donat|\bdons?\b|orphelin|orphan|charity|church building|aide humanitaire|cagnotte|fundrais|sick child|enfant malade|help (?:us )?(?:build|rebuild)|aidez[- ]nous",
+                "a fake charity appeal", "un faux appel aux dons"),
     "fake_page": (r"fake_social_profile|fake_document|fake (?:page|profile|account|communiqu[ée]|memo)|faux (?:profil|compte|communiqu[ée])|fausse page",
                   "a fake page or document using a known name", "une fausse page ou un faux document au nom d'une personne ou d'une marque connue"),
 }
@@ -105,6 +109,12 @@ LINES = {
                "Gardez les messages comme preuve, parlez-en à une personne de confiance, et signalez-le au commissariat ou à la brigade de gendarmerie la plus proche"),
         "dont": [("Do not pay: paying once brings more demands", "Ne payez pas : payer une fois amène d'autres demandes"),
                  ("Do not send more photos or personal details", "N'envoyez plus de photos ni d'informations personnelles")]},
+    "rental": {
+        "do": ("Visit the place yourself and meet the owner in person, with a witness, before you pay anything", "Visitez le logement vous-même et rencontrez le propriétaire en personne, avec un témoin, avant de payer quoi que ce soit"),
+        "dont": [("Do not pay rent or a deposit by mobile money before you have seen the place and signed a contract", "Ne payez ni loyer ni caution par mobile money avant d'avoir vu le logement et signé un contrat")]},
+    "charity": {
+        "do": ("Give only through an organisation you can visit, or call on a number you find yourself", "Donnez seulement par une organisation que vous pouvez visiter, ou appeler à un numéro que vous trouvez vous-même"),
+        "dont": [("Do not send money to a personal mobile money number for a collection you cannot check", "N'envoyez pas d'argent à un numéro mobile money personnel pour une collecte que vous ne pouvez pas vérifier")]},
     "official": {
         "do": ("Real offices do not collect fines or fees through a personal mobile money number. Go to the office yourself, or call a number you find on its official site",
                "Les vrais services ne perçoivent pas d'amende ni de frais sur un numéro mobile money personnel. Rendez-vous au bureau, ou appelez un numéro trouvé sur son site officiel"),
@@ -138,13 +148,51 @@ NOT_YET = ("Do not act on it yet. Check with the official source first, using a 
            "N'agissez pas encore. Vérifiez d'abord auprès de la source officielle, avec un numéro ou un site que vous trouvez vous-même")
 
 
+# how scams are worded beyond the first lists: used only to name the kind of scam, never to clear a message
+NAMING_HINTS = {
+    "job": r"shortlisted?|position of|poste de|poste d'|\bposte\b|interview slot|entretien|uniform|medical test|visite m[ée]dicale|applicant|candidature retenue|travail [àa] l'[ée]tranger|work abroad",
+    "romance": r"us army|\barmy\b|soldier|soldat|sergeant|\bsgt\b|peacekeep\w*|trunk box|inherit\w*|h[ée]ritage|saw your profile|something special|my dear|mon c[œo]eur|ma belle|mon ch[ée]ri|tr[èe]s belle|you are (?:very )?beautiful|"
+               r"talking for \d+|been talking|doctor with the (?:un|army)|i think i love|gift parcel",
+    "family": r"new number|nouveau num[ée]ro|changed my number|chang[ée] de num[ée]ro|phone (?:don )?spoil|\bna me\b|t[ée]l[ée]phone (?:est )?(?:cass[ée]|perdu)|lost my phone|\buncle\b|\btonton\b",
+    "exam": r"(?:questions?|papers?|sujets?|[ée]preuves?)\W+(?:\w+\W+){0,3}(?:leaked|fuit[ée]s?|d'avance)|\bgce\b|probatoire|baccalaur[ée]at|\bbepc\b",
+    "credential": r"\bpuk\b|sim (?:card|swap)|votre sim|carte sim",
+    "seller": r"\bdhl\b|fedex|\bups\b|chronopost|colissimo|stockage|storage fee|re-?delivery|reschedule|frais de (?:douane|livraison|stockage)|delivery fee|colis (?:est )?bloqu[ée]|parcel (?:is )?(?:held|blocked)",
+    "reversal": r"mauvais num[ée]ro|\bfloat\b|rends-?moi|rendez-?moi|garde le reste|keep the rest",
+}
+
+
+SCHEME_GUIDE = {
+    "visa_scholarship": "a fake visa, green-card lottery, study-abroad or scholarship offer that asks for money",
+    "job": "a fake job or recruitment offer (fee, medical test, uniform, visa fee, documents), including work abroad",
+    "exam": "a fake concours, admission or exam offer, leaked exam papers, grade fixing",
+    "investment": "an investment, trading, crypto, forex, mining or referral platform, or money doubling",
+    "loan": "a loan offer that asks for a fee first",
+    "reversal": "'money sent by mistake' or a fake credit receipt, asking you to send money back or cash",
+    "credential": "someone after your PIN, OTP, password, SIM or account (fake bank, operator, agent or customer service)",
+    "prize": "a fake prize, lottery, raffle, gift or promotion",
+    "seller": "a fake seller, delivery, parcel or customs or storage fee",
+    "family": "a fake emergency or request from a relative or friend (new number, hospital, stranded)",
+    "romance": "a romance or relationship story that leads to money or a parcel (soldier, doctor abroad)",
+    "extortion": "blackmail or threats (intimate photos, kidnapping)",
+    "official": "someone posing as police, tax, court, immigration or another official",
+    "advance_fee": "a fee demanded before a payout that fits none of the others",
+    "phishing": "a link made to steal your login",
+    "rental": "a house, room or rental deposit scam",
+    "charity": "a fake charity or donation appeal",
+    "fake_page": "a fake page, account or document using a known name",
+}
+
+
 def scheme_of(text: str, scam_types: list[str], model_scheme: str = "") -> str | None:
     """What this message itself says weighs most; the analyst's reading next; the types of similar old
     reports only break ties, since a neighbour can be a different scheme."""
     best, top = None, 0
+    picked = (model_scheme or "").strip().lower()
     for name, (rx, _, _) in SCHEMES.items():
-        rx = rf"(?<![^\W_])(?:{rx})"  # words start where a word starts; stems like "recrut" still take any ending
+        rx = rf"(?<![^\W_])(?:{rx}" + (f"|{NAMING_HINTS[name]}" if name in NAMING_HINTS else "") + ")"  # words start where a word starts; stems like "recrut" still take any ending
         direct = 2 * len(re.findall(rx, text, flags=re.I)) + 2 * len(re.findall(rx, model_scheme or "", flags=re.I))
+        if picked == name:
+            direct += 5
         if not direct:
             continue  # neighbours can break a tie, never name a scheme the message itself does not show
         n = direct + len(re.findall(rx, " ".join(scam_types or []), flags=re.I))

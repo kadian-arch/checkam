@@ -55,7 +55,11 @@ def _startup():
                 backfill_titles()
             except Exception:
                 pass
-            time.sleep(24 * 3600)
+            try:
+                missing = bool(store.alerts_missing_title_fr())
+            except Exception:
+                missing = False
+            time.sleep(3600 if missing else 24 * 3600)  # a title that could not be translated is tried again within the hour
 
     threading.Thread(target=tidy, daemon=True).start()
 
@@ -64,8 +68,12 @@ def translate_title(title: str) -> str:
     """A French title for an English one, when the analyst did not write it. Empty if the model is not available."""
     if not config.MODEL_API_KEY or not title.strip():
         return ""
-    out = nvidia.chat_json([{"role": "system", "content": "Translate this public fraud-alert title into French. Keep names, websites and numbers exactly. Reply with JSON only: {\"fr\": \"...\"}"},
-                            {"role": "user", "content": title[:200]}], max_tokens=120, agent="Reporter", action="translate_title") or {}
+    # an instruction that only says "keep names" makes the model return the English title untouched, so the rule is stated both ways
+    out = nvidia.chat_json([{"role": "system", "content": "You translate short public fraud-alert titles from English into natural French for people in Cameroon. Translate every ordinary word. "
+                                                          "Only names of people, companies, brands and websites, and numbers, stay unchanged. "
+                                                          "Example: 'Beware of Fake MTN Mobile Money Credit Scams' -> 'Méfiez-vous des fausses arnaques au crédit MTN Mobile Money'. "
+                                                          "Reply with JSON only: {\"fr\": \"<the French title>\"}"},
+                            {"role": "user", "content": title[:200]}], max_tokens=200, agent="Reporter", action="translate_title") or {}
     fr = str(out.get("fr") or "").strip()
     return fr[:200] if fr and fr.lower() != title.lower() else ""
 
