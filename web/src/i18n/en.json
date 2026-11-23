@@ -151,7 +151,9 @@
     "official": "someone posing as an official",
     "advance_fee": "a fee demanded before a payout",
     "phishing": "a link made to steal your login",
-    "fake_page": "a fake page or document using a known name"
+    "fake_page": "a fake page or document using a known name",
+    "rental": "a fake rental or housing deposit",
+    "charity": "a fake charity appeal"
   },
   "radar_title": "Scam radar",
   "radar_sub": "{n} scams caught in the last {days} days, by kind",

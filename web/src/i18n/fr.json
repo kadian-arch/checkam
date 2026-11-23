@@ -49,7 +49,7 @@
   "how_we_checked": "Pour les experts : chaque étape des agents",
   "evidence": "preuves",
   "check_another": "Vérifier un autre message",
-  "share": "Prévenir quelqu'un",
+  "share": "Partager",
   "share_text": "J'ai vérifié ce message sur CheckAm : {verdict}. Avant d'envoyer, vérifiez :",
   "how_title": "Comment ça marche",
   "how_sub": "Simple, et vous voyez toujours pourquoi.",
@@ -151,7 +151,9 @@
     "official": "quelqu'un qui se fait passer pour une autorité",
     "advance_fee": "des frais exigés avant un versement",
     "phishing": "un lien fait pour voler vos identifiants",
-    "fake_page": "une fausse page ou un faux document au nom d'une personne ou d'une marque connue"
+    "fake_page": "une fausse page ou un faux document au nom d'une personne ou d'une marque connue",
+    "rental": "un faux loyer ou une fausse caution",
+    "charity": "un faux appel aux dons"
   },
   "radar_title": "Radar des arnaques",
   "radar_sub": "{n} arnaques repérées ces {days} derniers jours, par type",
@@ -193,7 +195,7 @@
   "ctx_channel_call": "Appel téléphonique",
   "ctx_channel_voice_note": "Message vocal",
   "ctx_channel_social": "Facebook, TikTok ou autre application",
-  "ctx_channel_email": "Courriel",
+  "ctx_channel_email": "E-mail",
   "ctx_channel_in_person": "En personne",
   "ctx_relation": "Qui dit-il être ?",
   "ctx_relation_stranger": "Un inconnu",
