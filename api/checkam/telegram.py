@@ -47,7 +47,7 @@ TEXT = {
            "who": "Qui l'a envoyé ? Répondez avec le nom ou le numéro affiché en haut du message sur votre téléphone, et je vérifie à nouveau.",
            "ask": "Pour trancher, j'ai besoin de savoir :", "reply": "Répondez simplement ici avec vos mots et je vérifie à nouveau avec votre réponse.",
            "more": "(Ce que je peux ajouter :",
-           "seconds": "vérifié en {s} s", "unsupported": "Je ne peux pas encore écouter les messages vocaux ni ouvrir les fichiers. Écrivez ou collez ce qui a été dit, ou envoyez une capture du message, et je vérifie.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
+           "seconds": "vérifié en {s} s", "unsupported": "Je ne peux pas encore écouter les messages vocaux ni ouvrir les fichiers. Écrivez ou collez ce qui a été dit, ou envoyez des captures d'écran du message, et je vérifie.", "again": "Déjà vu : même réponse que {n} vérification(s) précédente(s)",
            "stage": {"Intake": "📖 Lecture de votre message", "Planner": "🧭 Choix des vérifications", "Investigator": "🔍 Comparaison avec les arnaques connues",
                      "Critic": "⚖️ Pesée des preuves", "Reporter": "✍️ Rédaction de votre réponse"},
            "after_title": "Que faire maintenant, puisque vous avez déjà {did}", "thanks": "Merci. Un analyste va regarder cela.", "gone": "Je n'ai plus cette vérification.",
