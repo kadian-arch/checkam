@@ -134,6 +134,7 @@ function cleanContext(c: Context): Context {
   if (c.channel) out.channel = c.channel;
   if (c.relation) out.relation = c.relation;
   if (c.wants?.length) out.wants = c.wants;
+  if (c.dictated) out.dictated = true;
   return out;
 }
 
@@ -149,6 +150,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
   const [ctx, setCtx] = useState<Context>({});
   const [listening, setListening] = useState(false);
   const [voiceMsg, setVoiceMsg] = useState("");
+  const [speech, setSpeech] = useState<Lang>(lang);  // the language the person speaks, which may differ from the site's
   const recog = useRef<{ stop: () => void } | null>(null);
   const top = useRef<HTMLElement>(null);
   const step = live.reduce((s, l) => Math.max(s, phase(l)), 0);
@@ -169,13 +171,13 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
     let heard = false;
     let failed = false;
     const r = new R();
-    r.lang = lang === "fr" ? "fr-FR" : "en-GB";
+    r.lang = speech === "fr" ? "fr-FR" : "en-GB";
     r.interimResults = false;
     r.continuous = false;
     r.onstart = () => setVoiceMsg(t.voice_listening);
     r.onresult = (e: any) => {
       const said = Array.from(e.results as ArrayLike<any>).slice(e.resultIndex).map((x: any) => x[0].transcript).join(" ").trim();
-      if (said) { heard = true; setText((was) => (was ? was + " " : "") + said); }
+      if (said) { heard = true; setCtx((c) => ({ ...c, dictated: true })); setText((was) => (was ? was + " " : "") + said); }
     };
     r.onerror = (e: any) => {
       failed = true;
@@ -253,6 +255,8 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
               onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => setVoiceMsg(t.paste_blocked)); }}>{t.paste_btn}</button>}
             {canDictate && <button type="button" className={listening ? "chip-btn rec" : "chip-btn"} disabled={busy} aria-pressed={listening}
               onClick={(e) => { e.preventDefault(); dictate(); }}>{listening ? t.voice_stop : t.voice_start}</button>}
+            {canDictate && <button type="button" className="chip-btn" disabled={busy || listening} aria-label={t.voice_language}
+              onClick={(e) => { e.preventDefault(); setSpeech((s) => (s === "fr" ? "en" : "fr")); }}>{speech === "fr" ? "🎤 Français" : "🎤 English"}</button>}
           </span>
           <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
         </label>

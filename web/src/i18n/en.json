@@ -187,6 +187,7 @@
   "acted_documents": "I sent my ID or documents",
   "acted_installed": "I installed an app",
   "voice_start": "Speak it",
+  "voice_language": "Language you will speak",
   "voice_stop": "Stop",
   "ctx_title": "Tell us more (optional, makes the answer more accurate)",
   "ctx_channel": "How did it reach you?",

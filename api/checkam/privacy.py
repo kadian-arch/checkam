@@ -178,3 +178,60 @@ def mask(text: str) -> str:
         return f"[PHONE:{code}]" if code else "[PHONE]"
 
     return CM_PHONE.sub(rep, clean)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Speech recognition writes what it hears: a phone number comes out as "six five five one one two two three three" and
+# an amount as "fifty thousand francs". The checks read digits, so spoken numbers become digits first (English and French).
+_UNITS = {"zero": 0, "zéro": 0, "oh": 0, "one": 1, "un": 1, "two": 2, "deux": 2, "three": 3, "trois": 3, "four": 4, "quatre": 4, "five": 5, "cinq": 5, "six": 6,
+          "seven": 7, "sept": 7, "eight": 8, "huit": 8, "nine": 9, "neuf": 9, "ten": 10, "dix": 10, "eleven": 11, "onze": 11, "twelve": 12, "douze": 12,
+          "thirteen": 13, "treize": 13, "fourteen": 14, "quatorze": 14, "fifteen": 15, "quinze": 15, "sixteen": 16, "seize": 16, "seventeen": 17, "eighteen": 18,
+          "nineteen": 19}
+_TENS = {"twenty": 20, "vingt": 20, "thirty": 30, "trente": 30, "forty": 40, "quarante": 40, "fifty": 50, "cinquante": 50, "sixty": 60, "soixante": 60,
+         "seventy": 70, "eighty": 80, "ninety": 90}
+_DIGIT_WORDS = r"(?:zero|zéro|oh|one|two|three|four|five|six|seven|eight|nine|un|deux|trois|quatre|cinq|sept|huit|neuf)"
+_RUN = re.compile(rf"(?i)\b{_DIGIT_WORDS}(?:[\s,.\-]+{_DIGIT_WORDS}){{5,}}\b")
+_NUMBER_WORDS = "|".join(sorted(list(_UNITS) + list(_TENS) + ["hundred", "cent", "cents", "thousand", "mille", "million", "millions", "and", "et", "vingts"], key=len, reverse=True))
+_AMOUNT = re.compile(rf"(?i)\b((?:(?:{_NUMBER_WORDS})(?:[\s\-]+|\b))+)(?:(?=\s*(?:francs?|fcfa|f cfa|cfa|xaf|frs?\b))|(?<=thousand\s)|(?<=mille\s)|(?<=million\s)|(?<=millions\s)|(?<=thousand)|(?<=mille)|(?<=million))")
+
+
+def _words_to_int(chunk: str) -> int | None:
+    total, current = 0, 0
+    toks = [t for t in re.split(r"[\s\-]+", chunk.lower().strip()) if t and t not in ("and", "et")]
+    if not toks:
+        return None
+    for t in toks:
+        if t in _UNITS:
+            current += _UNITS[t]
+        elif t in _TENS:
+            current += _TENS[t]
+        elif t in ("vingt", "vingts") and current == 4:
+            current = 80
+        elif t in ("hundred", "cent", "cents"):
+            current = (current or 1) * 100
+        elif t in ("thousand", "mille"):
+            total += (current or 1) * 1000
+            current = 0
+        elif t in ("million", "millions"):
+            total += (current or 1) * 1_000_000
+            current = 0
+        else:
+            return None
+    return total + current
+
+
+def normalize_spoken(text: str) -> str:
+    """Numbers spoken aloud become digits. Six or more digit words in a row are a phone number; a number in words followed by
+    thousand, mille, million or a currency word is an amount. Ordinary sentences are left alone."""
+    if not text:
+        return text
+    text = _RUN.sub(lambda m: "".join(str(_UNITS[w.lower()]) for w in re.findall(_DIGIT_WORDS, m.group(0), flags=re.I)), text)
+
+    def amount(m: re.Match) -> str:
+        chunk = m.group(1)
+        n = _words_to_int(chunk)
+        if n is None or n < 100 and not re.search(r"(?i)thousand|mille|million", chunk):
+            return m.group(0)
+        return f"{n} "
+
+    return _AMOUNT.sub(amount, text)

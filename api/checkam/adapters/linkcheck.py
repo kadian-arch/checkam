@@ -113,3 +113,45 @@ def claimed(text: str, lang: str = "en") -> tuple[str, tuple[str, ...]] | None:
 def belongs(host: str, domains: tuple[str, ...]) -> bool:
     host = host.lower()
     return any(host == d or host.endswith("." + d) for d in domains)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# What the address itself gives away, before any lookup: a look-alike of a known name, foreign letters made to look
+# like ours, a bare number instead of a name, a free page builder, an ending scam sites buy because it costs nothing.
+BRANDS = {"mtn": ("mtn.cm", "mtnonline.com", "mtn.com"), "momo": ("mtn.cm", "mtnonline.com", "mtn.com"), "orange": ("orange.cm", "orange.com"),
+          "campost": ("campost.cm",), "eneo": ("eneo.cm",), "camtel": ("camtel.cm",), "nexttel": ("nexttel.cm",), "canada": ("canada.ca", "gc.ca"),
+          "minesup": ("minesup.gov.cm",), "unicef": ("unicef.org",), "whatsapp": ("whatsapp.com", "wa.me"), "facebook": ("facebook.com", "fb.com"),
+          "paypal": ("paypal.com",), "afriland": ("afrilandfirstbank.com",), "ecobank": ("ecobank.com",), "uba": ("ubagroup.com",), "bicec": ("bicec.com",)}
+CHEAP_ENDINGS = {"xyz", "top", "click", "icu", "buzz", "sbs", "cyou", "monster", "tk", "ml", "ga", "cf", "gq", "rest", "cfd", "lol", "work", "shop", "site", "online", "live", "vip"}
+FREE_BUILDERS = ("blogspot.", "wixsite.com", "weebly.com", "github.io", "firebaseapp.com", "web.app", "netlify.app", "vercel.app", "glitch.me", "000webhostapp.com",
+                 "godaddysites.com", "google.com/forms", "forms.gle", "sites.google.com", "wordpress.com", "carrd.co", "webflow.io", "pages.dev")
+
+
+def shape(host: str) -> list[tuple[str, str, str]]:
+    """(strength, English, French) for each thing the address itself gives away. strength is 'strong' or 'weak'."""
+    host = host.lower().strip(".")
+    out: list[tuple[str, str, str]] = []
+    if re.fullmatch(r"\d{1,3}(?:\.\d{1,3}){3}", host):
+        return [("strong", "It sends you to a bare number address instead of a website name, which real companies do not do",
+                 "Il vous envoie vers une adresse faite de chiffres au lieu d'un nom de site, ce que les vraies entreprises ne font pas")]
+    if "xn--" in host:
+        out.append(("strong", "The address uses foreign letters made to look like ours, a way to copy a real name",
+                    "L'adresse utilise des lettres étrangères faites pour ressembler aux nôtres, une façon de copier un vrai nom"))
+    dom = registrable(host)
+    tokens = [t for t in re.split(r"[.\-_0-9]+", host) if t]
+    for brand, official in BRANDS.items():
+        if any(t == brand or (len(brand) >= 4 and t.startswith(brand) and len(t) <= len(brand) + 9) for t in tokens):
+            if not any(host == d or host.endswith("." + d) for d in official):
+                out.append(("strong", f"The address contains the name {brand.upper() if len(brand) < 5 else brand.title()} but is not their site (theirs ends in {official[0]})",
+                            f"L'adresse contient le nom {brand.upper() if len(brand) < 5 else brand.title()} mais n'est pas leur site (le leur finit par {official[0]})"))
+                break
+    if any(host == f.rstrip(".") or host.endswith(("." + f).rstrip(".")) or f in host for f in FREE_BUILDERS if "/" not in f):
+        out.append(("weak", "It is a page anyone can build for free, not a company's own website",
+                    "C'est une page que n'importe qui peut créer gratuitement, pas le site propre d'une entreprise"))
+    elif dom.rsplit(".", 1)[-1] in CHEAP_ENDINGS and dom not in {"live", "online"}:
+        out.append(("weak", f"The ending .{dom.rsplit('.', 1)[-1]} costs almost nothing, which is why scam sites favour it",
+                    f"La terminaison .{dom.rsplit('.', 1)[-1]} ne coûte presque rien, c'est pourquoi les sites d'arnaque l'aiment"))
+    if host.count("-") >= 3:
+        out.append(("weak", "The address is stuffed with hyphens, a common way to make a fake name look official",
+                    "L'adresse est pleine de tirets, une façon courante de faire passer un faux nom pour officiel"))
+    return out

@@ -1,6 +1,6 @@
 import type { TraceLine } from "./api";
 
-const SPONSOR: Record<string, string> = { zetaris: "Zetaris", meterless: "Meterless", nvidia: "Nemotron" };
+const SPONSOR: Record<string, string> = { zetaris: "evidence", meterless: "memory and graph", nvidia: "language model" };
 
 export default function TraceView({ lines, rounds }: { lines: TraceLine[]; rounds?: number }) {
   const counts = lines.reduce<Record<string, number>>((a, l) => ((a[l.sponsor] = (a[l.sponsor] ?? 0) + 1), a), {});

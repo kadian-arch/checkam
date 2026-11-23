@@ -1,0 +1,90 @@
+{
+  "summary": {
+    "tag": "v6-fp1",
+    "split": "all",
+    "with_sender": true,
+    "near_copies_hidden": true,
+    "n": 1,
+    "mode": "data=sample-duckdb, nemotron=on",
+    "seconds": 12,
+    "precision": 0.0,
+    "recall": 0,
+    "recall_checkable_messages": 0,
+    "scam_records_retold": 0,
+    "f1": 0,
+    "false_alarm_rate": 1.0,
+    "cant_tell": 0,
+    "confusion": {
+      "not_scam->scam": 1
+    },
+    "recall_by_source": {}
+  },
+  "results": [
+    {
+      "id": "G-0f1cab47",
+      "text": "Your payment of 500 XAF to MTN Bundle Boost has been completed at 2026-09-29 07:16:06. Your new balance: 53 XAF. Fee was 0 XAF. Message: Receiver's number(Numero destinataire) [PHONE:671-bqvcpz]. Transaction Id: [TXN_ID]. Back-to-School is Here... MoMo Got You! For any transactions from XAF 5,237,  stand a chance to win everyday : A Laptop + XAF 50,000 + a Home Box every day. Dial *126*6# or download the New MoMo App : link[.]mtn[.]cm/NewMoMoAppRef. More info: 8787 | WhatsApp 650 528 787.",
+      "label": "not_scam",
+      "origin": "contributed",
+      "text_type": "verbatim",
+      "language": "en",
+      "split": "train",
+      "verdict": "scam",
+      "confidence": 0.97,
+      "seconds": 11.5,
+      "rounds": 2,
+      "why": [
+        "It is worded almost exactly like a scam people have already reported",
+        "Our AI fraud analyst reads it as a scam (a fake prize): Promo link link.mtn.cm/NewMoMoAppRef included in a transaction receipt"
+      ],
+      "signals": [
+        {
+          "tool": "number_history",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "similar_scams",
+          "direction": "scam",
+          "weight": "strong",
+          "status": "accepted"
+        },
+        {
+          "tool": "genuine_twin",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        },
+        {
+          "tool": "model_judgement",
+          "direction": "scam",
+          "weight": "strong",
+          "status": "accepted"
+        },
+        {
+          "tool": "scam_type_stats",
+          "direction": "context",
+          "weight": "weak",
+          "status": "accepted"
+        }
+      ],
+      "profile": {
+        "pin": false,
+        "hidden": false,
+        "injection": false,
+        "forged_date": false,
+        "ussd_to_person": false,
+        "demands": 0,
+        "click": true,
+        "promise": true,
+        "links": 0,
+        "sender_kind": "unknown",
+        "retold": false,
+        "claims": [],
+        "official_route": true,
+        "score": 10
+      },
+      "sender_given": true
+    }
+  ]
+}

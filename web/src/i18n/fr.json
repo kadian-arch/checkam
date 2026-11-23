@@ -187,6 +187,7 @@
   "acted_documents": "J'ai envoyé ma pièce d'identité ou des documents",
   "acted_installed": "J'ai installé une application",
   "voice_start": "Dicter",
+  "voice_language": "Langue que vous allez parler",
   "voice_stop": "Arrêter",
   "ctx_title": "Dites-nous en plus (facultatif, rend la réponse plus précise)",
   "ctx_channel": "Comment l'avez-vous reçu ?",
