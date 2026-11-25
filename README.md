@@ -60,7 +60,7 @@ Mobile money scams reach every part of Cameroon and victims face them alone. In 
 
 Every step of every run is a line in a trace (agent, action, summaries, latency), shown in the app under "See how we checked".
 
-Components in this repository: `api/` (FastAPI, Python 3.12), `web/` (React, Vite, installable PWA), `engines/world-model` (campaign graph), `engines/scout-intent` (guard and signed publishing contracts), `engines/h-mem` (analyst memory), `data/` (sample evidence tables), `deploy/` and `render.yaml` (hosting). The evidence tables are the Stop Arnaque 237 data, queried with SQL (DuckDB by default; a Zetaris JDBC backend is supported, see [docs/ZETARIS.md](docs/ZETARIS.md) and [docs/METERLESS.md](docs/METERLESS.md)). The language model is optional: with no key every agent runs on rules and SQL.
+Components in this repository: `api/` (FastAPI, Python 3.12), `web/` (React, Vite, installable PWA), `engines/world-model` (campaign graph), `engines/scout-intent` (guard and signed publishing contracts), `engines/h-mem` (analyst memory), `data/` (sample evidence tables), `deploy/` and `render.yaml` (hosting). The evidence tables are the Stop Arnaque 237 data, queried with SQL (DuckDB by default; a Zetaris JDBC backend is supported through configuration). The language model is optional: with no key every agent runs on rules and SQL.
 
 ## Run it
 
@@ -84,7 +84,7 @@ cd engines/scout-intent && npm ci && npm start        # :8791
 cd web && npm ci && npm run build                     # served by the API
 python run.py serve                                   # :8000
 ```
-Set `MODEL_API_KEY` (an OpenAI-compatible endpoint; we use NVIDIA Nemotron) for the model steps. Without it the rule-based path answers.
+Set `MODEL_API_KEY` (an OpenAI-compatible endpoint; we use NVIDIA Nemotron) for the model steps. Without it the rule-based path answers. Set `CHECKAM_REDIS_URL` to share repeat answers and rate limits across instances (any Redis, for example Huawei Cloud DCS).
 
 ### Entry points
 | | |
