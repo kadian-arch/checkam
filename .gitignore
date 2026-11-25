@@ -16,3 +16,4 @@ dist/
 engines/*/data/
 web/dist/
 data/signing_key
+docs/*.docx

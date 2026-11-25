@@ -6,6 +6,8 @@ import time
 from collections import defaultdict, deque
 
 from fastapi import Request
+
+from . import kv
 from fastapi.responses import JSONResponse
 
 # (requests, seconds) per client IP, per route group
@@ -45,7 +47,23 @@ def client_ip(request: Request) -> str:
 MAX_BODY = 8_000_000
 
 
+def _shared(ip: str, g: str) -> tuple[bool, int] | None:
+    """The same limits counted in Redis, so they hold across several instances. None: Redis is not in use or did not answer."""
+    wall = time.time()
+    verdict = (True, 0)
+    for n, window in LIMITS[g]:
+        count = kv.incr(f"rl:{g}:{ip}:{window}:{int(wall // window)}", int(window) + 1)
+        if count is None:
+            return None
+        if count > n:
+            verdict = (False, int(window - wall % window) + 1)
+    return verdict
+
+
 def allowed(ip: str, g: str) -> tuple[bool, int]:
+    shared = _shared(ip, g)
+    if shared is not None:
+        return shared
     now = time.monotonic()
     longest = max(w for _, w in LIMITS[g])
     with _lock:

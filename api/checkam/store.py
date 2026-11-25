@@ -9,7 +9,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from . import config
+from . import config, kv
 
 _lock = threading.Lock()
 SCHEMA = """
@@ -224,6 +224,10 @@ def cache_key(text: str, sender: str, language: str) -> str:
 
 
 def cache_get(key: str) -> dict | None:
+    shared = kv.get("ans:" + key)
+    if shared:
+        n = kv.incr("hits:" + key, CACHE_HOURS * 3600) or 1
+        return {**json.loads(shared), "cached": n}
     r = conn().execute("SELECT card, created, hits FROM answers WHERE key=?", (key,)).fetchone()
     if not r or (datetime.now(timezone.utc) - datetime.fromisoformat(r["created"])).total_seconds() > CACHE_HOURS * 3600:
         return None
@@ -234,12 +238,15 @@ def cache_get(key: str) -> dict | None:
 
 
 def cache_put(key: str, card: dict) -> None:
+    kv.put("ans:" + key, json.dumps(card, ensure_ascii=False, default=str), int(CACHE_HOURS * 3600))
     with _lock:
         conn().execute("INSERT OR REPLACE INTO answers VALUES (?,?,?,0)", (key, now(), json.dumps(card, ensure_ascii=False, default=str)))
         conn().commit()
 
 
 def cache_clear() -> None:
+    kv.delete_prefix("ans:")
+    kv.delete_prefix("hits:")
     with _lock:
         conn().execute("DELETE FROM answers")
         conn().commit()
