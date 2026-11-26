@@ -35,6 +35,8 @@ DATA_DIR = Path(env("CHECKAM_DATA_DIR", str(ROOT / "data")))
 SAMPLE_DIR = DATA_DIR / "sample"
 LOG_DIR = Path(env("CHECKAM_LOG_DIR", str(ROOT / "logs")))
 DB_PATH = Path(env("CHECKAM_DB", str(DATA_DIR / "checkam.db")))
+# PostgreSQL address (for example Huawei Cloud RDS). Empty keeps the case store in the SQLite file above.
+DATABASE_URL = env("CHECKAM_DATABASE_URL", "")
 # archives sit beside the database, so on the host they live on the persistent disk and survive a redeploy
 ARCHIVE_DIR = Path(env("CHECKAM_ARCHIVE_DIR", str(DB_PATH.parent / "archive")))
 

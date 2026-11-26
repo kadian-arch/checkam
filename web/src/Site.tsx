@@ -223,6 +223,7 @@ function Hero({ t, lang, shared }: { t: Dict; lang: Lang; shared: string }) {
       setErr(t.error);
     } finally {
       setBusy(false);
+      setCtx((c) => (c.dictated ? { ...c, dictated: undefined } : c));  // the next message is typed again until it is dictated
     }
   }
 
@@ -249,17 +250,28 @@ ${t.followup_prefix} ${a})`; setText(more); setCard(null); go(sender, more); }} 
 
       <div className={`console ${busy ? "busy" : ""}`}>
         <div className="console-bar"><span /><span /><span /><code>checkam://check</code></div>
-        <label className="field">
-          <span className="field-head">{t.paste_label}
-            {canPaste && <button type="button" className="chip-btn" disabled={busy}
-              onClick={(e) => { e.preventDefault(); navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => setVoiceMsg(t.paste_blocked)); }}>{t.paste_btn}</button>}
-            {canDictate && <button type="button" className={listening ? "chip-btn rec" : "chip-btn"} disabled={busy} aria-pressed={listening}
-              onClick={(e) => { e.preventDefault(); dictate(); }}>{listening ? t.voice_stop : t.voice_start}</button>}
-            {canDictate && <button type="button" className="chip-btn" disabled={busy || listening} aria-label={t.voice_language}
-              onClick={(e) => { e.preventDefault(); setSpeech((s) => (s === "fr" ? "en" : "fr")); }}>{speech === "fr" ? "🎤 Français" : "🎤 English"}</button>}
-          </span>
-          <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
-        </label>
+        <div className="field">
+          <label className="field-label" htmlFor="message-box">{t.paste_label}</label>
+          <textarea id="message-box" value={text} onChange={(e) => setText(e.target.value)} placeholder={t.paste_placeholder} rows={6} maxLength={4000} disabled={busy} />
+        </div>
+        {/* the tools sit outside the label so a press never also clicks the text box, and they flow to the width they are given */}
+        {(canPaste || canDictate) && (
+          <div className="tools" role="group" aria-label={t.paste_label}>
+            {canPaste && <button type="button" className="tool" disabled={busy}
+              onClick={() => { navigator.clipboard.readText().then((s) => s.trim() && setText(s.slice(0, 4000))).catch(() => setVoiceMsg(t.paste_blocked)); }}>
+              <svg viewBox="0 0 24 24" aria-hidden><path d="M9 4h6v3H9z M7 5H5v15h14V5h-2" /></svg><span>{t.paste_btn}</span></button>}
+            {canDictate && <button type="button" className={listening ? "tool mic on" : "tool mic"} disabled={busy} aria-pressed={listening}
+              onClick={() => dictate()}>
+              <svg viewBox="0 0 24 24" aria-hidden><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z M5 11a7 7 0 0 0 14 0 M12 18v3" /></svg>
+              <span>{listening ? t.voice_stop : t.voice_start}</span></button>}
+            {canDictate && <div className="seg" role="radiogroup" aria-label={t.voice_language}>
+              {(["en", "fr"] as Lang[]).map((l) => (
+                <button key={l} type="button" role="radio" aria-checked={speech === l} className={speech === l ? "on" : ""} disabled={busy || listening}
+                  onClick={() => setSpeech(l)}>{l.toUpperCase()}</button>
+              ))}
+            </div>}
+          </div>
+        )}
         {(voiceMsg || !canDictate) && <p className="voice-msg" role="status" aria-live="polite">{voiceMsg || t.voice_hint}</p>}
         <div className="row">
           <label className="field grow">

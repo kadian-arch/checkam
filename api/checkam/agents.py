@@ -1154,6 +1154,21 @@ KNOWN_ISSUERS = re.compile(r"(?i)\b(port autonome|a[ée]roports? du cameroun|cam
                            r"santa lucia|chococam|boissons du cameroun|brasseries|nestl[ée]|total ?[ée]nergies|nations unies|united nations|programme alimentaire mondial|"
                            r"world food programme|afriland|ecobank|bicec|soci[ée]t[ée] g[ée]n[ée]rale|union bank|minesup|minesec|minist[èe]re|ministry of|"
                            r"orange cameroun|mtn cameroon|camtel|eneo|cnps)\b|(?-i:\b(?:PAD|ADC|ONU|VNU|PAM|WFP|UNICEF|UNHCR|PNUD|UNDP|UBA|CCAA)\b)")
+# any organisation named as a company, bank, group, university or ministry, not only the names listed above: a notice that
+# speaks for it but gives nothing to check on its own side is as unconfirmable as one naming a listed organisation
+GENERIC_ISSUER = re.compile(r"\b((?:[A-Z][\w&'’-]+\s+){1,3}(?:S\.?A\.?(?:R\.?L\.?)?|Ltd|Limited|Group|Groupe|Holding|Bank|Banque|Company|Compagnie|Corporation|Industries|Foundation|Fondation|Agency|Agence|University|Universit[ée]|Cameroun|Cameroon))\b|"
+                            r"\b((?:Ministry|Minist[èe]re|Universit[ée]|University|Banque|Bank|Agence|Agency|Groupe|Group)\s+(?:of|de|du|des|d')\s*[A-Z][\w'’-]+(?:\s+[A-Z][\w'’-]+){0,3})")
+
+
+def named_issuer(text: str) -> str:
+    """The organisation a notice speaks for, from the list of names scams borrow or from the way an organisation is written."""
+    m = KNOWN_ISSUERS.search(text)
+    if m:
+        return m.group(0).strip()
+    g = GENERIC_ISSUER.search(text)
+    return re.sub(r"^(?:The|Le|La|Les|L')\s*", "", (g.group(1) or g.group(2)).strip()) if g else ""
+
+
 # a way to apply that can be checked in person is a channel too
 APPLY_IN_PERSON = re.compile(r"(?i)\b(d[ée]poser? (?:vos?|votre|les) dossiers? (?:au|[àa]|sur)|dossiers? [àa] d[ée]poser (?:au|[àa])|apply in person|"
                        r"apply at (?:the|our) (?:office|branch|head ?office)|sur place|at the (?:head ?office|branch|office)|au si[èe]ge|[àa] la direction|affich[ée]e? (?:au|[àa]|sur|dans)|babillard|notice ?board|tableau d'affichage|secr[ée]tariat|dean'?s office|collect (?:yours|it) at)")
@@ -1281,8 +1296,8 @@ def arbitrate(case: Case, trace: Trace) -> None:
                     "Job, training and scholarship announcements are the most common bait in Cameroon. Real ones are published on the employer's or ministry's own website and never ask for a fee. Check there before you apply or pay anything",
                     "Les annonces d'emploi, de formation et de bourse sont l'appât le plus courant au Cameroun. Les vraies sont publiées sur le site de l'employeur ou du ministère et ne demandent jamais de frais. Vérifiez là-bas avant de postuler ou de payer quoi que ce soit"),
                     "scam", "medium", [{"table": "message", "id": "scheme", "detail": "job or scholarship announcement: " + "; ".join(bait)}], status="accepted"))
-            elif KNOWN_ISSUERS.search(case.facts["text"]) and not verifiable_channel(case.facts):
-                issuer = KNOWN_ISSUERS.search(case.facts["text"]).group(0).strip()
+            elif named_issuer(case.facts["text"]) and not verifiable_channel(case.facts):
+                issuer = named_issuer(case.facts["text"])
                 case.findings.append(Finding(_fid(), "unverified_issuer", L(case,
                     f"It speaks for {issuer}, a name scams often borrow, but it gives no address, link or contact on that organisation's own site. Real notices are published there: confirm it before you apply",
                     f"Il parle au nom de {issuer}, un nom que les arnaques empruntent souvent, mais il ne donne aucune adresse, aucun lien ni contact sur le site de cet organisme. Les vraies annonces y sont publiées : confirmez-la avant de postuler"),
