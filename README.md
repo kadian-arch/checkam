@@ -60,7 +60,7 @@ Mobile money scams reach every part of Cameroon and victims face them alone. In 
 
 Every step of every run is a line in a trace (agent, action, summaries, latency), shown in the app under "See how we checked".
 
-Components in this repository: `api/` (FastAPI, Python 3.12), `web/` (React, Vite, installable PWA), `engines/world-model` (campaign graph), `engines/scout-intent` (guard and signed publishing contracts), `engines/h-mem` (analyst memory), `data/` (sample evidence tables), `deploy/` and `render.yaml` (hosting). The evidence tables are the Stop Arnaque 237 data, queried with SQL (DuckDB by default; a Zetaris JDBC backend is supported through configuration). The language model is optional: with no key every agent runs on rules and SQL.
+Components in this repository: `api/` (FastAPI, Python 3.12), `web/` (React, Vite, installable PWA), `engines/world-model` (campaign graph), `engines/scout-intent` (guard and signed publishing contracts), `engines/h-mem` (analyst memory), `data/` (sample evidence tables), `deploy/` and `render.yaml` (hosting). The evidence tables are the Stop Arnaque 237 data, queried with SQL (DuckDB by default; a Zetaris JDBC backend is supported through configuration; the case store is SQLite, or PostgreSQL when `CHECKAM_DATABASE_URL` is set). The language model is optional: with no key every agent runs on rules and SQL.
 
 ## Run it
 
@@ -98,7 +98,7 @@ Set `MODEL_API_KEY` (an OpenAI-compatible endpoint; we use NVIDIA Nemotron) for 
 
 ## Tests
 ```bash
-python -m pytest -q api/tests          # about 490 tests, offline
+python -m pytest -q api/tests          # about 500 tests, offline
 cd engines/world-model && npm run conformance
 cd engines/scout-intent && npm run evals
 ```

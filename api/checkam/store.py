@@ -1,4 +1,5 @@
-"""Case store: anonymised citizen checks, analyst accounts, published alerts (SQLite)."""
+"""Case store: anonymised citizen checks, analyst accounts, published alerts. SQLite by default; PostgreSQL when
+CHECKAM_DATABASE_URL is set (see pgcompat.py)."""
 import hashlib
 import hmac
 import json
@@ -46,7 +47,10 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def db() -> sqlite3.Connection:
+def db():
+    if config.DATABASE_URL:
+        from . import pgcompat
+        return pgcompat.Conn(config.DATABASE_URL)
     config.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(config.DB_PATH, check_same_thread=False)
     c.row_factory = sqlite3.Row
@@ -117,7 +121,7 @@ def analytics(days: int = 14, operator: str = "") -> dict:
     by_day = [dict(r) for r in c.execute(
         f"SELECT substr(created,1,10) AS day, verdict, count(*) AS n FROM checks {where} GROUP BY day, verdict ORDER BY day DESC LIMIT ?", (*args, days * 4))]
     by_operator = {r[0] or "other": {"checks": r[1], "flagged": r[2]} for r in c.execute(
-        "SELECT operator, count(*), sum(verdict IN ('scam','suspicious')) FROM checks GROUP BY operator")}
+        "SELECT operator, count(*), sum(CASE WHEN verdict IN ('scam','suspicious') THEN 1 ELSE 0 END) FROM checks GROUP BY operator")}
     kept = c.execute(f"SELECT coalesce(sum(amount_fcfa), 0) FROM checks {where} {'AND' if where else 'WHERE'} verdict IN ('scam','suspicious')", args).fetchone()[0]
     flagged = [{k: r[k] for k in ("id", "created", "verdict", "confidence", "operator", "amount_fcfa", "masked_text")} for r in c.execute(
         f"SELECT * FROM checks {where} {'AND' if where else 'WHERE'} verdict IN ('scam','suspicious') ORDER BY created DESC LIMIT 8", args)]
@@ -145,7 +149,7 @@ def radar(days: int = 7) -> dict:
     c = conn()
     rows = c.execute("SELECT scheme, count(*) AS n FROM checks WHERE created >= ? AND verdict IN ('scam','suspicious') AND scheme IS NOT NULL "
                      "GROUP BY scheme ORDER BY n DESC LIMIT 6", (since,)).fetchall()
-    week = c.execute("SELECT count(*), sum(verdict IN ('scam','suspicious')) FROM checks WHERE created >= ?", (since,)).fetchone()
+    week = c.execute("SELECT count(*), sum(CASE WHEN verdict IN ('scam','suspicious') THEN 1 ELSE 0 END) FROM checks WHERE created >= ?", (since,)).fetchone()
     return {"days": days, "checks": week[0] or 0, "flagged": week[1] or 0, "top": [{"scheme": r["scheme"], "n": r["n"]} for r in rows]}
 
 
@@ -405,7 +409,7 @@ def add_monthly(rows: list[dict]) -> None:
     """Anonymous counts by month, kind of scam and verdict: kept for good, so totals and trends survive the archive."""
     with _lock:
         for r in rows:
-            conn().execute("INSERT INTO monthly_stats VALUES (?,?,?,1) ON CONFLICT(month, scheme, verdict) DO UPDATE SET n = n + 1",
+            conn().execute("INSERT INTO monthly_stats VALUES (?,?,?,1) ON CONFLICT(month, scheme, verdict) DO UPDATE SET n = monthly_stats.n + 1",
                            ((r.get("created") or "")[:7], r.get("scheme") or "unknown", r.get("verdict") or "unknown"))
         conn().commit()
 

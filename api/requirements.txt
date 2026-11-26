@@ -12,3 +12,4 @@ pyspellchecker==0.9.1
 pytesseract==0.3.13
 pillow==13.0.0
 redis>=5.0,<7
+psycopg[binary]>=3.2,<4
